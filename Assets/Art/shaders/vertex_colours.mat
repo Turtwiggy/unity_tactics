@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: vertex_colours
+  m_Shader: {fileID: 4800000, guid: f163472e033f81f429c2588e3d38757c, type: 3}
+  m_ShaderKeywords: GRID_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _GridTex:
+        m_Texture: {fileID: 2800000, guid: fb5356cf9035bbe4dbf03451bc419ed7, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 18700000, guid: 2ae72ec8c74f92747a0507fd6b12c09b, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Glossiness: 0.039
+    - _Metallic: 0.33
+    - _Size: 2
+    - _Slider: 0.025
+    m_Colors:
+    - _Color: {r: 0.4811321, g: 0.4811321, b: 0.4811321, a: 1}
+  m_BuildTextureStacks: []

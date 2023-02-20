@@ -1,0 +1,12 @@
+{
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/*.csproj": true,
+    "**/*.meta": true,
+    "obj/": true,
+    "Obj/": true,
+    "ProjectSettings/": true,
+    "temp/": true,
+    "Temp/": true
+  }
+}
