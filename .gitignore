@@ -11,6 +11,7 @@
 
 # Paid assets
 **/thirdparty_paid/*
+!**/thirdparty_paid/.gitkeep
 
 # Tests
 test-results/
