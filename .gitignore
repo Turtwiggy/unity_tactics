@@ -17,6 +17,10 @@
 Assets/Scripts/_incomplete
 Assets/Samples/*
 
+# Reflection probe data?
+*.exr
+*.exr.meta
+
 # Tests
 test-results/
 CodeCoverage/
