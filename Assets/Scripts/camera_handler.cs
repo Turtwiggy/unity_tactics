@@ -1,9 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// todo: look at this?
-// https://github.com/PanMig/Unity-RTS-Camera/blob/master/Assets/Scripts/RTSCameraController.cs
-
 namespace Wiggy
 {
   public class camera_handler : MonoBehaviour
@@ -41,9 +38,9 @@ namespace Wiggy
         fixed_lookat_point = Vector3.zero;
     }
 
-    private void FixedUpdate()
+    private void LateUpdate()
     {
-      float delta = Time.fixedDeltaTime;
+      float delta = Time.deltaTime;
       HandleCameraMovement(delta);
 
       // warning: a bug if fixed lookat point is actually 0,0,0
@@ -65,7 +62,12 @@ namespace Wiggy
       Vector2 mouse_pos = Mouse.current.position.ReadValue();
       var ray = view_camera.ScreenPointToRay(mouse_pos);
       if (ground_plane.Raycast(ray, out var ray_distance))
-        cursor.transform.position = ray.GetPoint(ray_distance);
+      {
+        var point = ray.GetPoint(ray_distance);
+
+        // TODO: should probably use smoothdamp or something
+        cursor.transform.position = new Vector3(point.x, cursor.transform.position.y, point.z);
+      }
     }
 
     private void HandleCameraMovement(float delta)
@@ -78,6 +80,7 @@ namespace Wiggy
       move_dir.Normalize();
       move_dir.y = 0;
 
+      //  TODO: should probably use smoothdamp or something
       camera_follow.transform.position += camera_move_speed * delta * move_dir;
     }
   }

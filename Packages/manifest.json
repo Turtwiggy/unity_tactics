@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.ecasillas.missingrefsfinder": "https://github.com/edcasillas/unity-missing-references-finder.git",
     "com.unity.feature.characters-animation": "1.0.0",
     "com.unity.feature.development": "1.0.1",
     "com.unity.feature.gameplay-storytelling": "1.0.0",
@@ -9,6 +10,7 @@
     "com.unity.ide.vscode": "1.2.5",
     "com.unity.inputsystem": "1.4.4",
     "com.unity.postprocessing": "3.2.2",
+    "com.unity.shadergraph": "12.1.10",
     "com.unity.test-framework": "1.1.31",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.timeline": "1.6.4",
