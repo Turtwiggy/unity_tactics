@@ -91,10 +91,7 @@ namespace Wiggy
     private int RndCritAmount()
     {
       if (Random.value < chance_to_crit)
-      {
-        Debug.Log("crit!");
         return crit_multiplier;
-      }
       return 1; // 1x multiplier is not a crit
     }
 
@@ -102,6 +99,7 @@ namespace Wiggy
     {
       return RndCritAmount() * damage;
     }
+
     #endregion
 
     #region XP

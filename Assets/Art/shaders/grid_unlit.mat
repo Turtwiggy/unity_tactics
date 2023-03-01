@@ -7,10 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: vertex_colours
-  m_Shader: {fileID: 4800000, guid: f163472e033f81f429c2588e3d38757c, type: 3}
-  m_ValidKeywords:
-  - GRID_ON
+  m_Name: grid_unlit
+  m_Shader: {fileID: 4800000, guid: c2e3639ac3be86a418f324e34d8f9b63, type: 3}
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,20 +20,15 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _GridTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 18700000, guid: 2ae72ec8c74f92747a0507fd6b12c09b, type: 2}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Glossiness: 0.039
-    - _Metallic: 0.33
-    - _Size: 2
-    - _Slider: 0.025
+    - _GridLineThickness: 0.003
+    - _GridSize: 0.05
     m_Colors:
-    - _Color: {r: 1, g: 0, b: 0, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _GridColour: {r: 0, g: 0.26551798, b: 0.4433962, a: 0.5019608}
   m_BuildTextureStacks: []

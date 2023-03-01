@@ -12,9 +12,15 @@ namespace Wiggy
     private float camera_move_speed = 20.0f;
     private Vector3 fixed_lookat_point;
 
+    public int grid_size = 1; // e.g. 1 meter
+    public int grid_width = 10;
+    public int grid_height = 10;
+    public Vector2 debug_grid;
+
     public GameObject camera_follow;
     public GameObject camera_lookat;
     public GameObject cursor;
+
 
     void Start()
     {
@@ -25,9 +31,8 @@ namespace Wiggy
 
     void Update()
     {
-      // int x = Mathf.Clamp(point.x, 0, max_grid_x - 1);
-      // int y = Mathf.Clamp(point.y, 0, max_grid_y - 1);
-      HandleCursor();
+      // HandleCursor();
+      HandleCursorOnGrid();
 
       // try use lmb to fix lookat point
       if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -67,6 +72,31 @@ namespace Wiggy
 
         // TODO: should probably use smoothdamp or something
         cursor.transform.position = new Vector3(point.x, cursor.transform.position.y, point.z);
+      }
+    }
+
+    private void HandleCursorOnGrid()
+    {
+      Vector2 mouse_pos = Mouse.current.position.ReadValue();
+      var ray = view_camera.ScreenPointToRay(mouse_pos);
+      if (ground_plane.Raycast(ray, out var ray_distance))
+      {
+        var point = ray.GetPoint(ray_distance);
+
+        // worldspace to gridspace
+        int grid_x = (int)(point.x / grid_size);
+        int grid_z = (int)(point.z / grid_size);
+        grid_x = Mathf.Clamp(grid_x, 0, grid_width - 1);
+        grid_z = Mathf.Clamp(grid_z, 0, grid_height - 1);
+        debug_grid = new Vector2(grid_x, grid_z);
+
+        // gridspace to worldspace
+        var world_space = new Vector3(grid_x, 0f, grid_z) * grid_size;
+
+        // TODO: should probably use smoothdamp or something
+        cursor.transform.position = world_space;
+
+        // int index = grid_width * grid_z + grid_x;
       }
     }
 
