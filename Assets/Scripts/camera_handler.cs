@@ -15,12 +15,14 @@ namespace Wiggy
     public int grid_size = 1; // e.g. 1 meter
     public int grid_width = 10;
     public int grid_height = 10;
-    public Vector2 debug_grid;
+    public Vector2Int grid_index { get; private set; }
 
     public GameObject camera_follow;
     public GameObject camera_lookat;
     public GameObject cursor;
 
+    bool camera_z_lock;
+    public float camera_follow_z_lock = 8f;
 
     void Start()
     {
@@ -33,6 +35,7 @@ namespace Wiggy
     {
       // HandleCursor();
       HandleCursorOnGrid();
+      HandleCameraZoom();
 
       // try use lmb to fix lookat point
       if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -47,19 +50,7 @@ namespace Wiggy
     {
       float delta = Time.deltaTime;
       HandleCameraMovement(delta);
-
-      // warning: a bug if fixed lookat point is actually 0,0,0
-      if (fixed_lookat_point != Vector3.zero)
-        camera_lookat.transform.position = fixed_lookat_point;
-      else
-      {
-        camera_lookat.transform.position = new Vector3()
-        {
-          x = camera_follow.transform.position.x,
-          y = 0f,
-          z = camera_follow.transform.position.z + 5f
-        };
-      }
+      HandleCameraLookAt();
     }
 
     private void HandleCursor()
@@ -82,21 +73,11 @@ namespace Wiggy
       if (ground_plane.Raycast(ray, out var ray_distance))
       {
         var point = ray.GetPoint(ray_distance);
-
-        // worldspace to gridspace
-        int grid_x = (int)(point.x / grid_size);
-        int grid_z = (int)(point.z / grid_size);
-        grid_x = Mathf.Clamp(grid_x, 0, grid_width - 1);
-        grid_z = Mathf.Clamp(grid_z, 0, grid_height - 1);
-        debug_grid = new Vector2(grid_x, grid_z);
-
-        // gridspace to worldspace
-        var world_space = new Vector3(grid_x, 0f, grid_z) * grid_size;
+        grid_index = Grid.WorldSpaceToGridSpace(point, grid_size, grid_width);
+        var world_space = Grid.GridSpaceToWorldSpace(grid_index, grid_size);
 
         // TODO: should probably use smoothdamp or something
         cursor.transform.position = world_space;
-
-        // int index = grid_width * grid_z + grid_x;
       }
     }
 
@@ -112,6 +93,49 @@ namespace Wiggy
 
       //  TODO: should probably use smoothdamp or something
       camera_follow.transform.position += camera_move_speed * delta * move_dir;
+    }
+
+    private void HandleCameraLookAt()
+    {
+      // warning: a bug if fixed lookat point is actually 0,0,0
+      if (fixed_lookat_point != Vector3.zero)
+        camera_lookat.transform.position = fixed_lookat_point;
+      else
+      {
+        // fixes the lookat a point but moves along the x-axis
+        if (camera_z_lock)
+        {
+          camera_lookat.transform.position = new Vector3()
+          {
+            x = camera_follow.transform.position.x,
+            y = 0f,
+            z = camera_follow_z_lock
+          };
+        }
+        else
+        {
+          // This a lookat point z+5 in front of the camera
+          camera_lookat.transform.position = new Vector3()
+          {
+            x = camera_follow.transform.position.x,
+            y = 0f,
+            z = camera_follow.transform.position.z + 5f
+          };
+        }
+
+      }
+    }
+
+    private void HandleCameraZoom()
+    {
+      // Scroll camera up/down
+      float mouse_y = Mouse.current.scroll.ReadValue().y;
+
+      if (mouse_y > 0.05f)
+        camera_follow.transform.position += Vector3.up;
+
+      if (mouse_y < -0.05f)
+        camera_follow.transform.position -= Vector3.up;
     }
   }
 } // namespace Wiggy

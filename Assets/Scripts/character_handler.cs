@@ -1,8 +1,15 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Wiggy
 {
+  //   DamageEvent dmg_evt = new()
+  //   {
+  //     amount = RndDamage(),
+  //     attackers_type = WeaknessMethods.GetRandomWeakness()
+  //   };
+  //   TakeDamage(dmg_evt, null);
+  //   current_hp = max_hp; // reset health
+
   public class DamageEvent
   {
     // Give attack an ID
@@ -28,7 +35,7 @@ namespace Wiggy
   }
 
   [System.Serializable]
-  public class character : MonoBehaviour
+  public class character_handler : MonoBehaviour
   {
     // health
     //
@@ -51,24 +58,6 @@ namespace Wiggy
     {
       weakness = WeaknessMethods.GetRandomWeakness();
     }
-
-#if DEBUG
-    private void Update()
-    {
-      if (Mouse.current.leftButton.wasPressedThisFrame)
-      {
-        DamageEvent dmg_evt = new()
-        {
-          amount = RndDamage(),
-          attackers_type = WeaknessMethods.GetRandomWeakness()
-        };
-
-        TakeDamage(dmg_evt, null);
-
-        current_hp = max_hp; // reset health
-      }
-    }
-#endif
 
     #region Combat
 
