@@ -12,26 +12,9 @@ namespace Wiggy
 
   public class DamageEvent
   {
-    // Give attack an ID
-    // private static int _attack_id_counter = 0;
-    // private readonly int _attack_id = 0;
-    // public int AttackID
-    // {
-    //   get
-    //   {
-    //     return _attack_id;
-    //   }
-    // }
-
     // Other Data
     public int amount;
     public WEAKNESS attackers_type;
-
-    // public DamageEvent()
-    // {
-    //   _attack_id_counter += 1;
-    //   _attack_id = _attack_id_counter;
-    // }
   }
 
   [System.Serializable]
@@ -63,7 +46,6 @@ namespace Wiggy
 
     public void TakeDamage(DamageEvent d, System.Action died)
     {
-
       int dmg_amount = d.amount;
       if (weakness.IsWeakTo(d.attackers_type))
         dmg_amount = d.amount * 2; // double damage
