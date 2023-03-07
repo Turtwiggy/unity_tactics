@@ -1,13 +1,11 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Wiggy
 {
   class character_movement : MonoBehaviour
   {
-    public camera_handler camera_handler;
     public map_manager map_manager;
 
     public int from_index = -1;
@@ -15,145 +13,110 @@ namespace Wiggy
     public GameObject cursor_available_prefab;
     private List<GameObject> instantiated_cursor_available = new();
 
-    private System.Action<Vector2Int> lmb_clicked;
-    private System.Action<Vector2Int> rmb_clicked;
+    private bool busy = false;
 
     private void Start()
     {
-      camera_handler = FindObjectOfType<camera_handler>();
       map_manager = FindObjectOfType<map_manager>();
-
-      lmb_clicked += (vec) => { HandleSelect(vec); };
-      rmb_clicked += (vec) => { HandleMove(vec); };
     }
 
     private void Update()
     {
       // if something is selected, show the cursor
       cursor_selected.SetActive(from_index != -1);
-
-      if (Mouse.current.leftButton.wasPressedThisFrame)
-      {
-        Vector2Int grid = camera_handler.grid_index;
-        lmb_clicked.Invoke(grid);
-      }
-
-      if (Mouse.current.rightButton.wasPressedThisFrame)
-      {
-        Vector2Int grid = camera_handler.grid_index;
-        rmb_clicked.Invoke(grid);
-      }
-
-      #region Show Direct Path
-
-      if (Keyboard.current.oKey.wasPressedThisFrame && from_index != -1)
-      {
-        // from: the lmb clicked cell
-        var from = map_manager.cells[from_index];
-        // to: the currently hovered cell
-        var to = map_manager.cells[Grid.GetIndex(camera_handler.grid_index, camera_handler.grid_width)];
-        var paths = a_star.generate_direct(map_manager.cells, from, to, camera_handler.grid_width);
-        // TODO: improve this
-        foreach (GameObject go in instantiated_cursor_available)
-          Destroy(go);
-        for (int i = 0; i < paths.Length; i++)
-        {
-          var pos = Grid.GridSpaceToWorldSpace(paths[i].pos, camera_handler.grid_size);
-          var cursor_available = Instantiate(cursor_available_prefab);
-          cursor_available.transform.position = pos;
-          cursor_available.SetActive(true);
-          instantiated_cursor_available.Add(cursor_available);
-        }
-
-        MoveUnitAlongPath(paths);
-      }
-
-      #endregion
-
-      #region Show Area
-
-      if (Keyboard.current.pKey.wasPressedThisFrame && from_index != -1)
-      {
-        // from: the lmb clicked cell
-        var from = map_manager.cells[from_index];
-        var avilable = a_star.generate_area(map_manager.cells, from, 2, camera_handler.grid_width);
-        // TODO: improve this
-        foreach (GameObject go in instantiated_cursor_available)
-          Destroy(go);
-        for (int i = 0; i < avilable.Length; i++)
-        {
-          var pos = Grid.GridSpaceToWorldSpace(avilable[i].pos, camera_handler.grid_size);
-          var cursor_available = Instantiate(cursor_available_prefab);
-          cursor_available.transform.position = pos;
-          cursor_available.SetActive(true);
-          instantiated_cursor_available.Add(cursor_available);
-        }
-      }
-
-      #endregion
     }
 
-    private void HandleSelect(Vector2Int xy)
+    public void SelectUnit(Vector2Int xy, int width, int size)
     {
-      int index = Grid.GetIndex(xy, camera_handler.grid_width);
+      Select(xy, width, size);
+    }
+
+    public async Task MoveUnit(Vector2Int xy, int width, int size)
+    {
+      if (from_index == -1)
+        return;
+
+      if (busy)
+        return;
+      busy = true;
+
+      await PathTo(xy, width, size);
+
+      busy = false;
+      from_index = -1;
+    }
+
+
+    private void Select(Vector2Int xy, int width, int size)
+    {
+      if (from_index != -1)
+      {
+        Debug.Log("You've already selected something...");
+        return;
+      }
+
+      int index = Grid.GetIndex(xy, width);
       var cell = map_manager.cells[index];
       var go = map_manager.gos[index];
+      var hcs = map_manager.high_cover_spots[index];
 
-      if (go != null)
+      // select only characters
+      if (go != null && go.GetComponent<character_handler>())
       {
-        var world_space = Grid.GridSpaceToWorldSpace(cell.pos, camera_handler.grid_size);
+        var world_space = Grid.GridSpaceToWorldSpace(cell.pos, size);
         cursor_selected.transform.position = world_space;
-
         from_index = index;
       }
       else
         from_index = -1;
+
+      Debug.Log("index is now..." + index);
     }
 
-    private void HandleMove(Vector2Int new_xy)
+    private async Task PathTo(Vector2Int dest, int width, int size)
     {
-      if (from_index == -1)
-        return; // from space must be selected
+      // from: the lmb clicked cell
+      var from = map_manager.cells[from_index];
+      // to: the currently hovered cell
+      var to = map_manager.cells[Grid.GetIndex(dest, width)];
+      var paths = a_star.generate_direct(map_manager.cells, from, to, width);
 
-      int to_index = Grid.GetIndex(new_xy, camera_handler.grid_width);
-
-      // validate "to" slot
+      if (paths == null)
       {
-        var to_go = map_manager.gos[to_index];
-
-        // "to" must be empty
-        if (to_go != null)
-          return;
+        Debug.Log("no path...");
+        return;
       }
 
-      // move gameobject
-      map_manager.gos[to_index] = map_manager.gos[from_index];
+      for (int i = 0; i < paths.Length; i++)
+      {
+        var pos = Grid.GridSpaceToWorldSpace(paths[i].pos, size);
+        var cursor_available = Instantiate(cursor_available_prefab);
+        cursor_available.transform.position = pos;
+        cursor_available.SetActive(true);
+        instantiated_cursor_available.Add(cursor_available);
+      }
 
-      // remove old reference
-      map_manager.gos[from_index] = null;
+      await AnimateUnitAlongPath(paths, width, size);
 
-      // update position in world
-      var cell = map_manager.cells[to_index];
-      var go = map_manager.gos[to_index];
-      var world_space = Grid.GridSpaceToWorldSpace(cell.pos, camera_handler.grid_size);
-      go.transform.position = world_space;
-
-      // finished with selected object
-      from_index = -1;
+      // TODO: improve this
+      foreach (GameObject asdf in instantiated_cursor_available)
+        Destroy(asdf);
     }
 
-    private async Task MoveUnitAlongPath(cell[] path)
+    private async Task AnimateUnitAlongPath(cell[] path, int width, int size)
     {
       if (path.Length <= 1)
         return;
       var from = path[0];
       var to = path[^1];
 
-      int from_index = Grid.GetIndex(from.pos, camera_handler.grid_width);
-      int to_index = Grid.GetIndex(to.pos, camera_handler.grid_width);
+      int from_index = Grid.GetIndex(from.pos, width);
+      int to_index = Grid.GetIndex(to.pos, width);
       GameObject go = map_manager.gos[from_index];
       map_manager.gos[from_index] = null;
+      map_manager.cells[from_index].path_cost = 0;
       map_manager.gos[to_index] = go;
+      map_manager.cells[to_index].path_cost = -1;
 
       int nodes = path.Length;
       int prev_index = 0;
@@ -186,8 +149,8 @@ namespace Wiggy
         var this_cell = path[prev_index];
         var next_cell = path[next_index];
 
-        var a = Grid.GridSpaceToWorldSpace(this_cell.pos, camera_handler.grid_size);
-        var b = Grid.GridSpaceToWorldSpace(next_cell.pos, camera_handler.grid_size);
+        var a = Grid.GridSpaceToWorldSpace(this_cell.pos, size);
+        var b = Grid.GridSpaceToWorldSpace(next_cell.pos, size);
         go.transform.localPosition = Vector3.Lerp(a, b, scaled_percentage_amount);
 
         // Rotation?
@@ -197,8 +160,28 @@ namespace Wiggy
 
         await Task.Yield();
       }
+
       // Done Move
     }
 
+    private void HandleShowArea(int width, int size)
+    {
+      // from: the lmb clicked cell
+      var from = map_manager.cells[from_index];
+      var avilable = a_star.generate_area(map_manager.cells, from, 2, width);
+      // TODO: improve this
+      foreach (GameObject go in instantiated_cursor_available)
+        Destroy(go);
+      for (int i = 0; i < avilable.Length; i++)
+      {
+        var pos = Grid.GridSpaceToWorldSpace(avilable[i].pos, size);
+        var cursor_available = Instantiate(cursor_available_prefab);
+        cursor_available.transform.position = pos;
+        cursor_available.SetActive(true);
+        instantiated_cursor_available.Add(cursor_available);
+      }
+    }
+
   }
+
 } // namespace Wiggy

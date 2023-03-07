@@ -7,7 +7,6 @@ namespace Wiggy
   {
     private Plane ground_plane;
     private Camera view_camera;
-    private input_handler input_handler;
 
     private float camera_move_speed = 20.0f;
     private Vector3 fixed_lookat_point;
@@ -15,7 +14,6 @@ namespace Wiggy
     public int grid_size = 1; // e.g. 1 meter
     public int grid_width = 10;
     public int grid_height = 10;
-    public Vector2Int grid_index { get; private set; }
 
     public GameObject camera_follow;
     public GameObject camera_lookat;
@@ -28,15 +26,11 @@ namespace Wiggy
     {
       ground_plane = new Plane(Vector3.up, Vector3.zero);
       view_camera = Camera.main;
-      input_handler = FindObjectOfType<input_handler>();
     }
 
+#if DEBUG
     void Update()
     {
-      // HandleCursor();
-      HandleCursorOnGrid();
-      HandleCameraZoom();
-
       // try use lmb to fix lookat point
       if (Mouse.current.leftButton.wasPressedThisFrame)
         fixed_lookat_point = cursor.transform.position;
@@ -45,15 +39,9 @@ namespace Wiggy
       if (Mouse.current.rightButton.wasPressedThisFrame)
         fixed_lookat_point = Vector3.zero;
     }
+#endif
 
-    private void LateUpdate()
-    {
-      float delta = Time.deltaTime;
-      HandleCameraMovement(delta);
-      HandleCameraLookAt();
-    }
-
-    private void HandleCursor()
+    public void HandleCursor()
     {
       Vector2 mouse_pos = Mouse.current.position.ReadValue();
       var ray = view_camera.ScreenPointToRay(mouse_pos);
@@ -66,36 +54,36 @@ namespace Wiggy
       }
     }
 
-    private void HandleCursorOnGrid()
+    public (bool, Vector2Int) HandleCursorOnGrid()
     {
       Vector2 mouse_pos = Mouse.current.position.ReadValue();
       var ray = view_camera.ScreenPointToRay(mouse_pos);
       if (ground_plane.Raycast(ray, out var ray_distance))
       {
         var point = ray.GetPoint(ray_distance);
-        grid_index = Grid.WorldSpaceToGridSpace(point, grid_size, grid_width);
+        var grid_index = Grid.WorldSpaceToGridSpace(point, grid_size, grid_width);
         var world_space = Grid.GridSpaceToWorldSpace(grid_index, grid_size);
 
         // TODO: should probably use smoothdamp or something
         cursor.transform.position = world_space;
+
+        return (true, grid_index);
       }
+
+      return (false, default);
     }
 
-    private void HandleCameraMovement(float delta)
+    public void HandleCameraMovement(float delta, Vector2 amount)
     {
-      var h = input_handler.l_analogue.x;
-      var v = input_handler.l_analogue.y;
-
-      Vector3 move_dir = camera_follow.transform.forward * v;
-      move_dir += camera_follow.transform.right * h;
+      Vector3 move_dir = camera_follow.transform.forward * amount.y;
+      move_dir += camera_follow.transform.right * amount.x;
       move_dir.Normalize();
       move_dir.y = 0;
 
-      //  TODO: should probably use smoothdamp or something
       camera_follow.transform.position += camera_move_speed * delta * move_dir;
     }
 
-    private void HandleCameraLookAt()
+    public void HandleCameraLookAt()
     {
       // warning: a bug if fixed lookat point is actually 0,0,0
       if (fixed_lookat_point != Vector3.zero)
@@ -126,7 +114,7 @@ namespace Wiggy
       }
     }
 
-    private void HandleCameraZoom()
+    public void HandleCameraZoom()
     {
       // Scroll camera up/down
       float mouse_y = Mouse.current.scroll.ReadValue().y;

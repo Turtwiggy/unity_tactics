@@ -191,6 +191,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "X",
+                    "type": "Button",
+                    "id": "63282a3f-7d88-4438-9148-e715bb5fddf4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Y",
+                    "type": "Button",
+                    "id": "43dec2db-c8b3-473a-b8b5-7d9e0ede9d98",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "RB",
                     "type": "Button",
                     "id": "df1a29f2-996e-47b8-907e-1605e9cf3c91",
@@ -381,7 +399,7 @@
                 {
                     "name": "",
                     "id": "93301981-8399-4597-bbd7-dd83bd2e2bab",
-                    "path": "<Keyboard>/a",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse & Keyboard",
@@ -396,6 +414,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Controller",
+                    "action": "A",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "52cb4e11-7843-4a8e-ad75-0d419a3421ad",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
                     "action": "A",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -425,7 +454,7 @@
                 {
                     "name": "",
                     "id": "e2b52334-0f26-41bd-a044-e56e74978212",
-                    "path": "<Keyboard>/leftShift",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse & Keyboard",
@@ -441,6 +470,50 @@
                     "processors": "",
                     "groups": "Controller",
                     "action": "B",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e203f9ce-26b8-475f-a52d-b6148338c589",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
+                    "action": "X",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c96b9f89-f229-4d5a-9cb0-cbd874ddf3f8",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Controller",
+                    "action": "X",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "159f27e0-0f91-4029-97d6-1feda3bf2be0",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
+                    "action": "Y",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f58c8000-a142-42e1-b85d-a4fe7f3dd819",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Controller",
+                    "action": "Y",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

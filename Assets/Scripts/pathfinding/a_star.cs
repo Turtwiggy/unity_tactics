@@ -9,6 +9,22 @@ namespace Wiggy
     N, E, S, W
   }
 
+  public static class square_direction_extensions
+  {
+    public static square_direction Opposite(this square_direction sd)
+    {
+      if (sd == square_direction.N)
+        return square_direction.S;
+      if (sd == square_direction.S)
+        return square_direction.N;
+      if (sd == square_direction.E)
+        return square_direction.W;
+      if (sd == square_direction.W)
+        return square_direction.E;
+      return sd;
+    }
+  }
+
   [System.Serializable]
   public class cell
   {
@@ -23,9 +39,9 @@ namespace Wiggy
     // Generate path from a to b
     public static cell[] generate_direct(cell[] map, cell from, cell to, int x_max)
     {
-      Debug.Log(map.ToString());
-      Debug.Log("from: " + from.pos);
-      Debug.Log("to: " + to.pos);
+      // Debug.Log(map.ToString());
+      // Debug.Log("from: " + from.pos);
+      // Debug.Log("to: " + to.pos);
 
       var frontier = new PriorityQueue<cell>();
       frontier.Enqueue(from, 0);
@@ -136,16 +152,16 @@ namespace Wiggy
       return path.ToArray();
     }
 
-    private static (square_direction, int)[] square_neighbour_indicies(int x, int y, int x_max, int y_max)
+    public static (square_direction, int)[] square_neighbour_indicies(int x, int y, int x_max, int y_max)
     {
       int max_idx = x_max * y_max;
-      int idx_north = x_max * (y - 1) + x;
+      int idx_north = x_max * (y + 1) + x;
       int idx_east = x_max * y + (x + 1);
-      int idx_south = x_max * (y + 1) + x;
+      int idx_south = x_max * (y - 1) + x;
       int idx_west = x_max * y + (x - 1);
-      bool ignore_north = y <= 0;
+      bool ignore_north = y >= y_max - 1;
       bool ignore_east = x >= x_max - 1;
-      bool ignore_south = y >= y_max - 1;
+      bool ignore_south = y <= 0;
       bool ignore_west = x <= 0;
 
       List<(square_direction, int)> results = new();

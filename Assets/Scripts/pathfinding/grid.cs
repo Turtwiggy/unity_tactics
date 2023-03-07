@@ -29,6 +29,14 @@ namespace Wiggy
     {
       return x_max * y + x;
     }
+
+    public static Vector2Int IndexToPos(int index, int x_max, int y_max)
+    {
+      int x = index % x_max;
+      int y = (int)(index / (float)y_max);
+      return new Vector2Int(x, y);
+    }
+
   }
 
 }
