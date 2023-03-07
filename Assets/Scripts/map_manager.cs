@@ -12,7 +12,7 @@ namespace Wiggy
     public HashSet<square_direction> covered_by = new();
   };
 
-  class map_manager : MonoBehaviour
+  public class map_manager : MonoBehaviour
   {
     public camera_handler camera_handler;
     public GameObject charcter_holder;
@@ -70,7 +70,7 @@ namespace Wiggy
         gos[index] = t.gameObject;
 
         // make it a character
-        t.gameObject.AddComponent<character_handler>();
+        t.gameObject.AddComponent<character_stats>();
       }
       foreach (Transform t in object_holder.transform)
       {

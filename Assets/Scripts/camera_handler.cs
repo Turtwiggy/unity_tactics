@@ -14,6 +14,7 @@ namespace Wiggy
     public int grid_size = 1; // e.g. 1 meter
     public int grid_width = 10;
     public int grid_height = 10;
+    public Vector2Int grid_index { get; private set; }
 
     public GameObject camera_follow;
     public GameObject camera_lookat;
@@ -54,7 +55,7 @@ namespace Wiggy
       }
     }
 
-    public (bool, Vector2Int) HandleCursorOnGrid()
+    public void HandleCursorOnGrid()
     {
       Vector2 mouse_pos = Mouse.current.position.ReadValue();
       var ray = view_camera.ScreenPointToRay(mouse_pos);
@@ -67,10 +68,8 @@ namespace Wiggy
         // TODO: should probably use smoothdamp or something
         cursor.transform.position = world_space;
 
-        return (true, grid_index);
+        this.grid_index = grid_index;
       }
-
-      return (false, default);
     }
 
     public void HandleCameraMovement(float delta, Vector2 amount)

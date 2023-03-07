@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Wiggy
 {
@@ -11,7 +10,7 @@ namespace Wiggy
   }
 
   [System.Serializable]
-  public class character_handler : MonoBehaviour
+  public class character_stats : MonoBehaviour
   {
     // damage
     public float chance_to_crit { get; private set; }
@@ -34,7 +33,7 @@ namespace Wiggy
     {
       chance_to_crit = 0.05f;
       crit_multiplier = 2;
-      damage = 3;
+      damage = 50;
 
       max_hp = 100;
       current_hp = 100;
@@ -48,40 +47,6 @@ namespace Wiggy
     }
 
     #region Combat
-
-    private void HandleDamageUnit()
-    {
-      // // The grid currently hovering on
-      // var index = Grid.GetIndex(camera_handler.grid_index, camera_handler.grid_width);
-      // var cell = map_manager.cells[index];
-      // var go = map_manager.gos[index];
-      // var hcs = map_manager.high_cover_spots[index];
-
-      // // only interested if a unit is there
-      // if (go == null)
-      //   return;
-
-      // // only interested if the unit is in cover
-      // if (hcs.covered_by.Count == 0)
-      //   return;
-
-      // if (go.TryGetComponent(out character_handler ch))
-      // {
-      //   Debug.Log("You clicked a unit in cover!");
-      //   DamageEvent dmg_evt = new()
-      //   {
-      //     amount = 10,
-      //     attackers_type = WeaknessMethods.GetRandomWeakness()
-      //   };
-      //   ch.TakeDamage(dmg_evt, () =>
-      //   {
-      //     // it died!
-      //     Destroy(go);
-      //     map_manager.gos[index] = null;
-      //     map_manager.cells[index].path_cost = 0;
-      //   });
-      // }
-    }
 
     public void TakeDamage(DamageEvent d, System.Action died)
     {
