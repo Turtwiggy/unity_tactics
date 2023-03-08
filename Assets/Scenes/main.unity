@@ -608,7 +608,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &194154585
 Transform:
   m_ObjectHideFlags: 0
@@ -1673,7 +1673,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272102723760910, guid: a88d8c413275b1943868da6ccc1fb6b5, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4133200930202776, guid: a88d8c413275b1943868da6ccc1fb6b5, type: 3}
       propertyPath: m_RootOrder
@@ -2594,7 +2594,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb8984430cf79374caa8712bb3c4b297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selection_phase: 0
 --- !u!4 &1307942418
 Transform:
   m_ObjectHideFlags: 0
@@ -4032,6 +4031,10 @@ PrefabInstance:
     - target: {fileID: 19807372, guid: a6ac4bd5202435c4aa5edad1f2fb53b9, type: 3}
       propertyPath: InitialModule.maxNumParticles
       value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 19807372, guid: a6ac4bd5202435c4aa5edad1f2fb53b9, type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 19982614, guid: a6ac4bd5202435c4aa5edad1f2fb53b9, type: 3}
       propertyPath: m_Materials.Array.size

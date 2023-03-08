@@ -11,10 +11,7 @@ namespace Wiggy
 
     public async Task Move(map_manager map, int from_index, int to_index, int width, int size)
     {
-      var from = map.cells[from_index];
-      var to = map.cells[to_index];
-      var path = a_star.generate_direct(map.cells, from, to, width);
-
+      var path = a_star.generate_direct(map.cells, from_index, to_index, width);
       if (path == null)
       {
         Debug.Log("no path...");

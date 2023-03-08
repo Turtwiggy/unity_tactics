@@ -37,11 +37,10 @@ namespace Wiggy
   public static class a_star
   {
     // Generate path from a to b
-    public static cell[] generate_direct(cell[] map, cell from, cell to, int x_max)
+    public static cell[] generate_direct(cell[] map, int from_idx, int to_idx, int x_max)
     {
-      // Debug.Log(map.ToString());
-      // Debug.Log("from: " + from.pos);
-      // Debug.Log("to: " + to.pos);
+      var from = map[from_idx];
+      var to = map[to_idx];
 
       var frontier = new PriorityQueue<cell>();
       frontier.Enqueue(from, 0);
@@ -81,8 +80,10 @@ namespace Wiggy
     }
 
     // Generate valid cells around a point
-    public static cell[] generate_area(cell[] map, cell from, int range, int x_max)
+    public static cell[] generate_area(cell[] map, int from_idx, int range, int x_max)
     {
+      var from = map[from_idx];
+
       for (int i = 0; i < map.Length; i++)
         map[i].distance = int.MaxValue;
       from.distance = 0;

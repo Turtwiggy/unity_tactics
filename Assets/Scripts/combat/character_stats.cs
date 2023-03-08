@@ -16,6 +16,7 @@ namespace Wiggy
     public float chance_to_crit { get; private set; }
     public int crit_multiplier { get; private set; }
     public int damage { get; private set; }
+    public int attack_range { get; private set; }
 
     // health
     public int max_hp { get; private set; }
@@ -34,6 +35,7 @@ namespace Wiggy
       chance_to_crit = 0.05f;
       crit_multiplier = 2;
       damage = 50;
+      attack_range = 2; // 1 is next door, etc
 
       max_hp = 100;
       current_hp = 100;
@@ -50,14 +52,7 @@ namespace Wiggy
 
     public void TakeDamage(DamageEvent d, System.Action died)
     {
-      int dmg_amount = d.amount;
-      if (weakness.IsWeakTo(d.attackers_type))
-        dmg_amount = d.amount * 2; // double damage
-
-      current_hp -= dmg_amount;
-      // bool was_double_damage = weakness.IsWeakTo(d.attackers_type);
-      // Debug.Log("AttackID: " + d.AttackID + "amount: " + dmg_amount + " you are: " + weakness.ToString() + " attack: " + d.attackers_type.ToString() + " was_dd: " + was_double_damage);
-
+      current_hp -= d.amount;
       current_hp = Mathf.Clamp(current_hp, 0, max_hp);
       if (current_hp <= 0)
         died();
@@ -68,11 +63,6 @@ namespace Wiggy
       if (Random.value < chance_to_crit)
         return crit_multiplier;
       return 1; // 1x multiplier is not a crit
-    }
-
-    public int RndDamage()
-    {
-      return RndCritAmount() * damage;
     }
 
     #endregion
