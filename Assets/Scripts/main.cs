@@ -14,6 +14,8 @@ namespace Wiggy
     unit_select unit_select;
 
     private bool busy = false;
+    private GameObject debug_go_0;
+    private GameObject debug_go_1;
 
     void Start()
     {
@@ -59,6 +61,11 @@ namespace Wiggy
 
       if (input_handler.b_input)
         unit_select.ClearSelection();
+
+#if DEBUG
+      if (debug_go_0 != null && debug_go_1 != null)
+        Debug.DrawLine(debug_go_0.transform.position, debug_go_1.transform.position, Color.red);
+#endif
     }
 
     void LateUpdate()
@@ -100,6 +107,8 @@ namespace Wiggy
       if (selected_a_unit)
       {
         Debug.Log("attacking...");
+        debug_go_0 = map_manager.gos[from];
+        debug_go_1 = map_manager.gos[to];
         unit_attack.Attack(map_manager, from, to, x_max);
       }
 

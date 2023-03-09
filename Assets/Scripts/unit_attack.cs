@@ -29,40 +29,83 @@ namespace Wiggy
         return;
       }
 
-      // TODO: work out which quadrant player is in???
-      // var pull = def_cell.pos - atk_cell.pos;
-      // bool attacker_flanking_N = Mathf.Abs(pull.y) > Mathf.Abs(pull.x) ? pull.y > 0;
-      // bool attacker_flanking_S = Mathf.Abs(pull.y) > Mathf.Abs(pull.x) ? pull.y > 0;
-      // bool attacker_flanking_E = Mathf.Abs(pull.y) > Mathf.Abs(pull.x) ? pull.y > 0;
-      // bool attacker_flanking_W = Mathf.Abs(pull.y) > Mathf.Abs(pull.x) ? pull.y > 0;
+      // ... work out which quadrant player is in
+      var dir = def_cell.pos - atk_cell.pos;
+      bool on_diagonal = Mathf.Abs(dir.x) == Mathf.Abs(dir.y);
+      bool north = dir.y < 0;
+      bool south = dir.y > 0;
+      bool east = dir.x < 0;
+      bool west = dir.x > 0;
+      bool y_pull = Mathf.Abs(dir.y) > Mathf.Abs(dir.x);
+      bool x_pull = Mathf.Abs(dir.x) > Mathf.Abs(dir.y);
+      bool in_quad_N = y_pull && north;
+      bool in_quad_S = y_pull && south;
+      bool in_quad_E = x_pull && east;
+      bool in_quad_W = x_pull && west;
+      bool in_quad_NE = on_diagonal && north && east;
+      bool in_quad_NW = on_diagonal && north && west;
+      bool in_quad_SE = on_diagonal && south && east;
+      bool in_quad_SW = on_diagonal && south && west;
+      Debug.Log(string.Format("Quadrant -- N:{0} S:{1} E:{2} W:{3} ", in_quad_N, in_quad_S, in_quad_E, in_quad_W));
+      Debug.Log(string.Format("Diag Quadrant:{4} -- NE:{0} SE:{1} SW:{2} NW:{3} ", in_quad_NE, in_quad_SE, in_quad_SW, in_quad_NW, on_diagonal));
 
       // A defender can be in high cover, 
       // but the attacker can flank the defender.
-      bool defender_flanked_N = atk_cell.pos.y > def_cell.pos.y;
-      bool defender_flanked_S = atk_cell.pos.y < def_cell.pos.y;
-      bool defender_flanked_E = atk_cell.pos.x > def_cell.pos.x;
-      bool defender_flanked_W = atk_cell.pos.x < def_cell.pos.x;
+      bool flanked_N = atk_cell.pos.y > def_cell.pos.y && (in_quad_N || in_quad_NE || in_quad_NW);
+      bool flanked_S = atk_cell.pos.y < def_cell.pos.y && (in_quad_S || in_quad_SE || in_quad_SW);
+      bool flanked_E = atk_cell.pos.x > def_cell.pos.x && (in_quad_E || in_quad_NE || in_quad_SE);
+      bool flanked_W = atk_cell.pos.x < def_cell.pos.x && (in_quad_W || in_quad_NW || in_quad_SW);
 
       foreach (var cover_dir in map.high_cover_spots[to].covered_by)
       {
         // check if covered from flank...
         if (cover_dir == square_direction.N)
-          defender_flanked_N = false;
+          flanked_N = false;
         if (cover_dir == square_direction.S)
-          defender_flanked_S = false;
+          flanked_S = false;
         if (cover_dir == square_direction.E)
-          defender_flanked_E = false;
+          flanked_E = false;
         if (cover_dir == square_direction.W)
-          defender_flanked_W = false;
+          flanked_W = false;
       }
-
-      // TODO: carry this on
       Debug.Log(string.Format("def:{0} atk:{1}", def_cell.pos.ToString(), atk_cell.pos.ToString()));
-      Debug.Log(string.Format("defender flanked N: {0}", defender_flanked_N));
-      Debug.Log(string.Format("defender flanked S: {0}", defender_flanked_S));
-      Debug.Log(string.Format("defender flanked E: {0}", defender_flanked_E));
-      Debug.Log(string.Format("defender flanked W: {0}", defender_flanked_W));
+      Debug.Log(string.Format("flanked N:{0} S:{1} E:{2} W:{3}", flanked_N, flanked_S, flanked_E, flanked_W));
 
+      // ... check line of sight
+      // Note: this only matters for "high" cover 
+      // or objects that shouldnt be shot through
+
+      bool line_of_sight_blocked = false;
+
+      //
+      // APPROACH 1
+      //
+
+      // var direct_path = line_algorithm.create(atk_cell.pos.x, atk_cell.pos.y, def_cell.pos.x, def_cell.pos.y);
+      // for (int i = 0; i < direct_path.Count; i++)
+      // {
+      //   (int, int) p = direct_path[i];
+      //   int index = Grid.GetIndex(new Vector2Int(p.Item1, p.Item2), x_max);
+      //   Debug.Log(string.Format("x:{0}, y:{1}", p.Item1, p.Item2));
+      //   if (map.gos[index] != null)
+      //   {
+      //     line_of_sight_blocked = true;
+      //     Debug.Log(string.Format("Blocked line of sight!", p.Item1, p.Item2));
+      //     break;
+      //   }
+      // }
+
+      //
+      // APPROACH 2:
+      //
+
+      var atk_go = map.gos[from];
+      var def_go = map.gos[to];
+      if (Physics.Linecast(atk_go.transform.position, def_go.transform.position, layer_mask))
+      {
+        line_of_sight_blocked = true;
+      }
+      Debug.Log("Blocked line of sight: " + line_of_sight_blocked.ToString());
 
 
       // if (is_covered_from_attacker)
