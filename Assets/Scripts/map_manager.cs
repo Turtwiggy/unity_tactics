@@ -103,17 +103,15 @@ namespace Wiggy
       }
 
       // DEBUG: debug the cover spots
-      for (int index = 0; index < high_cover_spots.Length; index++)
-      {
-        var hcs = high_cover_spots[index];
-
-        if (hcs.covered_by.Count == 0)
-          continue; // not a hcs
-
-        var pos = Grid.IndexToPos(index, camera_handler.grid_width, camera_handler.grid_height);
-        var wpos = Grid.GridSpaceToWorldSpace(pos, camera_handler.grid_size);
-        hcs.instantiated_prefab = Instantiate(cover_spot_prefab, wpos, Quaternion.identity, cover_spot_holder.transform);
-      }
+      // for (int index = 0; index < high_cover_spots.Length; index++)
+      // {
+      //   var hcs = high_cover_spots[index];
+      //   if (hcs.covered_by.Count == 0)
+      //     continue; // not a hcs
+      //   var pos = Grid.IndexToPos(index, camera_handler.grid_width, camera_handler.grid_height);
+      //   var wpos = Grid.GridSpaceToWorldSpace(pos, camera_handler.grid_size);
+      //   hcs.instantiated_prefab = Instantiate(cover_spot_prefab, wpos, Quaternion.identity, cover_spot_holder.transform);
+      // }
 
     }
   }

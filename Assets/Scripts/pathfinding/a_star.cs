@@ -6,7 +6,14 @@ namespace Wiggy
 {
   public enum square_direction
   {
-    N, E, S, W
+    N = 1,
+    E = 2,
+    S = 4,
+    W = 8,
+    NE = 3,
+    SE = 6,
+    SW = 12,
+    NW = 9
   }
 
   public static class square_direction_extensions
@@ -21,8 +28,32 @@ namespace Wiggy
         return square_direction.W;
       if (sd == square_direction.W)
         return square_direction.E;
+
+      if (sd == square_direction.NE)
+        return square_direction.SW;
+      if (sd == square_direction.SE)
+        return square_direction.NW;
+      if (sd == square_direction.SW)
+        return square_direction.NE;
+      if (sd == square_direction.NW)
+        return square_direction.SE;
+
       return sd;
     }
+
+    public static bool InQuadrant(this square_direction a, square_direction desired)
+    {
+      if (desired == square_direction.N)
+        return a == square_direction.N || a == square_direction.NE || a == square_direction.NW;
+      if (desired == square_direction.S)
+        return a == square_direction.S || a == square_direction.SE || a == square_direction.SW;
+      if (desired == square_direction.E)
+        return a == square_direction.E || a == square_direction.NE || a == square_direction.SE;
+      if (desired == square_direction.W)
+        return a == square_direction.W || a == square_direction.NW || a == square_direction.SW;
+      return false;
+    }
+
   }
 
   [System.Serializable]
@@ -63,8 +94,57 @@ namespace Wiggy
           var neighbour = map[neighbour_idx];
 
           int map_cost = neighbour.path_cost;
+
           if (map_cost == -1)
             continue; // impassable
+
+          int new_cost = cost_so_far[current] + map_cost;
+          if (!cost_so_far.ContainsKey(neighbour) || new_cost < cost_so_far[neighbour])
+          {
+            cost_so_far[neighbour] = new_cost;
+            int priority = new_cost + heuristic(neighbour.pos, to.pos);
+            frontier.Enqueue(neighbour, priority);
+            came_from[neighbour] = current;
+          }
+        }
+      }
+
+      return null;
+    }
+
+    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max, bool include_obstacles = true)
+    {
+      var from = map[from_idx];
+      var to = map[to_idx];
+
+      var frontier = new PriorityQueue<cell>();
+      frontier.Enqueue(from, 0);
+      var came_from = new Dictionary<cell, cell>();
+      var cost_so_far = new Dictionary<cell, int>();
+      came_from[from] = from;
+      cost_so_far[from] = 0;
+
+      while (frontier.Count > 0)
+      {
+        cell current = frontier.Dequeue();
+
+        if (current.Equals(to))
+          return reconstruct_path(came_from, from, to);
+
+        var neighbours = square_neighbour_indicies_with_diagonals(current.pos.x, current.pos.y, x_max, x_max);
+        for (int i = 0; i < neighbours.Length; i++)
+        {
+          var neighbour_idx = neighbours[i].Item2;
+          var neighbour = map[neighbour_idx];
+
+          int map_cost = neighbour.path_cost;
+
+          if (!include_obstacles && map_cost == -1)
+            map_cost = 0; // ignore obstacle
+
+          if (map_cost == -1)
+            continue; // impassable
+
           int new_cost = cost_so_far[current] + map_cost;
           if (!cost_so_far.ContainsKey(neighbour) || new_cost < cost_so_far[neighbour])
           {
@@ -181,5 +261,61 @@ namespace Wiggy
 
       return results.ToArray();
     }
+
+    public static (square_direction, int)[] square_neighbour_indicies_with_diagonals(int x, int y, int x_max, int y_max)
+    {
+      int max_idx = x_max * y_max;
+      int idx_north = x_max * (y + 1) + x;
+      int idx_east = x_max * y + (x + 1);
+      int idx_south = x_max * (y - 1) + x;
+      int idx_west = x_max * y + (x - 1);
+      int idx_north_east = idx_north + 1;
+      int idx_north_west = idx_north - 1;
+      int idx_south_east = idx_south + 1;
+      int idx_south_west = idx_south - 1;
+
+      bool ignore_north = y >= y_max - 1;
+      bool ignore_east = x >= x_max - 1;
+      bool ignore_south = y <= 0;
+      bool ignore_west = x <= 0;
+      bool ignore_north_east = ignore_north | ignore_east;
+      bool ignore_south_east = ignore_south | ignore_east;
+      bool ignore_south_west = ignore_south | ignore_west;
+      bool ignore_north_west = ignore_north | ignore_west;
+
+      List<(square_direction, int)> results = new();
+
+      bool in_bounds(int x)
+      {
+        return x >= 0 && x < max_idx;
+      };
+
+      if (!ignore_north && in_bounds(idx_north))
+        results.Add((square_direction.N, idx_north));
+
+      if (!ignore_east && in_bounds(idx_east))
+        results.Add((square_direction.E, idx_east));
+
+      if (!ignore_south && in_bounds(idx_south))
+        results.Add((square_direction.S, idx_south));
+
+      if (!ignore_west && in_bounds(idx_west))
+        results.Add((square_direction.W, idx_west));
+
+      if (!ignore_north_east && in_bounds(idx_north_east))
+        results.Add((square_direction.NE, idx_north_east));
+
+      if (!ignore_south_east && in_bounds(idx_south_east))
+        results.Add((square_direction.SE, idx_south_east));
+
+      if (!ignore_south_west && in_bounds(idx_south_west))
+        results.Add((square_direction.SW, idx_south_west));
+
+      if (!ignore_north_west && in_bounds(idx_north_west))
+        results.Add((square_direction.NW, idx_north_west));
+
+      return results.ToArray();
+    }
+
   }
 }

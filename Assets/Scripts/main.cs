@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -14,8 +15,6 @@ namespace Wiggy
     unit_select unit_select;
 
     private bool busy = false;
-    private GameObject debug_go_0;
-    private GameObject debug_go_1;
 
     void Start()
     {
@@ -25,8 +24,6 @@ namespace Wiggy
       unit_move = FindObjectOfType<unit_move>();
       unit_select = FindObjectOfType<unit_select>();
 
-      // units.player_prefab = player_prefab;
-      // units.enemy_prefab = enemy_prefab;
       // units.CreateUnit(grid, new coord(0, 1), "Wiggy", Team.PLAYER);
       // units.CreateUnit(grid, new coord(0, 2), "Wallace", Team.PLAYER);
       // units.CreateUnit(grid, new coord(2, 3), "Elite Goblin", Team.ENEMY);
@@ -61,11 +58,6 @@ namespace Wiggy
 
       if (input_handler.b_input)
         unit_select.ClearSelection();
-
-#if DEBUG
-      if (debug_go_0 != null && debug_go_1 != null)
-        Debug.DrawLine(debug_go_0.transform.position, debug_go_1.transform.position, Color.red);
-#endif
     }
 
     void LateUpdate()
@@ -105,12 +97,7 @@ namespace Wiggy
       // a unit?
       bool selected_a_unit = unit_attack.IsCharacter(map_manager, to);
       if (selected_a_unit)
-      {
-        Debug.Log("attacking...");
-        debug_go_0 = map_manager.gos[from];
-        debug_go_1 = map_manager.gos[to];
         unit_attack.Attack(map_manager, from, to, x_max);
-      }
 
       // a different tile?
       else
