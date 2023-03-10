@@ -9,7 +9,7 @@ namespace Wiggy
     public GameObject cursor_selected;
     public int from_index { get; private set; }
 
-    private void Start()
+    public void DoStart()
     {
       map = FindObjectOfType<map_manager>();
       ClearSelection();

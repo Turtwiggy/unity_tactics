@@ -4,6 +4,7 @@ public enum Team
 {
   PLAYER,
   ENEMY,
+  NEUTRAL,
 }
 
 [System.Serializable]

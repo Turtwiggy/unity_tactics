@@ -1,18 +1,21 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Wiggy
 {
   [System.Serializable]
   class main : MonoBehaviour
   {
-    // Systems
     input_handler input_handler;
     camera_handler camera_handler;
     map_manager map_manager;
     unit_move unit_move;
     unit_select unit_select;
+    objective_manager objective_manager;
+
+    public UnityEvent<Vector2Int> unit_moved { get; private set; }
 
     private bool busy = false;
 
@@ -23,6 +26,15 @@ namespace Wiggy
       map_manager = FindObjectOfType<map_manager>();
       unit_move = FindObjectOfType<unit_move>();
       unit_select = FindObjectOfType<unit_select>();
+      objective_manager = FindObjectOfType<objective_manager>();
+
+      camera_handler.DoStart();
+      map_manager.DoStart();
+      unit_select.DoStart();
+      objective_manager.DoStart();
+
+      unit_moved = new();
+      unit_moved.AddListener((pos) => objective_manager.UnitMovedEvent(pos));
 
       // units.CreateUnit(grid, new coord(0, 1), "Wiggy", Team.PLAYER);
       // units.CreateUnit(grid, new coord(0, 2), "Wallace", Team.PLAYER);
@@ -53,7 +65,6 @@ namespace Wiggy
         busy = true;
         await UnitAct(camera_handler.grid_index);
         busy = false;
-        Debug.Log("done act");
       }
 
       if (input_handler.b_input)
@@ -101,7 +112,10 @@ namespace Wiggy
 
       // a different tile?
       else
+      {
         await unit_move.Move(map_manager, from, to, x_max, size);
+        unit_moved.Invoke(xy);
+      }
 
       //
       // Assume action was successful, and clear the selected tile

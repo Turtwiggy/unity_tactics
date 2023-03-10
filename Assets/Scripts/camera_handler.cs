@@ -23,7 +23,7 @@ namespace Wiggy
     bool camera_z_lock;
     public float camera_follow_z_lock = 8f;
 
-    void Start()
+    public void DoStart()
     {
       ground_plane = new Plane(Vector3.up, Vector3.zero);
       view_camera = Camera.main;

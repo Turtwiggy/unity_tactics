@@ -20,6 +20,12 @@ namespace Wiggy
       return new Vector2Int(grid_x, grid_z);
     }
 
+    public static int WorldSpaceToIndex(Vector3 point, int size_per_grid_tile, int x_max)
+    {
+      var grid_space = WorldSpaceToGridSpace(point, size_per_grid_tile, x_max);
+      return GetIndex(grid_space, x_max);
+    }
+
     public static int GetIndex(Vector2Int grid, int x_max)
     {
       return x_max * grid.y + grid.x;

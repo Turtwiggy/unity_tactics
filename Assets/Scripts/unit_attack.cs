@@ -148,7 +148,7 @@ namespace Wiggy
       e.amount *= crit_amount;
 
       // Debug.Log(string.Format("def:{0} atk:{1}", def_cell.pos.ToString(), atk_cell.pos.ToString()));
-      Debug.Log(string.Format("Damage:{0}. Info, weak:{1}, flanked:{2}, outofsight:{3}, was_crit by {4}",
+      Debug.Log(string.Format("Damage:{0}. Info, weak:{1}, flanked:{2}, outofsight:{3}, was_crit {4}x",
         e.amount,
         info.defender_is_weak,
         info.defender_is_flanked,

@@ -25,8 +25,9 @@ namespace Wiggy
     public cell[] cells { get; private set; }
     public GameObject[] gos { get; private set; }
     public high_cover_spot[] high_cover_spots { get; private set; }
+    public objective_hold_zone[] objective_spots { get; private set; }
 
-    void Start()
+    public void DoStart()
     {
       camera_handler = FindObjectOfType<camera_handler>();
 
@@ -39,6 +40,7 @@ namespace Wiggy
       cells = new cell[grid_dim];
       gos = new GameObject[grid_dim];
       high_cover_spots = new high_cover_spot[grid_dim];
+      objective_spots = new objective_hold_zone[grid_dim];
 
       // instantiate grid
 
@@ -48,10 +50,8 @@ namespace Wiggy
         {
           var pos = new Vector2Int(x, y);
           var index = Grid.GetIndex(pos, grid_width);
-          cells[index] = new();
-          cells[index].pos = pos;
-          cells[index].path_cost = 0;
 
+          cells[index] = new() { pos = pos };
           high_cover_spots[index] = new();
         }
       }
@@ -112,7 +112,6 @@ namespace Wiggy
       //   var wpos = Grid.GridSpaceToWorldSpace(pos, camera_handler.grid_size);
       //   hcs.instantiated_prefab = Instantiate(cover_spot_prefab, wpos, Quaternion.identity, cover_spot_holder.transform);
       // }
-
     }
   }
 } // namespace Wiggy
