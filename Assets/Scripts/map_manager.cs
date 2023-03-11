@@ -16,7 +16,7 @@ namespace Wiggy
   {
     public GameObject charcter_holder;
     public GameObject obstacle_holder;
-    public GameObject cover_spot_prefab;
+    public GameObject debug_spot_prefab;
     public GameObject cover_spot_holder;
 
     public GameObject map_holder_public;
@@ -30,7 +30,6 @@ namespace Wiggy
     public objective_hold_zone[] objective_spots { get; private set; }
 
     // map gen info
-
     public int width = 30;
     public int height = 30;
     public int size = 1;
@@ -55,7 +54,10 @@ namespace Wiggy
       map_holder.parent = map_holder_public.transform;
 
       var map = map_gen_cell_automata.Generate(width, height, iterations, seed);
+      var srt = map_gen_cell_automata.StartPoint(map, width, height);
+      var end = map_gen_cell_automata.ExitPoint(map, width, height);
 
+      // Visualize the map
       for (int i = 0; i < map.Length; i++)
       {
         var xy = Grid.IndexToPos(i, width, height);
@@ -72,6 +74,35 @@ namespace Wiggy
           // Instantiate(floor_prefab, pos, Quaternion.Euler(Vector3.right * 90), map_holder);
         }
       }
+
+      // DEBUG START AND EXIT POINTS
+      {
+        var index = Grid.GetIndex(srt, width);
+        var pos = Grid.IndexToPos(index, width, height);
+        var wpos = Grid.GridSpaceToWorldSpace(pos, size);
+        Instantiate(debug_spot_prefab, wpos, Quaternion.identity, map_holder);
+      }
+      {
+        var index = Grid.GetIndex(end, width);
+        var pos = Grid.IndexToPos(index, width, height);
+        var wpos = Grid.GridSpaceToWorldSpace(pos, size);
+        Instantiate(debug_spot_prefab, wpos, Quaternion.identity, map_holder);
+      }
+    }
+
+    public static cell[] GeneratedToGame(TILE_TYPE[] gen, int x_max, int y_max)
+    {
+      cell[] map = new cell[gen.Length];
+
+      for (int i = 0; i < gen.Length; i++)
+      {
+        cell c = new();
+        c.pos = Grid.IndexToPos(i, x_max, y_max);
+        c.path_cost = gen[i] == TILE_TYPE.WALL ? -1 : 1;
+        map[i] = c;
+      }
+
+      return map;
     }
 
     public void DoStart()

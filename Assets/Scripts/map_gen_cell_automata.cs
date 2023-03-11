@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Wiggy
 {
-  enum TILE_TYPE
+  public enum TILE_TYPE
   {
     WALL,
     FLOOR
@@ -10,7 +10,15 @@ namespace Wiggy
 
   // inspired by: 
   // https://bfnightly.bracketproductions.com/rustbook/chapter_27.html
-  static class map_gen_cell_automata
+
+  // TODO mapgen idea: 
+  // poisson distribute a bunch of points
+  // compute the voronoi on those points to turn in to zones
+  // make the different zones differen colours
+  // get the floor tiles for each zone
+  // spawn things in each zone!
+
+  public static class map_gen_cell_automata
   {
     public static TILE_TYPE[] Generate(int width, int height, int iterations, int seed)
     {
@@ -44,7 +52,6 @@ namespace Wiggy
             int neighbours = 0;
             for (int n = 0; n < neighbours_info.Length; n++)
             {
-              // var dir = neighbours_info[i].Item1;
               int nidx = neighbours_info[n].Item2;
               neighbours += map[nidx] == TILE_TYPE.WALL ? 1 : 0;
             }
@@ -67,14 +74,43 @@ namespace Wiggy
       return map;
     }
 
-    // Try: 
-    // Split up map in to voronoi zones
-    // Generate items/loot/enemies? based on zone type?
-    public static void SpawnEntities()
+    public static Vector2Int StartPoint(TILE_TYPE[] map, int width, int height)
     {
-      //
+      // Find a starting point; start at the middle and walk left until we find an open tile
+      var pos = new Vector2Int(width / 2, height / 2);
+      int idx = Grid.GetIndex(pos, width);
+
+      while (map[idx] != TILE_TYPE.FLOOR)
+      {
+        pos.x -= 1;
+        idx = Grid.GetIndex(pos, width);
+      }
+
+      // WARNING: in theory, there could be no floor tile on this row
+
+      return pos;
     }
 
+    public static Vector2Int ExitPoint(TILE_TYPE[] map, int width, int height)
+    {
+      // Find all tiles we can reach from the starting point
+      var start = StartPoint(map, width, height);
+      var start_idx = Grid.GetIndex(start, width);
 
+      // Generate DijkstraMap
+      var gmap = map_manager.GeneratedToGame(map, width, height);
+      var dmap = a_star.generate_accessible_areas(gmap, start_idx, int.MaxValue, width, height);
+
+      // Get the tile furthest away from the starting point 
+      (int, int) result = (start_idx, 0);
+      for (int i = 0; i < dmap.Length; i++)
+      {
+        var visible_cell = dmap[i];
+        if (visible_cell.distance > result.Item2)
+          result = (Grid.GetIndex(visible_cell.pos, width), visible_cell.distance);
+      }
+
+      return Grid.IndexToPos(result.Item1, width, height);
+    }
   }
 } // namespace Wiggy

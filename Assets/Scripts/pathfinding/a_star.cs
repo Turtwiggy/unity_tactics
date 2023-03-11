@@ -61,7 +61,7 @@ namespace Wiggy
     // public cell[] neighbours;
     public Vector2Int pos = new(-1, -1);
     public int path_cost = 1; // make all passable by default
-    public int distance = 0;
+    public int distance = int.MaxValue;
   }
 
   public static class a_star
@@ -111,7 +111,7 @@ namespace Wiggy
       return null;
     }
 
-    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max, bool include_obstacles = true)
+    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max)
     {
       var from = map[from_idx];
       var to = map[to_idx];
@@ -138,9 +138,6 @@ namespace Wiggy
 
           int map_cost = neighbour.path_cost;
 
-          if (!include_obstacles && map_cost == -1)
-            map_cost = 0; // ignore obstacle
-
           if (map_cost == -1)
             continue; // impassable
 
@@ -159,35 +156,34 @@ namespace Wiggy
     }
 
     // Generate valid cells around a point
-    public static cell[] generate_area(cell[] map, int from_idx, int range, int x_max)
+    public static cell[] generate_accessible_areas(cell[] map, int from_idx, int range, int x_max, int y_max)
     {
       var from = map[from_idx];
-
-      for (int i = 0; i < map.Length; i++)
-        map[i].distance = int.MaxValue;
       from.distance = 0;
 
-      var valid_cells = new HashSet<cell>();
+      var visible_cell = new HashSet<cell>();
       var frontier = new Queue<cell>();
       frontier.Enqueue(from);
 
       while (frontier.Count > 0)
       {
         var current = frontier.Dequeue();
-
-        // Skip invalid cells
-        if (current.distance > range)
-          continue;
-        valid_cells.Add(current);
+        visible_cell.Add(current);
 
         // Check neighbours
-        var neighbours = square_neighbour_indicies(current.pos.x, current.pos.y, x_max, x_max);
+        var neighbours = square_neighbour_indicies(current.pos.x, current.pos.y, x_max, y_max);
         for (int i = 0; i < neighbours.Length; i++)
         {
           var neighbour_idx = neighbours[i].Item2;
           var neighbour = map[neighbour_idx];
-          int distance = current.distance;
-          distance += 1; // default
+
+          if (neighbour.path_cost == -1)
+            continue; // skip
+
+          int distance = current.distance + 1;
+
+          if (distance > range)
+            continue; // skip
 
           if (neighbour.distance == int.MaxValue)
           {
@@ -199,7 +195,7 @@ namespace Wiggy
         }
       }
 
-      return valid_cells.ToArray();
+      return visible_cell.ToArray();
     }
 
     // default heuristic
