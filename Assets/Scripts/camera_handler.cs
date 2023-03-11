@@ -5,17 +5,15 @@ namespace Wiggy
 {
   public class camera_handler : MonoBehaviour
   {
+    private map_manager map;
+
     private Plane ground_plane;
     private Camera view_camera;
 
     private float camera_move_speed = 20.0f;
     private Vector3 fixed_lookat_point;
 
-    public int grid_size = 1; // e.g. 1 meter
-    public int grid_width = 10;
-    public int grid_height = 10;
     public Vector2Int grid_index { get; private set; }
-
     public GameObject camera_follow;
     public GameObject camera_lookat;
     public GameObject cursor;
@@ -25,6 +23,7 @@ namespace Wiggy
 
     public void DoStart()
     {
+      map = FindObjectOfType<map_manager>();
       ground_plane = new Plane(Vector3.up, Vector3.zero);
       view_camera = Camera.main;
     }
@@ -62,8 +61,8 @@ namespace Wiggy
       if (ground_plane.Raycast(ray, out var ray_distance))
       {
         var point = ray.GetPoint(ray_distance);
-        var grid_index = Grid.WorldSpaceToGridSpace(point, grid_size, grid_width);
-        var world_space = Grid.GridSpaceToWorldSpace(grid_index, grid_size);
+        var grid_index = Grid.WorldSpaceToGridSpace(point, map.size, map.width);
+        var world_space = Grid.GridSpaceToWorldSpace(grid_index, map.size);
 
         // TODO: should probably use smoothdamp or something
         cursor.transform.position = world_space;

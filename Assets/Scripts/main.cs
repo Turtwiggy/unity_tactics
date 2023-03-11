@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,7 +9,7 @@ namespace Wiggy
   {
     input_handler input_handler;
     camera_handler camera_handler;
-    map_manager map_manager;
+    map_manager map;
     unit_move unit_move;
     unit_select unit_select;
     objective_manager objective_manager;
@@ -23,13 +22,13 @@ namespace Wiggy
     {
       input_handler = FindObjectOfType<input_handler>();
       camera_handler = FindObjectOfType<camera_handler>();
-      map_manager = FindObjectOfType<map_manager>();
+      map = FindObjectOfType<map_manager>();
       unit_move = FindObjectOfType<unit_move>();
       unit_select = FindObjectOfType<unit_select>();
       objective_manager = FindObjectOfType<objective_manager>();
 
       camera_handler.DoStart();
-      map_manager.DoStart();
+      map.DoStart();
       unit_select.DoStart();
       objective_manager.DoStart();
 
@@ -46,7 +45,7 @@ namespace Wiggy
     {
       camera_handler.HandleCursorOnGrid();
       camera_handler.HandleCameraZoom();
-      unit_select.UpdateUI(camera_handler.grid_size);
+      unit_select.UpdateUI(map.size);
 
       // CURSOR IN WORLDSPACE??
       // var x = input_handler.l_analogue.x;
@@ -81,8 +80,8 @@ namespace Wiggy
 
     private async Task UnitAct(Vector2Int xy)
     {
-      int x_max = camera_handler.grid_width;
-      int size = camera_handler.grid_size;
+      int x_max = map.width;
+      int size = map.size;
 
       //
       // Must select a unit
@@ -106,14 +105,14 @@ namespace Wiggy
         return;
 
       // a unit?
-      bool selected_a_unit = unit_attack.IsCharacter(map_manager, to);
+      bool selected_a_unit = unit_attack.IsCharacter(map, to);
       if (selected_a_unit)
-        unit_attack.Attack(map_manager, from, to, x_max);
+        unit_attack.Attack(map, from, to, x_max);
 
       // a different tile?
       else
       {
-        await unit_move.Move(map_manager, from, to, x_max, size);
+        await unit_move.Move(map, from, to, x_max, size);
         unit_moved.Invoke(xy);
       }
 

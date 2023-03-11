@@ -6,7 +6,6 @@ namespace Wiggy
   public class objective_manager : MonoBehaviour
   {
     private map_manager map;
-    private camera_handler cam;
 
     public Color player_held;
     public Color enemy_held;
@@ -20,7 +19,6 @@ namespace Wiggy
     public void DoStart()
     {
       map = FindObjectOfType<map_manager>();
-      cam = FindObjectOfType<camera_handler>();
 
       foreach (Transform tr in objective_holder_manager.transform)
       {
@@ -37,10 +35,10 @@ namespace Wiggy
         var zone_bl = new Vector3(l, zone_pos.y, b);
         var zone_br = new Vector3(r, zone_pos.y, b);
 
-        var zone_tl_idx = Grid.WorldSpaceToIndex(zone_tl, cam.grid_size, cam.grid_width);
-        var zone_tr_idx = Grid.WorldSpaceToIndex(zone_tr, cam.grid_size, cam.grid_width);
-        var zone_bl_idx = Grid.WorldSpaceToIndex(zone_bl, cam.grid_size, cam.grid_width);
-        var zone_br_idx = Grid.WorldSpaceToIndex(zone_br, cam.grid_size, cam.grid_width);
+        var zone_tl_idx = Grid.WorldSpaceToIndex(zone_tl, map.size, map.width);
+        var zone_tr_idx = Grid.WorldSpaceToIndex(zone_tr, map.size, map.width);
+        var zone_bl_idx = Grid.WorldSpaceToIndex(zone_bl, map.size, map.width);
+        var zone_br_idx = Grid.WorldSpaceToIndex(zone_br, map.size, map.width);
 
         // one index points to a shared zone
         map.objective_spots[zone_tl_idx] = zone;

@@ -33,9 +33,7 @@ public class PriorityQueue<T>
     for (int i = 0; i < elements.Count; i++)
     {
       if (elements[i].Item2 < elements[bestIndex].Item2)
-      {
         bestIndex = i;
-      }
     }
 
     T bestItem = elements[bestIndex].Item1;

@@ -14,43 +14,81 @@ namespace Wiggy
 
   public class map_manager : MonoBehaviour
   {
-    public camera_handler camera_handler;
     public GameObject charcter_holder;
-    public GameObject object_holder;
+    public GameObject obstacle_holder;
     public GameObject cover_spot_prefab;
     public GameObject cover_spot_holder;
 
+    public GameObject map_holder_public;
+    public GameObject wall_prefab;
+    public GameObject floor_prefab;
+
     // >:(
-    private int x_max;
     public cell[] cells { get; private set; }
     public GameObject[] gos { get; private set; }
     public high_cover_spot[] high_cover_spots { get; private set; }
     public objective_hold_zone[] objective_spots { get; private set; }
 
+    // map gen info
+
+    public int width = 30;
+    public int height = 30;
+    public int size = 1;
+    public int iterations = 5;
+    public int seed = 0;
+
+    public void GenerateMap()
+    {
+      string holder_name = "Generated Map";
+      { // Existing Map Holder
+        var holder = map_holder_public.transform.Find(holder_name);
+        if (holder)
+          DestroyImmediate(holder.gameObject);
+      }
+
+      // Warning: this would overwrite any editor edits
+      foreach (Transform t in obstacle_holder.transform)
+        DestroyImmediate(t.gameObject);
+
+      // New Map Holder
+      var map_holder = new GameObject(holder_name).transform;
+      map_holder.parent = map_holder_public.transform;
+
+      var map = map_gen_cell_automata.Generate(width, height, iterations, seed);
+
+      for (int i = 0; i < map.Length; i++)
+      {
+        var xy = Grid.IndexToPos(i, width, height);
+        var pos = Grid.GridSpaceToWorldSpace(xy, size);
+
+        if (map[i] == TILE_TYPE.WALL)
+        {
+          pos.y += 0.5f;
+          Instantiate(wall_prefab, pos, Quaternion.identity, obstacle_holder.transform);
+        }
+        else if (map[i] == TILE_TYPE.FLOOR)
+        {
+          // Use one global floor
+          // Instantiate(floor_prefab, pos, Quaternion.Euler(Vector3.right * 90), map_holder);
+        }
+      }
+    }
+
     public void DoStart()
     {
-      camera_handler = FindObjectOfType<camera_handler>();
+      int x_max = width;
+      int dim = width * height;
+      cells = new cell[dim];
+      gos = new GameObject[dim];
+      high_cover_spots = new high_cover_spot[dim];
+      objective_spots = new objective_hold_zone[dim];
 
-      int grid_size = camera_handler.grid_size;
-      int grid_width = camera_handler.grid_width;
-      int grid_height = camera_handler.grid_height;
-      int grid_dim = grid_width * grid_height;
-      x_max = camera_handler.grid_width;
-
-      cells = new cell[grid_dim];
-      gos = new GameObject[grid_dim];
-      high_cover_spots = new high_cover_spot[grid_dim];
-      objective_spots = new objective_hold_zone[grid_dim];
-
-      // instantiate grid
-
-      for (int x = 0; x < grid_width; x++)
+      for (int x = 0; x < width; x++)
       {
-        for (int y = 0; y < grid_height; y++)
+        for (int y = 0; y < height; y++)
         {
           var pos = new Vector2Int(x, y);
-          var index = Grid.GetIndex(pos, grid_width);
-
+          var index = Grid.GetIndex(pos, width);
           cells[index] = new() { pos = pos };
           high_cover_spots[index] = new();
         }
@@ -62,7 +100,7 @@ namespace Wiggy
       foreach (Transform t in charcter_holder.transform)
       {
         var position = t.position;
-        var grid = Grid.WorldSpaceToGridSpace(position, grid_size, grid_width);
+        var grid = Grid.WorldSpaceToGridSpace(position, size, x_max);
         var index = Grid.GetIndex(grid, x_max);
 
         cells[index].pos = grid;
@@ -72,10 +110,10 @@ namespace Wiggy
         // make it a character
         t.gameObject.AddComponent<character_stats>();
       }
-      foreach (Transform t in object_holder.transform)
+      foreach (Transform t in obstacle_holder.transform)
       {
         var position = t.position;
-        var grid = Grid.WorldSpaceToGridSpace(position, grid_size, grid_width);
+        var grid = Grid.WorldSpaceToGridSpace(position, size, x_max);
         var index = Grid.GetIndex(grid, x_max);
 
         cells[index].pos = grid;
@@ -85,11 +123,11 @@ namespace Wiggy
 
       // assume each spot next to an obstacle 
       // (that isnt blocked) is a high cover spot
-      foreach (Transform t in object_holder.transform)
+      foreach (Transform t in obstacle_holder.transform)
       {
         var position = t.position;
-        var grid = Grid.WorldSpaceToGridSpace(position, grid_size, grid_width);
-        var neighbour_idxs = a_star.square_neighbour_indicies(grid.x, grid.y, camera_handler.grid_width, camera_handler.grid_width);
+        var grid = Grid.WorldSpaceToGridSpace(position, size, x_max);
+        var neighbour_idxs = a_star.square_neighbour_indicies(grid.x, grid.y, x_max, x_max);
         for (int i = 0; i < neighbour_idxs.Length; i++)
         {
           var neighbour_idx = neighbour_idxs[i].Item2;
@@ -108,7 +146,7 @@ namespace Wiggy
       //   var hcs = high_cover_spots[index];
       //   if (hcs.covered_by.Count == 0)
       //     continue; // not a hcs
-      //   var pos = Grid.IndexToPos(index, camera_handler.grid_width, camera_handler.grid_height);
+      //   var pos = Grid.IndexToPos(index, width, height);
       //   var wpos = Grid.GridSpaceToWorldSpace(pos, camera_handler.grid_size);
       //   hcs.instantiated_prefab = Instantiate(cover_spot_prefab, wpos, Quaternion.identity, cover_spot_holder.transform);
       // }

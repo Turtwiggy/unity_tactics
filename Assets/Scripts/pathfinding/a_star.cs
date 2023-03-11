@@ -53,7 +53,6 @@ namespace Wiggy
         return a == square_direction.W || a == square_direction.NW || a == square_direction.SW;
       return false;
     }
-
   }
 
   [System.Serializable]
@@ -61,8 +60,8 @@ namespace Wiggy
   {
     // public cell[] neighbours;
     public Vector2Int pos = new(-1, -1);
-    public int path_cost = 0; // make all passable by default
-    public int distance = -1;
+    public int path_cost = 1; // make all passable by default
+    public int distance = 0;
   }
 
   public static class a_star
@@ -72,11 +71,12 @@ namespace Wiggy
     {
       var from = map[from_idx];
       var to = map[to_idx];
+      var came_from = new Dictionary<cell, cell>();
+      var cost_so_far = new Dictionary<cell, int>();
 
       var frontier = new PriorityQueue<cell>();
       frontier.Enqueue(from, 0);
-      var came_from = new Dictionary<cell, cell>();
-      var cost_so_far = new Dictionary<cell, int>();
+
       came_from[from] = from;
       cost_so_far[from] = 0;
 
@@ -92,13 +92,12 @@ namespace Wiggy
         {
           var neighbour_idx = neighbours[i].Item2;
           var neighbour = map[neighbour_idx];
+          var neighbour_cost = neighbour.path_cost;
 
-          int map_cost = neighbour.path_cost;
-
-          if (map_cost == -1)
+          if (neighbour_cost == -1)
             continue; // impassable
 
-          int new_cost = cost_so_far[current] + map_cost;
+          int new_cost = cost_so_far[current] + neighbour_cost;
           if (!cost_so_far.ContainsKey(neighbour) || new_cost < cost_so_far[neighbour])
           {
             cost_so_far[neighbour] = new_cost;
@@ -204,16 +203,14 @@ namespace Wiggy
     }
 
     // default heuristic
-    private static int heuristic(Vector2Int a, Vector2Int b)
+    private static int heuristic(Vector2Int point, Vector2Int end)
     {
-      return distance(a, b);
+      return distance(point, end);
     }
 
     private static int distance(Vector2Int a, Vector2Int b)
     {
-      var x = a.x < b.x ? b.x - a.x : a.x - b.x;
-      var y = a.y < b.y ? b.y - a.y : a.y - b.y;
-      return x + y;
+      return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
     private static T[] reconstruct_path<T>(Dictionary<T, T> came_from, T start, T goal)
