@@ -111,7 +111,7 @@ namespace Wiggy
       return null;
     }
 
-    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max)
+    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max, bool obstacles = true)
     {
       var from = map[from_idx];
       var to = map[to_idx];
@@ -137,6 +137,9 @@ namespace Wiggy
           var neighbour = map[neighbour_idx];
 
           int map_cost = neighbour.path_cost;
+
+          if (!obstacles) // ignore obstacles
+            map_cost = 1;
 
           if (map_cost == -1)
             continue; // impassable

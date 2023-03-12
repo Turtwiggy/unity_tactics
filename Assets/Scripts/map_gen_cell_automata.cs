@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Wiggy
@@ -10,13 +11,6 @@ namespace Wiggy
 
   // inspired by: 
   // https://bfnightly.bracketproductions.com/rustbook/chapter_27.html
-
-  // TODO mapgen idea: 
-  // poisson distribute a bunch of points
-  // compute the voronoi on those points to turn in to zones
-  // make the different zones differen colours
-  // get the floor tiles for each zone
-  // spawn things in each zone!
 
   public static class map_gen_cell_automata
   {
@@ -112,5 +106,26 @@ namespace Wiggy
 
       return Grid.IndexToPos(result.Item1, width, height);
     }
+
+    // mapgen idea: 
+    // poisson distribute a bunch of points
+    // compute the voronoi on those points to turn in to zones
+    // make the different zones differen colours
+    // get the floor tiles for each zone
+    // spawn things in each zone!
+    public static List<cell> GenerateZoneCores(TILE_TYPE[] map, int zone_size, int zone_seed, int width, int height, int cell_size)
+    {
+      List<cell> zones = new();
+      poisson sampler = new poisson(width, height, zone_size);
+      var first_sample = StartPoint(map, width, height);
+      foreach (Vector2 sample in sampler.Samples(zone_seed, first_sample))
+      {
+        cell c = new();
+        c.pos = Grid.WorldSpaceToGridSpace(new Vector3(sample.x, 0, sample.y), cell_size, width);
+        zones.Add(c);
+      }
+      return zones;
+    }
+
   }
 } // namespace Wiggy
