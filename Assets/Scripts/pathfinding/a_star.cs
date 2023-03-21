@@ -55,26 +55,24 @@ namespace Wiggy
     }
   }
 
-  [System.Serializable]
-  public class cell
+  public class astar_cell
   {
-    // public cell[] neighbours;
-    public Vector2Int pos = new(-1, -1);
-    public int path_cost = 1; // make all passable by default
+    public Vector2Int pos;
+    public int path_cost = 1;
     public int distance = int.MaxValue;
   }
 
   public static class a_star
   {
     // Generate path from a to b
-    public static cell[] generate_direct(cell[] map, int from_idx, int to_idx, int x_max)
+    public static astar_cell[] generate_direct(astar_cell[] map, int from_idx, int to_idx, int x_max)
     {
       var from = map[from_idx];
       var to = map[to_idx];
-      var came_from = new Dictionary<cell, cell>();
-      var cost_so_far = new Dictionary<cell, int>();
+      var came_from = new Dictionary<astar_cell, astar_cell>();
+      var cost_so_far = new Dictionary<astar_cell, int>();
 
-      var frontier = new PriorityQueue<cell>();
+      var frontier = new PriorityQueue<astar_cell>();
       frontier.Enqueue(from, 0);
 
       came_from[from] = from;
@@ -82,7 +80,7 @@ namespace Wiggy
 
       while (frontier.Count > 0)
       {
-        cell current = frontier.Dequeue();
+        var current = frontier.Dequeue();
 
         if (current.Equals(to))
           return reconstruct_path(came_from, from, to);
@@ -111,21 +109,22 @@ namespace Wiggy
       return null;
     }
 
-    public static cell[] generate_direct_with_diagonals(cell[] map, int from_idx, int to_idx, int x_max, bool obstacles = true)
+    // Generate path from a to b 
+    public static astar_cell[] generate_direct_with_diagonals(astar_cell[] map, int from_idx, int to_idx, int x_max, bool obstacles = true)
     {
       var from = map[from_idx];
       var to = map[to_idx];
 
-      var frontier = new PriorityQueue<cell>();
+      var frontier = new PriorityQueue<astar_cell>();
       frontier.Enqueue(from, 0);
-      var came_from = new Dictionary<cell, cell>();
-      var cost_so_far = new Dictionary<cell, int>();
+      var came_from = new Dictionary<astar_cell, astar_cell>();
+      var cost_so_far = new Dictionary<astar_cell, int>();
       came_from[from] = from;
       cost_so_far[from] = 0;
 
       while (frontier.Count > 0)
       {
-        cell current = frontier.Dequeue();
+        var current = frontier.Dequeue();
 
         if (current.Equals(to))
           return reconstruct_path(came_from, from, to);
@@ -159,13 +158,13 @@ namespace Wiggy
     }
 
     // Generate valid cells around a point
-    public static cell[] generate_accessible_areas(cell[] map, int from_idx, int range, int x_max, int y_max)
+    public static astar_cell[] generate_accessible_areas(astar_cell[] map, int from_idx, int range, int x_max, int y_max)
     {
       var from = map[from_idx];
       from.distance = 0;
 
-      var visible_cell = new HashSet<cell>();
-      var frontier = new Queue<cell>();
+      var visible_cell = new HashSet<astar_cell>();
+      var frontier = new Queue<astar_cell>();
       frontier.Enqueue(from);
 
       while (frontier.Count > 0)
@@ -312,6 +311,5 @@ namespace Wiggy
 
       return results.ToArray();
     }
-
   }
 }
