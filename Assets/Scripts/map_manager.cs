@@ -13,11 +13,15 @@ namespace Wiggy
 
   public class map_manager : MonoBehaviour
   {
+    // Map representations
     public MapEntry[] obstacle_map;
     public MapEntry[] voronoi_map;
 
-    // editor driven 
-    // -------------
+    // Interesting spots
+    public List<List<int>> voronoi_zones;
+    public List<Vector2Int> srt_spots;
+    public List<Vector2Int> ext_spots;
+
     public GameObject map_holder_public;
     public Transform generated_obstacle_holder;
     public Transform generated_map_holder;
@@ -118,14 +122,14 @@ namespace Wiggy
       int players = 4;
       var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
       var ext = map_gen_obstacles.ExitPoint(obstacle_map, width, height);
-      var srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
-      var ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
+      srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
+      ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
 
       // Map Zones
       var poisson_points = voronoi.GeneratePoissonPoints(srt, zone_size, zone_seed, width, height, size);
       var voronoi_graph = voronoi.Generate(poisson_points, width, height, 0);
       voronoi_map = voronoi.GetVoronoiRepresentation(voronoi_graph, width, height, size);
-      var voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
+      voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
 
       // 
       // Unity side of things
@@ -175,32 +179,6 @@ namespace Wiggy
       //   var sr = debug_zone_edge_prefab.GetComponentInChildren<SpriteRenderer>();
       //   sr.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
       //   InstantiateSpotsFromIdxs(voronoi_map, voronoi_zones[i], debug_zone_edge_prefab);
-      // }
-    }
-
-    public void DoStart()
-    {
-      // foreach (Transform t in generated_obstacle_holder.transform)
-      // {
-      //   var position = t.position;
-      //   var grid = Grid.WorldSpaceToGridSpace(position, size, width);
-      //   var index = Grid.GetIndex(grid, width);
-
-      //   // assume each spot next to an obstacle 
-      //   // (that isnt blocked) is a high cover spot
-      //   var obstacle = obstacle_map[index];
-
-      //   //   var neighbour_idxs = a_star.square_neighbour_indicies(grid.x, grid.y, x_max, x_max);
-      //   //   for (int i = 0; i < neighbour_idxs.Length; i++)
-      //   //   {
-      //   //     var neighbour_idx = neighbour_idxs[i].Item2;
-      //   //     if (gos[neighbour_idx] != null)
-      //   //       continue; // full
-
-      //   //     // each spot around an obstacle is a high cover spot, covered by this obstacle
-      //   //     var hcs_direction = neighbour_idxs[i].Item1;
-      //   //     high_cover_spots[neighbour_idx].covered_by.Add(hcs_direction.Opposite());
-      //   //   }
       // }
     }
   }

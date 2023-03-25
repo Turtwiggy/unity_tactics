@@ -5,7 +5,7 @@ namespace Wiggy
 {
   public static class Animate
   {
-    public static async Task AlongPath(GameObject go, Vector2Int[] path, int width, int size)
+    public static async Task AlongPath(GameObject go, Vector2Int[] path, int size)
     {
       if (path.Length <= 1)
         return;

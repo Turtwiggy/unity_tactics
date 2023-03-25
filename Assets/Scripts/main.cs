@@ -1,155 +1,114 @@
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Wiggy
 {
   [System.Serializable]
-  public enum EntityType
-  {
-    empty,
-
-    actor_player,
-    // actor_bat,
-    // actor_troll,
-    // actor_shopkeeper,
-
-    tile_type_wall,
-    tile_type_floor,
-    tile_type_exit,
-
-    // equipment
-    // sword,
-    // shield,
-
-    // consumable
-    // potion,
-    // scroll_damage_nearest,
-    // scroll_damage_selected_on_grid,
-  };
-
-  [System.Serializable]
   class main : MonoBehaviour
   {
-    input_handler input_handler;
-    camera_handler camera_handler;
+    public GameObject player_prefab;
+    public GameObject enemy_prefab;
+
+    // x * y representation
+    public GameObject[] units;
+
+    input_handler input;
+    camera_handler camera;
     map_manager map;
-    // unit_move unit_move;
-    // unit_select unit_select;
-    // objective_manager objective_manager;
+    unit_select unit_select;
+    unit_act act;
 
-    public UnityEvent<Vector2Int> unit_moved { get; private set; }
-
-    private bool busy = false;
+    bool something_is_acting = false;
 
     void Start()
     {
-      input_handler = FindObjectOfType<input_handler>();
-      camera_handler = FindObjectOfType<camera_handler>();
+      input = FindObjectOfType<input_handler>();
+      camera = FindObjectOfType<camera_handler>();
       map = FindObjectOfType<map_manager>();
-      // unit_move = FindObjectOfType<unit_move>();
-      // unit_select = FindObjectOfType<unit_select>();
-      // objective_manager = FindObjectOfType<objective_manager>();
+      unit_select = FindObjectOfType<unit_select>();
+      act = new GameObject("unit_act").AddComponent<unit_act>();
 
-      camera_handler.DoStart();
-      map.DoStart();
-      // unit_select.DoStart();
-      // objective_manager.DoStart();
+      act.DoStart();
+      camera.DoStart();
+      unit_select.DoStart();
 
-      unit_moved = new();
-      // unit_moved.AddListener((pos) => objective_manager.UnitMovedEvent(pos));
-      // units.CreateUnit(grid, new coord(0, 1), "Wiggy", Team.PLAYER);
-      // units.CreateUnit(grid, new coord(0, 2), "Wallace", Team.PLAYER);
-      // units.CreateUnit(grid, new coord(2, 3), "Elite Goblin", Team.ENEMY);
-      // units.CreateUnit(grid, new coord(3, 3), "Goblin", Team.ENEMY);
+      // TODO: map_gen_items_and_enemies
+      var voronoi_map = map.voronoi_map;
+      var voronoi_zones = map.voronoi_zones;
+
+      // set players at start spots
+      units = new GameObject[map.width * map.height];
+      unit_manager.create_unit(units, player_prefab, map.srt_spots[0], map, "Wiggy");
+      unit_manager.create_unit(units, player_prefab, map.srt_spots[1], map, "Wallace");
+      unit_manager.create_unit(units, player_prefab, map.srt_spots[2], map, "Sherbert");
+      unit_manager.create_unit(units, player_prefab, map.srt_spots[3], map, "Grunbo");
+
+      // TODO: gameover if all players on exit spots
+      var ext_spots = map.ext_spots;
+
+      act.attack_event.AddListener((e) => AttackEvent(e));
+      act.move_event.AddListener((e) => MoveEvent(e));
+      // act.move_event.AddListener((e) => objective_manager.UnitMovedEvent(e));
     }
 
-    async void Update()
+    private void AttackEvent(AttackEvent e)
     {
-      camera_handler.HandleCursorOnGrid();
-      camera_handler.HandleCameraZoom();
-      // unit_select.UpdateUI(map.size);
+      Debug.Log("Attack something?");
+    }
 
-      // CURSOR IN WORLDSPACE??
-      // var x = input_handler.l_analogue.x;
-      // if (x > 0 && x < 1.0f)
-      //   select_pos.x += 1;
-      // if (x < 0 && x > -1.0f)
-      //   select_pos.x -= 1;
-      // var y = input_handler.l_analogue.y;
-      // if (y > 0 && y < 1.0f)
-      //   select_pos.y += 1;
-      // if (y < 0 && y > -1.0f)
-      //   select_pos.y -= 1;
+    private async void MoveEvent(MoveEvent e)
+    {
+      Debug.Log("Move to somewhere?");
 
-      if (input_handler.a_input && !busy)
+      // Slowly show animation
+      var cells = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
+      var path = a_star.generate_direct(cells, e.from, e.to, map.width);
+      if (path == null)
       {
-        busy = true;
-        await UnitAct(camera_handler.grid_index);
-        busy = false;
+        Debug.Log("no path...");
+        something_is_acting = false;
+        return;
+      }
+      // DisplayPathUI(path, size);
+
+      // Immediately update representation
+      var go = units[e.from];
+      units[e.from] = null;
+      units[e.to] = go;
+
+      var path_vec2s = new Vector2Int[path.Length];
+      for (int i = 0; i < path.Length; i++)
+      {
+        astar_cell p = path[i];
+        path_vec2s[i] = p.pos;
       }
 
-      // if (input_handler.b_input)
-      //   unit_select.ClearSelection();
+      await Animate.AlongPath(go, path_vec2s, map.size);
+      something_is_acting = false;
+    }
+
+    void Update()
+    {
+      camera.HandleCursorOnGrid();
+      camera.HandleCameraZoom();
+      unit_select.UpdateUI(map.size);
+
+      if (input.a_input && !something_is_acting)
+      {
+        something_is_acting = true;
+        act.Act(units, unit_select, camera, map);
+      }
+
+      if (input.b_input)
+        unit_select.ClearSelection();
     }
 
     void LateUpdate()
     {
       float delta = Time.deltaTime;
-      input_handler.DoLateUpdate();
-      camera_handler.HandleCameraMovement(delta, input_handler.l_analogue);
-      camera_handler.HandleCameraLookAt();
-    }
-
-    private async Task UnitAct(Vector2Int xy)
-    {
-      int x_max = map.width;
-      int size = map.size;
-
-      //
-      // // Must select a unit
-      // //
-      // bool unit_selected = unit_select.from_index != -1;
-      // if (!unit_selected)
-      // {
-      //   unit_select.Select(xy, x_max);
-      //   return;
-      // }
-
-      // //
-      // // Now there's a unit selected.
-      // // What did the user select next?
-      // //
-      // var from = unit_select.from_index;
-      // var to = Grid.GetIndex(xy, x_max);
-
-      // // the same tile?
-      // if (from == to)
-      //   return;
-
-      // // a unit?
-      // bool selected_a_unit = unit_attack.IsCharacter(map, to);
-      // if (selected_a_unit)
-      //   unit_attack.Attack(map, from, to, x_max);
-
-      // // a different tile?
-      // else
-      // {
-      //   await unit_move.Move(map, from, to, x_max, size);
-      //   unit_moved.Invoke(xy);
-      // }
-
-      // //
-      // // Assume action was successful, and clear the selected tile
-      // //
-      // unit_select.ClearSelection();
+      input.DoLateUpdate();
+      camera.HandleCameraMovement(delta, input.l_analogue);
+      camera.HandleCameraLookAt();
     }
   }
-
-  // Dumb AI: 
-  // AI takes the most immediately reasonable action with no history.
-  // Get nearest player
-  // Move cell closest to player
-  // Attack it
-  // Simulate thinking time?
 }
