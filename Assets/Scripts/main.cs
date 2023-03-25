@@ -102,8 +102,8 @@ namespace Wiggy
       if (input.b_input)
         unit_select.ClearSelection();
 
-      await ProcessMoveQueue();
-      await ProcessAttackQueue();
+      ProcessMoveQueue();
+      ProcessAttackQueue();
 
       extraction_system.Update(ecs, map.ext_spots);
       instantiate_system.Update(ecs);
@@ -117,7 +117,7 @@ namespace Wiggy
       camera.HandleCameraLookAt();
     }
 
-    private async Task ProcessMoveQueue()
+    private void ProcessMoveQueue()
     {
       if (move_event_queue.Count == 0)
         return;
@@ -145,11 +145,8 @@ namespace Wiggy
       units[e.from_index].Reset();
 
       // Update gridposition component data
-      var grid_pos = ecs.GetComponent<GridPositionComponent>(go);
+      ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(go);
       grid_pos.position = Grid.IndexToPos(e.to_index, map.width, map.height);
-
-      var grid_pos2 = ecs.GetComponent<GridPositionComponent>(go);
-      Debug.Log(grid_pos2.position);
 
       // convert astar_cells to Vector2Int[]
       var path_vec2s = new Vector2Int[path.Length];
@@ -157,14 +154,14 @@ namespace Wiggy
         path_vec2s[i] = path[i].pos;
 
       // DisplayPathUI(path, size);
-      var instance = ecs.GetComponent<InstantiatedComponent>(go);
-      await Animate.AlongPath(instance.instance, path_vec2s, map.size);
+      // var instance = ecs.GetComponent<InstantiatedComponent>(go);
+      // await Animate.AlongPath(instance.instance, path_vec2s, map.size);
       // DeletePathUI(path);
 
       Debug.Log("done with event");
     }
 
-    private async Task ProcessAttackQueue()
+    private void ProcessAttackQueue()
     {
       if (attack_event_queue.Count == 0)
         return;

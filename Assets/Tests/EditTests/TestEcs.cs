@@ -50,24 +50,27 @@ namespace Wiggy
       Wiggy.registry ecs = new();
       ecs.RegisterComponent<GridPositionComponent>();
 
+      var start = new Vector2Int(10, 12);
+      var change = new Vector2Int(14, 16);
+
       // Create entity
       var e = ecs.Create();
       GridPositionComponent gpc = new()
       {
-        position = new Vector2Int(10, 12)
+        position = start
       };
       ecs.AddComponent(e, gpc);
 
       // Act
       {
-        var pos = ecs.GetComponent<GridPositionComponent>(e);
-        pos.position = new Vector2Int(15, 13);
+        ref var pos = ref ecs.GetComponent<GridPositionComponent>(e);
+        pos.position = change;
       }
 
       // Assert
       {
         var pos = ecs.GetComponent<GridPositionComponent>(e);
-        Assert.AreEqual(pos.position, new Vector2Int(15, 13));
+        Assert.AreEqual(change, pos.position);
       }
     }
 

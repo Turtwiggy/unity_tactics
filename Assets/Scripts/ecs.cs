@@ -134,9 +134,9 @@ namespace Wiggy
 
   public class ComponentManager
   {
-    Dictionary<string, ComponentType> component_types = new();
-    Dictionary<string, IComponentArray> component_arrays = new();
-    ComponentType next_component_type;
+    private Dictionary<string, ComponentType> component_types = new();
+    private Dictionary<string, IComponentArray> component_arrays = new();
+    private ComponentType next_component_type;
     private readonly int max_entities;
 
     public ComponentManager(int max_entities)
@@ -170,7 +170,8 @@ namespace Wiggy
 
     public ref T GetComponent<T>(Entity e)
     {
-      return ref GetComponentArray<T>().Get(e);
+      var name = typeof(T).ToString();
+      return ref (component_arrays[name] as ComponentArray<T>).Get(e);
     }
 
     public void EntityDestroyed(Entity e)
@@ -183,12 +184,10 @@ namespace Wiggy
       }
     }
 
-    private ref ComponentArray<T> GetComponentArray<T>()
+    private ComponentArray<T> GetComponentArray<T>()
     {
       var name = typeof(T).ToString();
-      ref var array = component_arrays[name];
-      ref var tarray = array as ComponentArray<T>;
-      return ref tarray;
+      return component_arrays[name] as ComponentArray<T>;
     }
   }
 
@@ -314,7 +313,6 @@ namespace Wiggy
     {
       return component_manager.GetComponentType<T>();
     }
-
 
     //
     // System Methods
