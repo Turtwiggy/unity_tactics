@@ -14,7 +14,7 @@ namespace Wiggy
       ClearSelection();
     }
 
-    public void UpdateUI(int size)
+    public void UpdateSelectedCursorUI(int size)
     {
       // if something is selected, show the cursor
       cursor_selected.SetActive(from_index != -1);

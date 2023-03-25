@@ -1,13 +1,16 @@
 using UnityEngine;
 
-[System.Serializable]
-public class comp_initiative : MonoBehaviour
+namespace Wiggy
 {
-  public int initiative;
-
-  public void Generate()
+  [System.Serializable]
+  public class comp_initiative : MonoBehaviour
   {
-    initiative = Random.Range(0, 20);
-  }
+    public int initiative;
 
+    public void Generate()
+    {
+      initiative = Random.Range(0, 20);
+    }
+
+  }
 }

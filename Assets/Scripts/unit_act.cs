@@ -3,15 +3,24 @@ using UnityEngine.Events;
 
 namespace Wiggy
 {
+  using Entity = System.Int32;
+
+  [System.Serializable]
   public struct AttackEvent
   {
-    public GameObject from;
-    public GameObject target;
+    [SerializeField]
+    public Entity from;
+    [SerializeField]
+    public Entity target;
   };
+
+  [System.Serializable]
   public struct MoveEvent
   {
-    public int from;
-    public int to;
+    [SerializeField]
+    public int from_index;
+    [SerializeField]
+    public int to_index;
   };
 
   public class unit_act : MonoBehaviour
@@ -25,7 +34,7 @@ namespace Wiggy
       move_event = new();
     }
 
-    public void Act(GameObject[] units, unit_select select, camera_handler camera, map_manager map)
+    public void Act(Optional<Entity>[] units, unit_select select, camera_handler camera, map_manager map)
     {
       var hover_index = Grid.GetIndex(camera.grid_index, map.width);
 
@@ -51,12 +60,12 @@ namespace Wiggy
         return;
 
       // a unit?
-      if (units[to] != null)
+      if (units[from].IsSet && units[to].IsSet)
       {
         AttackEvent e = new()
         {
-          from = units[from],
-          target = units[to]
+          from = units[from].Data,
+          target = units[to].Data
         };
         attack_event.Invoke(e);
       }
@@ -66,8 +75,8 @@ namespace Wiggy
       {
         MoveEvent e = new()
         {
-          from = from,
-          to = to
+          from_index = from,
+          to_index = to
         };
         move_event.Invoke(e);
       }

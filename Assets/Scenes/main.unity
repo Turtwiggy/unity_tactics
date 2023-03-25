@@ -840,7 +840,7 @@ GameObject:
   - component: {fileID: 37916146}
   - component: {fileID: 37916145}
   - component: {fileID: 37916147}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1071,7 +1071,7 @@ GameObject:
   - component: {fileID: 38995884}
   - component: {fileID: 38995886}
   - component: {fileID: 38995885}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1872,7 +1872,7 @@ GameObject:
   - component: {fileID: 83974142}
   - component: {fileID: 83974144}
   - component: {fileID: 83974143}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: player objectives - value
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2479,7 +2479,7 @@ GameObject:
   - component: {fileID: 107863787}
   - component: {fileID: 107863789}
   - component: {fileID: 107863788}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2880,7 +2880,7 @@ GameObject:
   - component: {fileID: 128095443}
   - component: {fileID: 128095445}
   - component: {fileID: 128095444}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP) (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3144,7 +3144,7 @@ GameObject:
   - component: {fileID: 138196512}
   - component: {fileID: 138196514}
   - component: {fileID: 138196513}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text-r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3519,7 +3519,7 @@ GameObject:
   m_Component:
   - component: {fileID: 153524706}
   - component: {fileID: 153524707}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: vertical
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3585,7 +3585,7 @@ GameObject:
   - component: {fileID: 157131542}
   - component: {fileID: 157131544}
   - component: {fileID: 157131543}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4902,7 +4902,7 @@ GameObject:
   - component: {fileID: 209282787}
   - component: {fileID: 209282789}
   - component: {fileID: 209282788}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: overlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6777,7 +6777,7 @@ GameObject:
   m_Component:
   - component: {fileID: 334255986}
   - component: {fileID: 334255987}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: b
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6841,7 +6841,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 334939857}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: 'bar: left'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7175,7 +7175,7 @@ GameObject:
   - component: {fileID: 360257845}
   - component: {fileID: 360257847}
   - component: {fileID: 360257846}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7407,7 +7407,7 @@ GameObject:
   - component: {fileID: 362619052}
   - component: {fileID: 362619054}
   - component: {fileID: 362619053}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8193,7 +8193,7 @@ GameObject:
   - component: {fileID: 417765448}
   - component: {fileID: 417765450}
   - component: {fileID: 417765449}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8426,7 +8426,7 @@ GameObject:
   - component: {fileID: 438591827}
   - component: {fileID: 438591826}
   - component: {fileID: 438591825}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8553,7 +8553,7 @@ GameObject:
   - component: {fileID: 440106117}
   - component: {fileID: 440106119}
   - component: {fileID: 440106118}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8785,7 +8785,7 @@ GameObject:
   - component: {fileID: 460567792}
   - component: {fileID: 460567794}
   - component: {fileID: 460567793}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9927,7 +9927,7 @@ GameObject:
   m_Component:
   - component: {fileID: 526505394}
   - component: {fileID: 526505395}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: slider-foreground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10197,7 +10197,7 @@ GameObject:
   - component: {fileID: 544269316}
   - component: {fileID: 544269318}
   - component: {fileID: 544269317}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11186,7 +11186,7 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
 --- !u!1 &573984851
@@ -11424,7 +11424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 581905701}
   - component: {fileID: 581905703}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11473,7 +11473,7 @@ GameObject:
   - component: {fileID: 583344092}
   - component: {fileID: 583344095}
   - component: {fileID: 583344094}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: bar-l-delay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12516,7 +12516,7 @@ GameObject:
   - component: {fileID: 620646051}
   - component: {fileID: 620646053}
   - component: {fileID: 620646052}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: objectives - key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12651,7 +12651,7 @@ GameObject:
   - component: {fileID: 623799989}
   - component: {fileID: 623799991}
   - component: {fileID: 623799990}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12728,7 +12728,7 @@ GameObject:
   - component: {fileID: 626503260}
   - component: {fileID: 626503259}
   - component: {fileID: 626503261}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: bar-l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14379,7 +14379,7 @@ GameObject:
   - component: {fileID: 711681623}
   - component: {fileID: 711681625}
   - component: {fileID: 711681624}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text-center-background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14553,7 +14553,7 @@ GameObject:
   - component: {fileID: 725042249}
   - component: {fileID: 725042248}
   - component: {fileID: 725042247}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14713,7 +14713,7 @@ GameObject:
   - component: {fileID: 729651735}
   - component: {fileID: 729651737}
   - component: {fileID: 729651736}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16076,7 +16076,7 @@ GameObject:
   m_Component:
   - component: {fileID: 788363922}
   - component: {fileID: 788363923}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: weapon_background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16611,7 +16611,7 @@ GameObject:
   - component: {fileID: 814930840}
   - component: {fileID: 814930842}
   - component: {fileID: 814930841}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17185,7 +17185,7 @@ GameObject:
   - component: {fileID: 852751943}
   - component: {fileID: 852751942}
   - component: {fileID: 852751941}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17344,7 +17344,7 @@ GameObject:
   - component: {fileID: 865037491}
   - component: {fileID: 865037493}
   - component: {fileID: 865037492}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17915,7 +17915,7 @@ GameObject:
   - component: {fileID: 890548320}
   - component: {fileID: 890548322}
   - component: {fileID: 890548321}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: c
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17994,7 +17994,7 @@ GameObject:
   - component: {fileID: 890831067}
   - component: {fileID: 890831066}
   - component: {fileID: 890831065}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: action-4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18307,7 +18307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 905121545}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_ui
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18766,7 +18766,7 @@ GameObject:
   - component: {fileID: 936598660}
   - component: {fileID: 936598662}
   - component: {fileID: 936598661}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19677,7 +19677,7 @@ GameObject:
   - component: {fileID: 956436430}
   - component: {fileID: 956436433}
   - component: {fileID: 956436432}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: bar-l-background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19849,7 +19849,7 @@ GameObject:
   m_Component:
   - component: {fileID: 961324226}
   - component: {fileID: 961324227}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19996,7 +19996,7 @@ GameObject:
   - component: {fileID: 972432690}
   - component: {fileID: 972432689}
   - component: {fileID: 972432691}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20350,7 +20350,7 @@ GameObject:
   - component: {fileID: 990038133}
   - component: {fileID: 990038132}
   - component: {fileID: 990038134}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameObject (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20512,7 +20512,7 @@ GameObject:
   - component: {fileID: 999863106}
   - component: {fileID: 999863105}
   - component: {fileID: 999863104}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: bar-r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20638,7 +20638,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1008785368}
   - component: {fileID: 1008785369}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: a
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21822,7 +21822,7 @@ GameObject:
   - component: {fileID: 1048092263}
   - component: {fileID: 1048092262}
   - component: {fileID: 1048092264}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameObject (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -23471,7 +23471,7 @@ GameObject:
   - component: {fileID: 1112900810}
   - component: {fileID: 1112900812}
   - component: {fileID: 1112900811}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: enemy objectives - value
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24615,7 +24615,7 @@ GameObject:
   - component: {fileID: 1165617457}
   - component: {fileID: 1165617456}
   - component: {fileID: 1165617455}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25020,7 +25020,7 @@ GameObject:
   - component: {fileID: 1174329710}
   - component: {fileID: 1174329712}
   - component: {fileID: 1174329711}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -25349,7 +25349,7 @@ GameObject:
   - component: {fileID: 1184921624}
   - component: {fileID: 1184921626}
   - component: {fileID: 1184921625}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26291,7 +26291,7 @@ GameObject:
   - component: {fileID: 1210373325}
   - component: {fileID: 1210373327}
   - component: {fileID: 1210373326}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27138,7 +27138,7 @@ GameObject:
   - component: {fileID: 1230368177}
   - component: {fileID: 1230368179}
   - component: {fileID: 1230368178}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: objectives - key
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28500,7 +28500,7 @@ GameObject:
   - component: {fileID: 1291151280}
   - component: {fileID: 1291151282}
   - component: {fileID: 1291151281}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28634,7 +28634,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1291153738}
   - component: {fileID: 1291153740}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: weapon_background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29067,6 +29067,8 @@ MonoBehaviour:
   player_prefab: {fileID: 616306016093886966, guid: f5a06eb09f7cb3b43b9765555f20c0a5, type: 3}
   enemy_prefab: {fileID: 5849651294011755790, guid: 99aafd9c132498b44b919be485b2bfd3, type: 3}
   units: []
+  move_event_queue: []
+  attack_event_queue: []
 --- !u!4 &1307942418
 Transform:
   m_ObjectHideFlags: 0
@@ -30276,7 +30278,7 @@ GameObject:
   - component: {fileID: 1371035755}
   - component: {fileID: 1371035757}
   - component: {fileID: 1371035756}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30411,7 +30413,7 @@ GameObject:
   - component: {fileID: 1374732281}
   - component: {fileID: 1374732283}
   - component: {fileID: 1374732282}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30837,7 +30839,7 @@ GameObject:
   - component: {fileID: 1400062932}
   - component: {fileID: 1400062934}
   - component: {fileID: 1400062933}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_icon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31010,7 +31012,7 @@ GameObject:
   - component: {fileID: 1417352096}
   - component: {fileID: 1417352098}
   - component: {fileID: 1417352097}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31377,7 +31379,7 @@ GameObject:
   - component: {fileID: 1450373374}
   - component: {fileID: 1450373376}
   - component: {fileID: 1450373375}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: actions
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32152,7 +32154,7 @@ GameObject:
   - component: {fileID: 1498060111}
   - component: {fileID: 1498060113}
   - component: {fileID: 1498060112}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33389,7 +33391,7 @@ GameObject:
   - component: {fileID: 1541872341}
   - component: {fileID: 1541872343}
   - component: {fileID: 1541872342}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34130,7 +34132,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1572150551}
   - component: {fileID: 1572150552}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: your_units
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34198,7 +34200,7 @@ GameObject:
   - component: {fileID: 1578088269}
   - component: {fileID: 1578088271}
   - component: {fileID: 1578088270}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34655,7 +34657,7 @@ GameObject:
   - component: {fileID: 1596650997}
   - component: {fileID: 1596650999}
   - component: {fileID: 1596650998}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34733,7 +34735,7 @@ GameObject:
   - component: {fileID: 1602178158}
   - component: {fileID: 1602178160}
   - component: {fileID: 1602178159}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37311,7 +37313,7 @@ GameObject:
   - component: {fileID: 1642230626}
   - component: {fileID: 1642230625}
   - component: {fileID: 1642230624}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38287,7 +38289,7 @@ GameObject:
   - component: {fileID: 1682799462}
   - component: {fileID: 1682799464}
   - component: {fileID: 1682799463}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text -dmg - r
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39460,7 +39462,7 @@ GameObject:
   - component: {fileID: 1725919240}
   - component: {fileID: 1725919239}
   - component: {fileID: 1725919238}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39879,7 +39881,7 @@ GameObject:
   - component: {fileID: 1731299727}
   - component: {fileID: 1731299726}
   - component: {fileID: 1731299725}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: action-3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40194,7 +40196,7 @@ GameObject:
   - component: {fileID: 1739663633}
   - component: {fileID: 1739663635}
   - component: {fileID: 1739663634}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40871,7 +40873,7 @@ GameObject:
   - component: {fileID: 1770007771}
   - component: {fileID: 1770007773}
   - component: {fileID: 1770007772}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40948,7 +40950,7 @@ GameObject:
   - component: {fileID: 1771152439}
   - component: {fileID: 1771152438}
   - component: {fileID: 1771152437}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: action-5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41263,7 +41265,7 @@ GameObject:
   - component: {fileID: 1800986522}
   - component: {fileID: 1800986524}
   - component: {fileID: 1800986523}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41399,7 +41401,7 @@ GameObject:
   - component: {fileID: 1801441909}
   - component: {fileID: 1801441908}
   - component: {fileID: 1801441910}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameObject (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41627,7 +41629,7 @@ GameObject:
   - component: {fileID: 1829318197}
   - component: {fileID: 1829318196}
   - component: {fileID: 1829318195}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: action-2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43234,7 +43236,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1904343177}
   - component: {fileID: 1904343178}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: all_units
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43597,7 +43599,7 @@ GameObject:
   - component: {fileID: 1909802925}
   - component: {fileID: 1909802926}
   - component: {fileID: 1909802928}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43964,7 +43966,7 @@ GameObject:
   - component: {fileID: 1934206276}
   - component: {fileID: 1934206278}
   - component: {fileID: 1934206277}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44595,7 +44597,7 @@ GameObject:
   - component: {fileID: 1969523918}
   - component: {fileID: 1969523917}
   - component: {fileID: 1969523916}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: action-1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44814,7 +44816,7 @@ GameObject:
   - component: {fileID: 1976535800}
   - component: {fileID: 1976535799}
   - component: {fileID: 1976535798}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46086,7 +46088,7 @@ GameObject:
   - component: {fileID: 2013240072}
   - component: {fileID: 2013240074}
   - component: {fileID: 2013240073}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text-center
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46544,7 +46546,7 @@ GameObject:
   - component: {fileID: 2058030558}
   - component: {fileID: 2058030560}
   - component: {fileID: 2058030559}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: text-l
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46775,7 +46777,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2073047379}
   - component: {fileID: 2073047380}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: attack_ui
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47104,7 +47106,7 @@ GameObject:
   - component: {fileID: 2090889274}
   - component: {fileID: 2090889273}
   - component: {fileID: 2090889272}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: name_background_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47424,7 +47426,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2122880547}
   - component: {fileID: 2122880548}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: slider-delayed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47707,7 +47709,7 @@ GameObject:
   - component: {fileID: 2132977503}
   - component: {fileID: 2132977505}
   - component: {fileID: 2132977504}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: unit_prefab (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
