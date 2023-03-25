@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -5,10 +6,10 @@ namespace Wiggy
 {
   public static class Animate
   {
-    public static async Task AlongPath(GameObject go, Vector2Int[] path, int size)
+    public static IEnumerator AlongPath(GameObject go, Vector2Int[] path, int size)
     {
       if (path.Length <= 1)
-        return;
+        yield break;
 
       int nodes = path.Length;
       float percent = 0.0f;
@@ -47,7 +48,7 @@ namespace Wiggy
         //  if (dir.sqrMagnitude > EPSILON)
         //    unit.transform.localRotation = Quaternion.LookRotation(dir);
 
-        await Task.Yield();
+        yield return null;
       }
 
       // Done Move

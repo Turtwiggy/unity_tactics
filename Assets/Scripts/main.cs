@@ -1,6 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Wiggy
 {
@@ -18,6 +19,7 @@ namespace Wiggy
     map_manager map;
     unit_select unit_select;
     unit_act act;
+    scene_manager scene;
 
     // x * y representation
     Optional<Entity>[] units;
@@ -27,6 +29,15 @@ namespace Wiggy
 
     ExtractionSystem extraction_system;
     InstantiateSystem instantiate_system;
+
+    public GameObject extraction_ui;
+    public Button extraction_button;
+
+    [SerializeField]
+    private IEnumerator animation_coroutine;
+    private GameObject animation_go;
+    private Vector2Int animation_final;
+
 
     void Start()
     {
@@ -43,6 +54,7 @@ namespace Wiggy
       input = FindObjectOfType<input_handler>();
       camera = FindObjectOfType<camera_handler>();
       unit_select = FindObjectOfType<unit_select>();
+      scene = FindObjectOfType<scene_manager>();
       act = new GameObject("unit_act").AddComponent<unit_act>();
 
       units = new Optional<Entity>[map.width * map.height];
@@ -83,30 +95,32 @@ namespace Wiggy
       create_player(map.srt_spots[2], "Sherbert");
       create_player(map.srt_spots[3], "Grunbo");
 
-      // gameover if all players on exit spots
-      var ext_spots = map.ext_spots;
-
       act.attack_event.AddListener((e) => attack_event_queue.Add(e));
       act.move_event.AddListener((e) => move_event_queue.Add(e));
+      extraction_button.onClick.AddListener(() => scene.Load());
     }
 
-    async void Update()
+    void Update()
     {
+      // Camera
       camera.HandleCursorOnGrid();
       camera.HandleCameraZoom();
-      unit_select.UpdateSelectedCursorUI(map.size);
 
+      // Input
       if (input.a_input)
         act.Act(units, unit_select, camera, map);
-
       if (input.b_input)
         unit_select.ClearSelection();
 
+      // Logic
       ProcessMoveQueue();
       ProcessAttackQueue();
-
       extraction_system.Update(ecs, map.ext_spots);
       instantiate_system.Update(ecs);
+
+      // UI
+      unit_select.UpdateSelectedCursorUI(map.size);
+      extraction_ui.SetActive(extraction_system.ready_for_extraction);
     }
 
     void LateUpdate()
@@ -121,7 +135,6 @@ namespace Wiggy
     {
       if (move_event_queue.Count == 0)
         return;
-      Debug.Log("pulling move event from queue!");
       var e = move_event_queue[0];
       move_event_queue.RemoveAt(0);
 
@@ -133,6 +146,8 @@ namespace Wiggy
         Debug.Log("no path...");
         return;
       }
+
+
 
       // Immediately update representation
       if (!units[e.from_index].IsSet || units[e.to_index].IsSet)
@@ -148,17 +163,27 @@ namespace Wiggy
       ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(go);
       grid_pos.position = Grid.IndexToPos(e.to_index, map.width, map.height);
 
+      if (animation_coroutine != null)
+      {
+        Debug.Log("Stopping coroutine");
+        StopAllCoroutines();
+
+        // Finish moving animation
+        animation_go.transform.localPosition =
+          Grid.GridSpaceToWorldSpace(animation_final, map.size);
+      }
+
       // convert astar_cells to Vector2Int[]
       var path_vec2s = new Vector2Int[path.Length];
       for (int i = 0; i < path.Length; i++)
         path_vec2s[i] = path[i].pos;
 
-      // DisplayPathUI(path, size);
-      // var instance = ecs.GetComponent<InstantiatedComponent>(go);
-      // await Animate.AlongPath(instance.instance, path_vec2s, map.size);
-      // DeletePathUI(path);
-
-      Debug.Log("done with event");
+      Debug.Log("Starting coroutine");
+      var instance = ecs.GetComponent<InstantiatedComponent>(go);
+      animation_go = instance.instance;
+      animation_final = path[^1].pos;
+      animation_coroutine = Animate.AlongPath(animation_go, path_vec2s, map.size);
+      StartCoroutine(animation_coroutine);
     }
 
     private void ProcessAttackQueue()

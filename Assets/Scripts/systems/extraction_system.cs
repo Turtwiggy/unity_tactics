@@ -6,6 +6,8 @@ namespace Wiggy
 {
   public class ExtractionSystem : ECSSystem
   {
+    public bool ready_for_extraction { get; private set; }
+
     public void Start(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -27,9 +29,8 @@ namespace Wiggy
           spots_copy.Remove(pos.position);
       }
 
-      var spots_filled = spots.Count == 0;
-      if (spots_filled)
-        Debug.Log("Ready for extraction!");
+      var spots_filled = spots_copy.Count == 0;
+      ready_for_extraction = spots_filled;
     }
   }
 }

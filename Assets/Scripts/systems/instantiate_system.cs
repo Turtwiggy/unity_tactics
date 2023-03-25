@@ -19,8 +19,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      // If removing a component from an entity iterate backwards
-      foreach (var e in entities.ToArray())
+      foreach (var e in entities.ToArray()) // ReadOnly Copy
       {
         var p = ecs.GetComponent<GridPositionComponent>(e);
         var r = ecs.GetComponent<ToBeInstantiatedComponent>(e);
