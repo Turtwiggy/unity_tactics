@@ -9,7 +9,17 @@ namespace Wiggy
     // 0 is bottom, n is top
     [SerializeField]
     public List<EntityType> entities = new();
+
+    [SerializeField]
+    public List<GameObject> instantiated = new();
   };
+
+  [System.Serializable]
+  public class IndexList
+  {
+    [SerializeField]
+    public List<int> idxs = new();
+  }
 
   public class map_manager : MonoBehaviour
   {
@@ -18,7 +28,7 @@ namespace Wiggy
     public MapEntry[] voronoi_map;
 
     // Interesting spots
-    public List<List<int>> voronoi_zones;
+    public List<IndexList> voronoi_zones;
     public List<Vector2Int> srt_spots;
     public List<Vector2Int> ext_spots;
 
@@ -109,9 +119,9 @@ namespace Wiggy
       generated_obstacle_holder.parent = generated_map_holder;
 
       // Generate a floor
-      GameObject go = new("Floor");
-      go.transform.parent = generated_map_holder;
-      quad.Create(go, width * size, height * size);
+      // GameObject go = new("Floor");
+      // go.transform.parent = generated_map_holder;
+      // quad.Create(go, width * size, height * size);
 
       // Generate Obstacles
       obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
@@ -143,7 +153,8 @@ namespace Wiggy
           {
             var pos = Grid.IndexToPos(i, width, height);
             var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-            Instantiate(prefab, wpos, Quaternion.identity, parent);
+            var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
+            map[i].instantiated.Add(go);
           }
         }
       }

@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1608198229272546, guid: 68813e3f18422044094750f43ff6381b, type: 3}
       propertyPath: m_Name
-      value: Chr_FantasyHero_Preset_5
+      value: player
       objectReference: {fileID: 0}
     - target: {fileID: 1608198229272546, guid: 68813e3f18422044094750f43ff6381b, type: 3}
       propertyPath: m_Layer
@@ -65,21 +65,3 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 68813e3f18422044094750f43ff6381b, type: 3}
---- !u!1 &616306016093886966 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1608198229272546, guid: 68813e3f18422044094750f43ff6381b, type: 3}
-  m_PrefabInstance: {fileID: 614804758927605268}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1182763162
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 616306016093886966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 048d89a82f35d5548bfe3ec1a448b1af, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  team: 0

@@ -84,15 +84,15 @@ namespace Wiggy
       return zones;
     }
 
-    public static List<List<int>> GetZones(List<Vector2Int> zone_center, MapEntry[] voronoi_map, int width, int height)
+    public static List<IndexList> GetZones(List<Vector2Int> zone_center, MapEntry[] voronoi_map, int width, int height)
     {
       var astar_map = map_manager.GameToAStar(voronoi_map, width, height);
 
-      List<List<int>> zones = new();
+      List<IndexList> zones = new();
 
       for (int i = 0; i < zone_center.Count; i++)
       {
-        List<int> tiles = new();
+        IndexList tiles = new();
 
         Vector2Int center = zone_center[i];
         var index = Grid.GetIndex(center, width);
@@ -101,7 +101,7 @@ namespace Wiggy
         astar_cell[] area = a_star.generate_accessible_areas(astar_map, index, range, width, height);
 
         for (int j = 0; j < area.Length; j++)
-          tiles.Add(Grid.GetIndex(area[j].pos, width));
+          tiles.idxs.Add(Grid.GetIndex(area[j].pos, width));
 
         zones.Add(tiles);
       }

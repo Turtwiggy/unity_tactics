@@ -10,8 +10,21 @@ namespace Wiggy
   [System.Serializable]
   class main : MonoBehaviour
   {
+    [Header("Entities")]
     public GameObject player_prefab;
     public GameObject enemy_prefab;
+
+    [Header("FOV")]
+    public int fov_max_distance = 5;
+    public GameObject fov_holder;
+    public GameObject fov_cursor_prefab;
+    public GameObject fov_enabled_prefab;
+    public GameObject fov_disabled_prefab;
+    private Vector2Int fov_pos = new(0, 0);
+
+    [Header("Extraction")]
+    public GameObject extraction_ui;
+    public Button extraction_button;
 
     Wiggy.registry ecs;
     input_handler input;
@@ -29,15 +42,12 @@ namespace Wiggy
 
     ExtractionSystem extraction_system;
     InstantiateSystem instantiate_system;
-
-    public GameObject extraction_ui;
-    public Button extraction_button;
+    fov_system fov;
 
     [SerializeField]
     private IEnumerator animation_coroutine;
     private GameObject animation_go;
     private Vector2Int animation_final;
-
 
     void Start()
     {
@@ -49,6 +59,7 @@ namespace Wiggy
       ecs.RegisterComponent<InstantiatedComponent>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
+      fov = ecs.RegisterSystem<fov_system>();
 
       map = FindObjectOfType<map_manager>();
       input = FindObjectOfType<input_handler>();
@@ -63,6 +74,19 @@ namespace Wiggy
 
       instantiate_system.Start(ecs, map);
       extraction_system.Start(ecs);
+      {
+        fov_system_init init = new()
+        {
+          fov_pos = fov_pos,
+          fov_holder = fov_holder,
+          fov_cursor_prefab = fov_cursor_prefab,
+          fov_enabled_prefab = fov_enabled_prefab,
+          fov_disabled_prefab = fov_disabled_prefab,
+          max_dst = fov_max_distance
+        };
+        fov.Start(ecs, map, init);
+      }
+
       act.DoStart();
       camera.DoStart();
       unit_select.DoStart();
@@ -70,30 +94,29 @@ namespace Wiggy
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
       var voronoi_zones = map.voronoi_zones;
-
-      void create_player(Vector2Int spot, string name)
+      foreach (IndexList zone_idxs in voronoi_zones)
       {
-        var e = ecs.Create();
-
-        ecs.AddComponent<PlayerComponent>(e, default);
-
-        GridPositionComponent gpc = new();
-        gpc.position = spot;
-        ecs.AddComponent(e, gpc);
-
-        ToBeInstantiatedComponent tbic = new();
-        tbic.prefab = player_prefab;
-        tbic.name = name;
-        ecs.AddComponent(e, tbic);
-
-        var index = Grid.GetIndex(spot, map.width);
-        units[index] = new Optional<Entity>(e);
+        foreach (int idx in zone_idxs.idxs)
+        {
+          // TODO: checks
+          // In obstacle?
+          // Player unit in zone?
+          var pos = Grid.IndexToPos(idx, map.width, map.height);
+          var enemy = Entities.create_unit(ecs, enemy_prefab, pos, "Random Enemy");
+          units[idx] = new Optional<Entity>(enemy);
+          break;
+        }
       }
+
       // set players at start spots
-      create_player(map.srt_spots[0], "Wiggy");
-      create_player(map.srt_spots[1], "Wallace");
-      create_player(map.srt_spots[2], "Sherbert");
-      create_player(map.srt_spots[3], "Grunbo");
+      var e0 = Entities.create_unit(ecs, player_prefab, map.srt_spots[0], "Wiggy");
+      var e1 = Entities.create_unit(ecs, player_prefab, map.srt_spots[1], "Wallace");
+      var e2 = Entities.create_unit(ecs, player_prefab, map.srt_spots[2], "Sherbert");
+      var e3 = Entities.create_unit(ecs, player_prefab, map.srt_spots[3], "Grunbo");
+      units[Grid.GetIndex(map.srt_spots[0], map.width)] = new Optional<Entity>(e0);
+      units[Grid.GetIndex(map.srt_spots[1], map.width)] = new Optional<Entity>(e1);
+      units[Grid.GetIndex(map.srt_spots[2], map.width)] = new Optional<Entity>(e2);
+      units[Grid.GetIndex(map.srt_spots[3], map.width)] = new Optional<Entity>(e3);
 
       act.attack_event.AddListener((e) => attack_event_queue.Add(e));
       act.move_event.AddListener((e) => move_event_queue.Add(e));
@@ -112,11 +135,24 @@ namespace Wiggy
       if (input.b_input)
         unit_select.ClearSelection();
 
+      // Debug FOV
+      if (input.d_pad_u)
+        fov_pos.y += 1;
+      if (input.d_pad_d)
+        fov_pos.y -= 1;
+      if (input.d_pad_l)
+        fov_pos.x -= 1;
+      if (input.d_pad_r)
+        fov_pos.x += 1;
+
       // Logic
       ProcessMoveQueue();
       ProcessAttackQueue();
       extraction_system.Update(ecs, map.ext_spots);
       instantiate_system.Update(ecs);
+
+      if (input.d_pad_d || input.d_pad_u || input.d_pad_l || input.d_pad_r)
+        fov.Update(ecs, fov_pos);
 
       // UI
       unit_select.UpdateSelectedCursorUI(map.size);
@@ -146,8 +182,6 @@ namespace Wiggy
         Debug.Log("no path...");
         return;
       }
-
-
 
       // Immediately update representation
       if (!units[e.from_index].IsSet || units[e.to_index].IsSet)
