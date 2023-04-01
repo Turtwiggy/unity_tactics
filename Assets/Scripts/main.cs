@@ -18,8 +18,7 @@ namespace Wiggy
     public int fov_max_distance = 5;
     public GameObject fov_holder;
     public GameObject fov_cursor_prefab;
-    public GameObject fov_enabled_prefab;
-    public GameObject fov_disabled_prefab;
+    public GameObject fov_grid_prefab;
     private Vector2Int fov_pos = new(0, 0);
 
     [Header("Extraction")]
@@ -75,13 +74,15 @@ namespace Wiggy
       instantiate_system.Start(ecs, map);
       extraction_system.Start(ecs);
       {
-        fov_system_init init = new()
+        // todo: make it average pos of players
+        fov_pos = map.srt_spots[0];
+
+        fov_system.fov_system_init init = new()
         {
           fov_pos = fov_pos,
           fov_holder = fov_holder,
           fov_cursor_prefab = fov_cursor_prefab,
-          fov_enabled_prefab = fov_enabled_prefab,
-          fov_disabled_prefab = fov_disabled_prefab,
+          fov_grid_prefab = fov_grid_prefab,
           max_dst = fov_max_distance
         };
         fov.Start(ecs, map, init);
@@ -117,6 +118,7 @@ namespace Wiggy
       units[Grid.GetIndex(map.srt_spots[1], map.width)] = new Optional<Entity>(e1);
       units[Grid.GetIndex(map.srt_spots[2], map.width)] = new Optional<Entity>(e2);
       units[Grid.GetIndex(map.srt_spots[3], map.width)] = new Optional<Entity>(e3);
+
 
       act.attack_event.AddListener((e) => attack_event_queue.Add(e));
       act.move_event.AddListener((e) => move_event_queue.Add(e));
