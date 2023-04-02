@@ -10,11 +10,6 @@ namespace Wiggy
     public void Start(Wiggy.registry ecs, map_manager map)
     {
       this.map = map;
-
-      Signature s = new();
-      s.Set(ecs.GetComponentType<GridPositionComponent>());
-      s.Set(ecs.GetComponentType<ToBeInstantiatedComponent>());
-      ecs.SetSystemSignature<InstantiateSystem>(s);
     }
 
     public void Update(Wiggy.registry ecs)

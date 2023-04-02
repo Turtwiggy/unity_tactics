@@ -4,7 +4,7 @@ using TMPro;
 
 namespace Wiggy
 {
-  public class selector : MonoBehaviour
+  public class character_visuals_selector : MonoBehaviour
   {
     public Toggle toggle;
     public Button left;

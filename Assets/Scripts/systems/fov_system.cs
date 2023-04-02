@@ -172,10 +172,10 @@ namespace Wiggy
   }
 
   [System.Serializable]
-  public class fov_system : ECSSystem
+  public class FovSystem : ECSSystem
   {
 
-    public struct fov_system_init
+    public struct FovSystemInit
     {
       public Vector2Int fov_pos;
       public GameObject fov_cursor_prefab;
@@ -199,13 +199,8 @@ namespace Wiggy
     private Color previously_seen_colour = Color.yellow;
     private int max_dst;
 
-    public void Start(Wiggy.registry ecs, map_manager mm, fov_system_init init)
+    public void Start(Wiggy.registry ecs, map_manager mm, FovSystemInit init)
     {
-      Signature s = new();
-      s.Set(ecs.GetComponentType<GridPositionComponent>());
-      s.Set(ecs.GetComponentType<InstantiatedComponent>());
-      ecs.SetSystemSignature<fov_system>(s);
-
       // Data
       map_manager = mm;
       fov_map_live = new TileState[mm.obstacle_map.Length];
@@ -334,7 +329,7 @@ namespace Wiggy
       //
       // Set actors on visible tiles as visible
       //
-      foreach (var e in entities.ToArray())
+      foreach (var e in entities)
       {
         var p = ecs.GetComponent<GridPositionComponent>(e);
         var i = ecs.GetComponent<InstantiatedComponent>(e);

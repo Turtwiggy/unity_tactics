@@ -21,7 +21,7 @@ namespace Wiggy
     bool camera_z_lock;
     public float camera_follow_z_lock = 8f;
 
-    public void DoStart()
+    public void Start()
     {
       map = FindObjectOfType<map_manager>();
       ground_plane = new Plane(Vector3.up, Vector3.zero);

@@ -10,6 +10,10 @@ namespace Wiggy
   {
   };
 
+  public struct CursorComponent
+  {
+  };
+
   // Other
 
   public struct GridPositionComponent

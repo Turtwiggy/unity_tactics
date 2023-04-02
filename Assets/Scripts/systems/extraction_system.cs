@@ -10,10 +10,7 @@ namespace Wiggy
 
     public void Start(Wiggy.registry ecs)
     {
-      Signature s = new();
-      s.Set(ecs.GetComponentType<PlayerComponent>());
-      s.Set(ecs.GetComponentType<GridPositionComponent>());
-      ecs.SetSystemSignature<ExtractionSystem>(s);
+
     }
 
     public void Update(Wiggy.registry ecs, List<Vector2Int> spots)

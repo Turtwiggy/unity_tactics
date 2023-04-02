@@ -61,21 +61,6 @@ namespace Wiggy
     }
   }
 
-  public class Indexable<T>
-  {
-    public string display_name;
-    public List<T> list;
-    public int index;
-    public bool enabled = true;
-
-    public Indexable(string name, List<T> list, int index)
-    {
-      this.display_name = name;
-      this.list = list;
-      this.index = index;
-    }
-  }
-
   public class character : MonoBehaviour
   {
     [Header("Material")]
@@ -204,7 +189,7 @@ namespace Wiggy
         int tmp = i;
 
         Indexable<Characteristic> indexable = state.characteristics[tmp];
-        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, characteristics_parent.transform).GetComponent<selector>();
+        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, characteristics_parent.transform).GetComponent<character_visuals_selector>();
         selector.center.SetText(indexable.display_name);
         selector.count.SetText(string.Format("{0}", indexable.list[indexable.index].type.ToString()));
 
@@ -355,7 +340,7 @@ namespace Wiggy
         int tmp = i;
 
         var indexable = state.body[i];
-        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, body_parent.transform).GetComponent<selector>();
+        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, body_parent.transform).GetComponent<character_visuals_selector>();
         selector.center.SetText(indexable.display_name);
         selector.count.SetText(string.Format("{0}/{1}", indexable.index, indexable.list.Count));
         selector.toggle.isOn = indexable.enabled;
@@ -423,7 +408,7 @@ namespace Wiggy
         int tmp = i;
 
         var indexable = state.attachments[i];
-        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, attachments_parent.transform).GetComponent<selector>();
+        var selector = Instantiate(selector_ui_prefab, Vector3.zero, Quaternion.identity, attachments_parent.transform).GetComponent<character_visuals_selector>();
         selector.center.SetText(indexable.display_name);
         selector.count.SetText(string.Format("{0}/{1}", indexable.index, indexable.list.Count));
         selector.toggle.isOn = indexable.enabled;

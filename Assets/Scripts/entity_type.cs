@@ -7,6 +7,7 @@ namespace Wiggy
     empty,
 
     // actor_player,
+    // actor_enemy,
     // actor_bat,
     // actor_troll,
     // actor_shopkeeper,
