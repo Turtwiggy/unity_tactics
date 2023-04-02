@@ -24,7 +24,7 @@ namespace Wiggy
     HIDDEN,
     VISIBLE,
     PREVIOUSLY_SEEN,
-  };
+  }
 
   // heavily based off:
   // https://www.albertford.com/shadowcasting/
@@ -69,7 +69,7 @@ namespace Wiggy
 
     // Gameplay
 
-    public static void mark_visible(ref TileState[] tiles, int index)
+    public static void mark_visible(TileState[] tiles, int index)
     {
       tiles[index] = TileState.VISIBLE;
     }
@@ -99,13 +99,13 @@ namespace Wiggy
       return map.obstacle_map[index].entities.Contains(EntityType.tile_type_floor);
     }
 
-    public static void compute_fov(ref TileState[] tiles, map_manager mm, Vector2Int origin, int x_max)
+    public static void compute_fov(TileState[] tiles, map_manager mm, Vector2Int origin, int x_max)
     {
       { // Set origin as visible
         var index = Grid.GetIndex(origin, x_max);
         if (index < 0 || index >= tiles.Length)
           return; // invalid origin
-        mark_visible(ref tiles, index);
+        mark_visible(tiles, index);
       }
 
       //
@@ -145,7 +145,7 @@ namespace Wiggy
             var prev_tile_index = Grid.GetIndex(px, py, x_max);
 
             if (is_wall(mm, curr_tile_index) || is_symmetric(row, tile))
-              mark_visible(ref tiles, curr_tile_index);
+              mark_visible(tiles, curr_tile_index);
 
             if (prev_tile.IsSet && is_wall(mm, prev_tile_index) && is_floor(mm, curr_tile_index))
               row.start_slope = slope(tile);
@@ -186,7 +186,8 @@ namespace Wiggy
     }
 
     // Data
-    public TileState[] fov_map;
+    public TileState[] fov_map_live { get; private set; }
+    public TileState[] fov_map_mask { get; private set; }
     public SpriteRenderer[] fov_cursor_map { get; private set; }
     private map_manager map_manager;
 
@@ -195,7 +196,6 @@ namespace Wiggy
     private GameObject fov_debug_cursor;
     private Color enable_color = Color.white;
     private Color disable_color = Color.grey;
-    private Color out_of_range_color = Color.red;
     private Color previously_seen_colour = Color.yellow;
     private int max_dst;
 
@@ -208,7 +208,12 @@ namespace Wiggy
 
       // Data
       map_manager = mm;
-      fov_map = new TileState[mm.obstacle_map.Length];
+      fov_map_live = new TileState[mm.obstacle_map.Length];
+      for (int i = 0; i < fov_map_live.Length; i++)
+        fov_map_live[i] = TileState.HIDDEN;
+      fov_map_mask = new TileState[mm.obstacle_map.Length];
+      for (int i = 0; i < fov_map_mask.Length; i++)
+        fov_map_mask[i] = TileState.HIDDEN;
 
       // Unity/UI
       fov_holder = init.fov_holder;
@@ -218,12 +223,10 @@ namespace Wiggy
       //
       // Instantiate squares all over, to visulize the fov
       //
-      for (int i = 0; i < fov_map.Length; i++)
+      for (int i = 0; i < fov_map_live.Length; i++)
       {
-        var enabled = fov_map[i] == TileState.VISIBLE;
         var gpos = Grid.IndexToPos(i, mm.width, mm.height);
         var wpos = Grid.GridSpaceToWorldSpace(gpos, mm.size);
-        wpos.y = -0.01f;
         Object.Instantiate(init.fov_grid_prefab, wpos, Quaternion.identity, fov_holder.transform);
       }
       fov_cursor_map = fov_holder.GetComponentsInChildren<SpriteRenderer>();
@@ -241,46 +244,60 @@ namespace Wiggy
       Debug.Log("computing fov");
       int x_max = map_manager.width;
 
-      for (int i = 0; i < fov_map.Length; i++)
+      // The live view from the position
+      for (int i = 0; i < fov_map_live.Length; i++)
+        fov_map_live[i] = TileState.HIDDEN;
+      symmetric_shadowcasting.compute_fov(fov_map_live, map_manager, pos, x_max);
+
+      // Combine the live view and the mask
+      for (int i = 0; i < fov_map_mask.Length; i++)
       {
-        // Make any visible previously-seen
-        if (fov_map[i] == TileState.VISIBLE)
-          fov_map[i] = TileState.PREVIOUSLY_SEEN;
+        var live_view_state = fov_map_live[i];
+        var mask_view_state = fov_map_mask[i];
 
-        // If not previously seen, make it hidden
-        if (!(fov_map[i] == TileState.PREVIOUSLY_SEEN))
-          fov_map[i] = TileState.HIDDEN;
+        var dst = pos - Grid.IndexToPos(i, x_max, map_manager.height);
+        bool in_range = Mathf.Abs(dst.x) <= max_dst && Mathf.Abs(dst.y) <= max_dst;
 
-        // processing (range cutoff)
-        // var gpos = Grid.IndexToPos(i, x_max, map_manager.height);
-        // var dst = pos - gpos;
-        // bool out_of_range = Mathf.Abs(dst.x) > max_dst || Mathf.Abs(dst.y) > max_dst;
-        // if (out_of_range && fov_map[i] == TileState.VISIBLE)
-        //   fov_map[i] = TileState.OUT_OF_RANGE;
-      }
+        //
+        // Update the mask based on the live state
+        //
 
-      // This would re-mark previously-seen as visible, or leave it as previously-seen
-      symmetric_shadowcasting.compute_fov(ref fov_map, map_manager, pos, x_max);
+        // visible conditions
+        bool v0 = live_view_state == TileState.VISIBLE;
+        bool v1 = in_range;
+        if (v0 && v1)
+          fov_map_mask[i] = TileState.VISIBLE;
 
-      for (int i = 0; i < fov_map.Length; i++)
-      {
+        // hidden conditions
+        bool h0 = live_view_state == TileState.HIDDEN;
+        bool h1 = !in_range;
+        bool h2 = mask_view_state != TileState.PREVIOUSLY_SEEN;
+        if (h0 && h1 && h2)
+          fov_map_mask[i] = TileState.HIDDEN;
+
+        // previously seen conditions
+        bool p0 = live_view_state == TileState.HIDDEN;
+        bool p1 = mask_view_state == TileState.VISIBLE;
+        if (p0 && p1)
+          fov_map_mask[i] = TileState.PREVIOUSLY_SEEN;
+
         //
         // Update Grid View
         //
         fov_cursor_map[i].color = disable_color;
         fov_cursor_map[i].gameObject.SetActive(false);
 
-        if (fov_map[i] == TileState.VISIBLE)
+        if (fov_map_mask[i] == TileState.VISIBLE)
         {
           fov_cursor_map[i].gameObject.SetActive(true);
           fov_cursor_map[i].color = enable_color;
         }
-        if (fov_map[i] == TileState.HIDDEN)
+        if (fov_map_mask[i] == TileState.HIDDEN)
         {
           fov_cursor_map[i].gameObject.SetActive(false);
           fov_cursor_map[i].color = disable_color;
         }
-        if (fov_map[i] == TileState.PREVIOUSLY_SEEN)
+        if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
         {
           fov_cursor_map[i].gameObject.SetActive(true);
           fov_cursor_map[i].color = previously_seen_colour;
@@ -290,6 +307,7 @@ namespace Wiggy
         // Update obstacle view
         // It's a for loop because there could be multiple instantiated items?
         //
+
         for (int iidx = 0; iidx < map_manager.obstacle_map[i].instantiated.Count; iidx++)
         {
           var instance = map_manager.obstacle_map[i].instantiated[iidx];
@@ -299,12 +317,14 @@ namespace Wiggy
           settings.object_when_was_seen.SetActive(false);
           settings.object_when_hidden.SetActive(false);
 
-          if (fov_map[i] == TileState.VISIBLE)
+          if (fov_map_mask[i] == TileState.VISIBLE)
             settings.object_when_active.SetActive(true);
-          if (fov_map[i] == TileState.PREVIOUSLY_SEEN)
-            settings.object_when_was_seen.SetActive(true);
-          if (fov_map[i] == TileState.HIDDEN)
+
+          if (fov_map_mask[i] == TileState.HIDDEN)
             settings.object_when_hidden.SetActive(false);
+
+          if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
+            settings.object_when_was_seen.SetActive(true);
         }
       }
 
@@ -319,8 +339,10 @@ namespace Wiggy
         var p = ecs.GetComponent<GridPositionComponent>(e);
         var i = ecs.GetComponent<InstantiatedComponent>(e);
         var idx = Grid.GetIndex(p.position, x_max);
-        i.instance.SetActive(fov_map[idx] == TileState.VISIBLE);
+        i.instance.SetActive(fov_map_mask[idx] == TileState.VISIBLE);
       }
+
+      //
     }
   }
 }

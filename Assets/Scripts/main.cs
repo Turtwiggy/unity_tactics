@@ -15,7 +15,7 @@ namespace Wiggy
     public GameObject enemy_prefab;
 
     [Header("FOV")]
-    public int fov_max_distance = 5;
+    private int fov_max_distance = 10;
     public GameObject fov_holder;
     public GameObject fov_cursor_prefab;
     public GameObject fov_grid_prefab;
@@ -118,7 +118,6 @@ namespace Wiggy
       units[Grid.GetIndex(map.srt_spots[1], map.width)] = new Optional<Entity>(e1);
       units[Grid.GetIndex(map.srt_spots[2], map.width)] = new Optional<Entity>(e2);
       units[Grid.GetIndex(map.srt_spots[3], map.width)] = new Optional<Entity>(e3);
-
 
       act.attack_event.AddListener((e) => attack_event_queue.Add(e));
       act.move_event.AddListener((e) => move_event_queue.Add(e));
