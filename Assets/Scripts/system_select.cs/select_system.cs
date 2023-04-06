@@ -11,11 +11,20 @@ namespace Wiggy
     private camera_handler camera;
 
     public int from_index { get; private set; }
+    public Entity cursor { get; private set; }
+
+    public void SetSignature(Wiggy.registry ecs)
+    {
+      Signature s = new();
+      s.Set(ecs.GetComponentType<CursorComponent>());
+      s.Set(ecs.GetComponentType<GridPositionComponent>());
+      s.Set(ecs.GetComponentType<InstantiatedComponent>());
+      ecs.SetSystemSignature<SelectSystem>(s);
+    }
 
     public void Start(Wiggy.registry ecs, GameObject selected_cursor_prefab)
     {
-      Entities.create_cursor(ecs, selected_cursor_prefab);
-
+      cursor = Entities.create_cursor(ecs, selected_cursor_prefab);
       map = Object.FindObjectOfType<map_manager>();
       camera = Object.FindObjectOfType<camera_handler>();
 
@@ -47,6 +56,7 @@ namespace Wiggy
 
       if (from_index != -1)
         return;
+
       from_index = index;
     }
 

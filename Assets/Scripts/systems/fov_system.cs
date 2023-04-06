@@ -199,13 +199,22 @@ namespace Wiggy
     private Color previously_seen_colour = Color.yellow;
     private int max_dst;
 
+    public void SetSignature(Wiggy.registry ecs)
+    {
+      Signature s = new();
+      s.Set(ecs.GetComponentType<GridPositionComponent>());
+      s.Set(ecs.GetComponentType<InstantiatedComponent>());
+      ecs.SetSystemSignature<FovSystem>(s);
+    }
+
     public void Start(Wiggy.registry ecs, map_manager mm, FovSystemInit init)
     {
-      // Data
       map_manager = mm;
+
       fov_map_live = new TileState[mm.obstacle_map.Length];
       for (int i = 0; i < fov_map_live.Length; i++)
         fov_map_live[i] = TileState.HIDDEN;
+
       fov_map_mask = new TileState[mm.obstacle_map.Length];
       for (int i = 0; i < fov_map_mask.Length; i++)
         fov_map_mask[i] = TileState.HIDDEN;
@@ -222,6 +231,9 @@ namespace Wiggy
       {
         var gpos = Grid.IndexToPos(i, mm.width, mm.height);
         var wpos = Grid.GridSpaceToWorldSpace(gpos, mm.size);
+
+        wpos.y = Random.Range(-0.05f, 0.05f);
+
         Object.Instantiate(init.fov_grid_prefab, wpos, Quaternion.identity, fov_holder.transform);
       }
       fov_cursor_map = fov_holder.GetComponentsInChildren<SpriteRenderer>();

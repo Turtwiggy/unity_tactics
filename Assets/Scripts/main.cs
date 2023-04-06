@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Wiggy
 {
@@ -28,6 +25,7 @@ namespace Wiggy
 
     // ecs-based systems
     Wiggy.registry ecs;
+    ActionSystem action_system;
     ExtractionSystem extraction_system;
     FovSystem fov_system;
     InstantiateSystem instantiate_system;
@@ -44,41 +42,19 @@ namespace Wiggy
       ecs.RegisterComponent<ToBeInstantiatedComponent>();
       ecs.RegisterComponent<InstantiatedComponent>();
 
+      action_system = ecs.RegisterSystem<ActionSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
       fov_system = ecs.RegisterSystem<FovSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
       units_system = ecs.RegisterSystem<UnitSpawnSystem>();
 
-      {
-        Signature s = new();
-        s.Set(ecs.GetComponentType<PlayerComponent>());
-        s.Set(ecs.GetComponentType<GridPositionComponent>());
-        ecs.SetSystemSignature<ExtractionSystem>(s);
-      }
-      {
-        Signature s = new();
-        s.Set(ecs.GetComponentType<GridPositionComponent>());
-        s.Set(ecs.GetComponentType<InstantiatedComponent>());
-        ecs.SetSystemSignature<FovSystem>(s);
-      }
-      {
-        Signature s = new();
-        s.Set(ecs.GetComponentType<GridPositionComponent>());
-        s.Set(ecs.GetComponentType<ToBeInstantiatedComponent>());
-        ecs.SetSystemSignature<InstantiateSystem>(s);
-      }
-      {
-        Signature s = new();
-        s.Set(ecs.GetComponentType<CursorComponent>());
-        s.Set(ecs.GetComponentType<GridPositionComponent>());
-        s.Set(ecs.GetComponentType<InstantiatedComponent>());
-        ecs.SetSystemSignature<SelectSystem>(s);
-      }
-      {
-        Signature s = new();
-        ecs.SetSystemSignature<UnitSpawnSystem>(s);
-      }
+      action_system.SetSignature(ecs);
+      extraction_system.SetSignature(ecs);
+      fov_system.SetSignature(ecs);
+      instantiate_system.SetSignature(ecs);
+      select_system.SetSignature(ecs);
+      units_system.SetSignature(ecs);
 
       map = FindObjectOfType<map_manager>();
       input = FindObjectOfType<input_handler>();
@@ -87,6 +63,12 @@ namespace Wiggy
 
       // HACK
       fov_pos = map.srt_spots[0];
+
+      // unity-based systems
+
+      // map.seed = 0;
+      // map.zone_seed = 0;
+      // map.GenerateMap();
 
       // ecs-based systems
 
@@ -105,6 +87,7 @@ namespace Wiggy
         enemy_prefab = enemy_prefab
       };
 
+      action_system.Start(ecs);
       extraction_system.Start(ecs);
       fov_system.Start(ecs, map, fov_data);
       instantiate_system.Start(ecs, map);

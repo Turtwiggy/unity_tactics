@@ -26,10 +26,14 @@ namespace Wiggy
       units[idx] = new Optional<Entity>(enemy);
     }
 
+    public void SetSignature(Wiggy.registry ecs)
+    {
+      Signature s = new();
+      ecs.SetSystemSignature<UnitSpawnSystem>(s);
+    }
+
     public void Start(Wiggy.registry ecs, UnitSpawnSystemInit data)
     {
-
-
       map = Object.FindObjectOfType<map_manager>();
 
       units = new Optional<Entity>[map.width * map.height];
@@ -52,8 +56,8 @@ namespace Wiggy
           // TODO: checks
           // In obstacle?
           // Player unit in zone?
-
-          CreateUnit(ecs, data.enemy_prefab, Grid.IndexToPos(idx, map.width, map.height), "Random Enemy");
+          var pos = Grid.IndexToPos(idx, map.width, map.height);
+          CreateUnit(ecs, data.enemy_prefab, pos, "Random Enemy");
           break;
         }
       }

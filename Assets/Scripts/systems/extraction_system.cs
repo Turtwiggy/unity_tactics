@@ -8,6 +8,14 @@ namespace Wiggy
   {
     public bool ready_for_extraction { get; private set; }
 
+    public void SetSignature(Wiggy.registry ecs)
+    {
+      Signature s = new();
+      s.Set(ecs.GetComponentType<PlayerComponent>());
+      s.Set(ecs.GetComponentType<GridPositionComponent>());
+      ecs.SetSystemSignature<ExtractionSystem>(s);
+    }
+
     public void Start(Wiggy.registry ecs)
     {
 

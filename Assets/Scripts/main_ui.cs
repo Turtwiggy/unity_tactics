@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,8 +19,8 @@ namespace Wiggy
     public GameObject action_holder;
     public GameObject action_prefab;
 
-    map_manager map;
-    scene_manager scene;
+    private map_manager map;
+    private scene_manager scene;
 
     public void Start()
     {
@@ -35,9 +33,6 @@ namespace Wiggy
 
     public void DoUpdate(main_ui_data data)
     {
-      // update the cursor
-      // unit_select.UpdateSelectedCursorUI(map.size);
-
       // set ui active/inactive
       extraction_holder.SetActive(data.ready_for_extraction);
     }
