@@ -22,8 +22,8 @@ namespace Wiggy
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var enemy = Entities.create_unit(ecs, prefab, pos, name);
-      units[idx] = new Optional<Entity>(enemy);
+      var unit = Entities.create_unit(ecs, prefab, pos, name);
+      units[idx] = new Optional<Entity>(unit);
     }
 
     public void SetSignature(Wiggy.registry ecs)
@@ -49,13 +49,27 @@ namespace Wiggy
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
       var voronoi_zones = map.voronoi_zones;
+
       foreach (IndexList zone_idxs in voronoi_zones)
       {
         foreach (int idx in zone_idxs.idxs)
         {
-          // TODO: checks
+          // validation checks
+
+          // unit in zone?
+          if (units[idx].IsSet)
+          {
+            Debug.Log("Skipping tile; unit already existed");
+            break;
+          }
+
           // In obstacle?
-          // Player unit in zone?
+          if (map.obstacle_map[idx].entities.Contains(EntityType.tile_type_wall))
+          {
+            Debug.Log("Would spawn in obstacle... skipping");
+            continue;
+          }
+
           var pos = Grid.IndexToPos(idx, map.width, map.height);
           CreateUnit(ecs, data.enemy_prefab, pos, "Random Enemy");
           break;

@@ -81,7 +81,7 @@ namespace Wiggy
 
     public ref T Get(Entity e)
     {
-      return ref component_array[e];
+      return ref component_array[entity_to_index_map[e]];
     }
 
     public void EntityDestroyed(Entity e)
@@ -104,6 +104,7 @@ namespace Wiggy
       signatures = new Signature[max_entities];
       for (int i = 0; i < signatures.Length; i++)
         signatures[i] = new();
+
       available_entities = new(Enumerable.Range(0, max_entities));
     }
 
@@ -123,6 +124,13 @@ namespace Wiggy
 
     public void SetSignature(Entity e, Signature s)
     {
+      // Convert signature to readable bits
+      // System.Collections.BitArray b = new(new int[] { s.data });
+      // byte[] bits = new byte[b.Count];
+      // b.CopyTo(bits, 0);
+      // string str = string.Join("", bits);
+      // Debug.Log("entity " + e + " signature set to: " + str);
+
       signatures[e] = s;
     }
 
@@ -234,7 +242,6 @@ namespace Wiggy
   }
 
   // All systems to inherit from this
-  [System.Serializable]
   public abstract class ECSSystem
   {
     public HashSet<Entity> entities = new();

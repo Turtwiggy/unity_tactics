@@ -171,10 +171,8 @@ namespace Wiggy
     }
   }
 
-  [System.Serializable]
   public class FovSystem : ECSSystem
   {
-
     public struct FovSystemInit
     {
       public Vector2Int fov_pos;
@@ -231,9 +229,6 @@ namespace Wiggy
       {
         var gpos = Grid.IndexToPos(i, mm.width, mm.height);
         var wpos = Grid.GridSpaceToWorldSpace(gpos, mm.size);
-
-        wpos.y = Random.Range(-0.05f, 0.05f);
-
         Object.Instantiate(init.fov_grid_prefab, wpos, Quaternion.identity, fov_holder.transform);
       }
       fov_cursor_map = fov_holder.GetComponentsInChildren<SpriteRenderer>();

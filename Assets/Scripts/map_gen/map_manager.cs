@@ -153,9 +153,6 @@ namespace Wiggy
           {
             var pos = Grid.IndexToPos(i, width, height);
             var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-
-            // wpos.y = Random.Range(0.45f, 0.55f);
-
             var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
             map[i].instantiated.Add(go);
           }
@@ -169,7 +166,7 @@ namespace Wiggy
           Instantiate(prefab, wpos, Quaternion.identity, generated_map_holder);
         }
       }
-      void InstantiateSpotsFromIdxs(MapEntry[] map, List<int> idxs, GameObject prefab)
+      void InstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
       {
         for (int j = 0; j < idxs.Count; j++)
         {

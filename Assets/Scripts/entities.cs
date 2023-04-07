@@ -19,6 +19,12 @@ namespace Wiggy
       tbic.name = name;
       ecs.AddComponent(e, tbic);
 
+      ActionsComponent actions = new();
+      actions.allowed_actions_per_turn = 2;
+      actions.done = new Action[5];
+      actions.requested = new Action[5];
+      ecs.AddComponent(e, actions);
+
       return e;
     }
 

@@ -1,117 +1,91 @@
+using UnityEngine;
 
 namespace Wiggy
 {
   using Entity = System.Int32;
 
-  public class ActionsPerTurn
-  {
-    public int allowed_actions = 2;
-
-    // movement
-    public bool move;
-
-    // combat
-    public bool heal;
-    public bool shoot;
-    public bool melee;
-    public bool overwatch;
-    public bool reload;
-  }
-
-  [System.Serializable]
   public class ActionSystem : ECSSystem
   {
-    private Entity cursor;
+    private map_manager map;
+    private UnitSpawnSystem unit_spawn_system;
 
     public void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
+      s.Set(ecs.GetComponentType<ActionsComponent>());
       ecs.SetSystemSignature<ActionSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs)
+    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss)
     {
-      // Entity[] view = ecs.View<CursorComponent>();
-
-      // // Get the first cursor
-      // Entity cursor = default;
-      // foreach (var e in view)
-      // {
-      //   cursor = e;
-      //   break;
-      // }
-
-      // if (cursor != default)
-      // {
-      // }
+      map = Object.FindObjectOfType<map_manager>();
+      unit_spawn_system = uss;
     }
 
-    public void Update()
+    public void RequestActionFromMap(Wiggy.registry ecs, int from, int to)
     {
+      if (from == to)
+      {
+        Debug.Log("from == to; no action to take");
+        return;
+      }
 
+      var units = unit_spawn_system.units;
+      Optional<Entity> from_entity = units[from];
+      Optional<Entity> to_entity = units[to];
+      bool to_contains_unit = to_entity.IsSet;
+      bool to_contains_obstacle = map.obstacle_map[to].entities.Contains(EntityType.tile_type_wall);
+
+      if (from_entity.IsSet && to_contains_unit)
+      {
+        ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity.Data);
+        actions.requested[0] = new Attack();
+      }
+
+      if (from_entity.IsSet && !to_contains_obstacle)
+      {
+        ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity.Data);
+        actions.requested[0] = new Move();
+      }
+    }
+
+    public void RequestActionFromUI(Wiggy.registry ecs, int from, Action a)
+    {
+      var units = unit_spawn_system.units;
+      Optional<Entity> from_entity = units[from];
+
+      if (!from_entity.IsSet)
+      {
+        Debug.Log("no unit at requested action index");
+        return;
+      }
+
+      ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity.Data);
+
+      if (a.GetType() == typeof(Overwatch))
+        actions.requested[0] = new Overwatch();
+
+      if (a.GetType() == typeof(Reload))
+        actions.requested[0] = new Reload();
+    }
+
+    public void Update(Wiggy.registry ecs)
+    {
+      foreach (var e in entities)
+      {
+        ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
+        ref var requested = ref actions.requested;
+
+        for (int i = 0; i < requested.Length; i++)
+        {
+          var action = actions.requested[i];
+
+          if (action != null)
+          {
+            Debug.Log("unit wants to take an action!");
+          }
+        }
+      }
     }
   }
 }
-
-// using UnityEngine.Events;
-
-// namespace Wiggy
-// {
-//   using Entity = System.Int32;
-
-//   public class unit_act : MonoBehaviour
-//   {
-//     public void Act(Optional<Entity>[] units, unit_select select, camera_handler camera, map_manager map)
-//     {
-//       var hover_index = Grid.GetIndex(camera.grid_index, map.width);
-
-//       //
-//       // Must select a unit
-//       //
-//       bool unit_selected = select.from_index != -1;
-//       if (!unit_selected)
-//       {
-//         select.Select(hover_index);
-//         return;
-//       }
-
-//       //
-//       // Now there's a unit selected.
-//       // What did the user select next?
-//       //
-//       var from = select.from_index;
-//       var to = hover_index;
-
-//       // the same tile?
-//       if (from == to)
-//         return;
-
-//       // a unit?
-//       if (units[from].IsSet && units[to].IsSet)
-//       {
-//         AttackEvent e = new()
-//         {
-//           from = units[from].Data,
-//           target = units[to].Data
-//         };
-//         attack_event.Invoke(e);
-//       }
-
-//       // a different tile?
-//       else if (map.obstacle_map[to].entities.Contains(EntityType.tile_type_floor))
-//       {
-//         MoveEvent e = new()
-//         {
-//           from_index = from,
-//           to_index = to
-//         };
-//         move_event.Invoke(e);
-//       }
-
-//       //
-//       // Assume action was successful, and clear the selected tile
-//       //
-//       select.ClearSelection();
-//     }
-//   }
-// } // namespace Wiggy

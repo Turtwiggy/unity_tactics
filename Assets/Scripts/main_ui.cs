@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,16 +20,32 @@ namespace Wiggy
     public GameObject action_holder;
     public GameObject action_prefab;
 
-    private map_manager map;
     private scene_manager scene;
 
     public void Start()
     {
-      map = FindObjectOfType<map_manager>();
       scene = FindObjectOfType<scene_manager>();
 
       // ui events
       extraction_button.onClick.AddListener(() => scene.Load());
+
+      // Instantiate Action UI
+      foreach (Transform t in action_holder.transform)
+        Destroy(t.gameObject);
+      for (int i = 0; i < 5; i++)
+      {
+        var go = Instantiate(action_prefab, Vector3.zero, Quaternion.identity, action_holder.transform);
+        go.transform.name = "Action: " + i;
+        var text = go.GetComponentInChildren<TextMeshProUGUI>();
+        text.SetText("Action: " + i);
+
+        var local = i;
+        go.GetComponent<Button>().onClick.AddListener(() =>
+        {
+          // action_system.DoActionFromUI(ecs, )
+          Debug.Log(local);
+        });
+      }
     }
 
     public void DoUpdate(main_ui_data data)

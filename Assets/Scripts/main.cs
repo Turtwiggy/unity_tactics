@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace Wiggy
 {
-  [System.Serializable]
   class main : MonoBehaviour
   {
     [Header("Entities")]
@@ -30,12 +29,13 @@ namespace Wiggy
     FovSystem fov_system;
     InstantiateSystem instantiate_system;
     SelectSystem select_system;
-    UnitSpawnSystem units_system;
+    UnitSpawnSystem unit_spawn_system;
 
     void Start()
     {
       // Register all components
       ecs = new();
+      ecs.RegisterComponent<ActionsComponent>();
       ecs.RegisterComponent<PlayerComponent>();
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<GridPositionComponent>();
@@ -47,14 +47,14 @@ namespace Wiggy
       fov_system = ecs.RegisterSystem<FovSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
-      units_system = ecs.RegisterSystem<UnitSpawnSystem>();
+      unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
 
       action_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
       fov_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
-      units_system.SetSignature(ecs);
+      unit_spawn_system.SetSignature(ecs);
 
       map = FindObjectOfType<map_manager>();
       input = FindObjectOfType<input_handler>();
@@ -87,12 +87,12 @@ namespace Wiggy
         enemy_prefab = enemy_prefab
       };
 
-      action_system.Start(ecs);
+      action_system.Start(ecs, unit_spawn_system);
       extraction_system.Start(ecs);
       fov_system.Start(ecs, map, fov_data);
       instantiate_system.Start(ecs, map);
       select_system.Start(ecs, selected_cursor_prefab);
-      units_system.Start(ecs, us_data);
+      unit_spawn_system.Start(ecs, us_data);
     }
 
     void Update()
@@ -103,9 +103,25 @@ namespace Wiggy
 
       // Input
       if (input.a_input)
-        select_system.Select();
+      {
+        if (!select_system.HasSelected())
+          select_system.Select();
+        else
+        {
+          // Here, these are actions the user takes because
+          // they've interacted with something on the map.
+          //
+          // An example of an action outside of scope here might be reload.
+          // The user wouldnt be able to click anything on the map to make them reload.
+          //
+          var from = select_system.GetSelected();
+          var to = Grid.GetIndex(camera.grid_index, map.width);
+          action_system.RequestActionFromMap(ecs, from, to);
+        }
+      }
       if (input.b_input)
         select_system.ClearSelect();
+
       if (input.d_pad_u)
         fov_pos.y += 1;
       if (input.d_pad_d)
@@ -118,6 +134,7 @@ namespace Wiggy
         fov_system.Update(ecs, fov_pos);
 
       // Systems
+      action_system.Update(ecs);
       extraction_system.Update(ecs, map.ext_spots);
       instantiate_system.Update(ecs);
       select_system.Update(ecs);

@@ -3,15 +3,12 @@ using UnityEngine;
 
 namespace Wiggy
 {
-  using Entity = System.Int32;
-
   public class SelectSystem : ECSSystem
   {
     private map_manager map;
     private camera_handler camera;
 
-    public int from_index { get; private set; }
-    public Entity cursor { get; private set; }
+    private int from_index = -1;
 
     public void SetSignature(Wiggy.registry ecs)
     {
@@ -24,22 +21,20 @@ namespace Wiggy
 
     public void Start(Wiggy.registry ecs, GameObject selected_cursor_prefab)
     {
-      cursor = Entities.create_cursor(ecs, selected_cursor_prefab);
+      var cursor = Entities.create_cursor(ecs, selected_cursor_prefab);
       map = Object.FindObjectOfType<map_manager>();
       camera = Object.FindObjectOfType<camera_handler>();
-
-      ClearSelect();
     }
 
     public void Update(Wiggy.registry ecs)
     {
       foreach (var e in entities.ToArray()) // ReadOnly Copy
       {
-        // ref var p = ref ecs.GetComponent<GridPositionComponent>(cursor);
+        // ref var c = ref ecs.GetComponent<CursorComponent>(e);
+        // ref var p = ref ecs.GetComponent<GridPositionComponent>(e);
         ref var i = ref ecs.GetComponent<InstantiatedComponent>(e);
 
-        // if something is selected, move cursor position
-        if (from_index != -1)
+        if (HasSelected())
         {
           var pos = Grid.IndexToPos(from_index, map.width, map.height);
           var world_space = Grid.GridSpaceToWorldSpace(pos, map.size);
@@ -54,7 +49,7 @@ namespace Wiggy
       var camera_pos = camera.grid_index;
       var index = Grid.GetIndex(camera_pos, map.width);
 
-      if (from_index != -1)
+      if (HasSelected())
         return;
 
       from_index = index;
@@ -63,6 +58,16 @@ namespace Wiggy
     public void ClearSelect()
     {
       from_index = -1;
+    }
+
+    public bool HasSelected()
+    {
+      return from_index != -1;
+    }
+
+    public int GetSelected()
+    {
+      return from_index;
     }
   }
 } // namespace Wiggy
