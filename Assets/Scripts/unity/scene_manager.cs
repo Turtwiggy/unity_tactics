@@ -5,11 +5,13 @@ namespace Wiggy
 {
   public class scene_manager : MonoBehaviour
   {
-    public string scene_to_load;
-
-    public void Load()
+    public void LoadMenu()
     {
-      SceneManager.LoadScene(scene_to_load);
+      SceneManager.LoadScene("main_menu");
+    }
+    public void LoadGame()
+    {
+      SceneManager.LoadScene("main");
     }
   }
 }

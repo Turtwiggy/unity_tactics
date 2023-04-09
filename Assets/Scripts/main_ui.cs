@@ -33,13 +33,13 @@ namespace Wiggy
 
     public void DoStart(main main)
     {
-      scene = FindObjectOfType<scene_manager>();
+      scene = new GameObject("scene_manager").AddComponent<scene_manager>();
 
       // all the game/data
       this.main = main;
 
       // ui events
-      extraction_button.onClick.AddListener(() => scene.Load());
+      extraction_button.onClick.AddListener(() => scene.LoadMenu());
 
       // Actions UI
       {

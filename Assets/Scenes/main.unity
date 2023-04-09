@@ -15499,8 +15499,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 254013343}
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
-  m_LocalPosition: {x: 13.5, y: 8.5, z: 8}
+  m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
+  m_LocalPosition: {x: 0, y: 5.88, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -76741,6 +76741,10 @@ MonoBehaviour:
   fov_holder: {fileID: 437873237}
   fov_cursor_prefab: {fileID: 1069762382}
   fov_grid_prefab: {fileID: 243836313}
+  input: {fileID: 0}
+  camera: {fileID: 0}
+  map: {fileID: 0}
+  ui: {fileID: 0}
 --- !u!4 &1307942418
 Transform:
   m_ObjectHideFlags: 0
@@ -76771,9 +76775,9 @@ MonoBehaviour:
   main: {fileID: 0}
   extraction_holder: {fileID: 435160522}
   extraction_button: {fileID: 1608626750}
+  selected_text: {fileID: 417765449}
   action_holder: {fileID: 1450373373}
   action_prefab: {fileID: 6654779904254659705, guid: 789631fc69ae70340bfbb383864f6195, type: 3}
-  selected_text: {fileID: 417765449}
   next_turn_button: {fileID: 2689093287763519258}
 --- !u!1 &1310641046
 GameObject:
