@@ -89,13 +89,17 @@ namespace Wiggy
       //   actions.requested.Add(new Attack());
 
       if (temp.GetType() == typeof(Reload))
+      {
         actions.requested.Add(new Reload());
-
+      }
       if (temp.GetType() == typeof(Overwatch))
+      {
         actions.requested.Add(new Overwatch());
-
+      }
       if (temp.GetType() == typeof(Heal))
+      {
         actions.requested.Add(new Heal());
+      }
     }
 
     public void Update(Wiggy.registry ecs)
