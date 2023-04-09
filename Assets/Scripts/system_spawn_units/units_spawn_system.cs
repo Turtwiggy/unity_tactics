@@ -1,10 +1,7 @@
-using System.Collections;
 using UnityEngine;
 
 namespace Wiggy
 {
-  using Entity = System.Int32;
-
   public class UnitSpawnSystem : ECSSystem
   {
     public struct UnitSpawnSystemInit
@@ -18,11 +15,19 @@ namespace Wiggy
 
     private map_manager map;
 
-    private void CreateUnit(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
+    private void CreatePlayer(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_unit(ecs, prefab, pos, name);
+      var unit = Entities.create_player(ecs, prefab, pos, name);
+      units[idx] = new Optional<Entity>(unit);
+    }
+    
+    private void CreateEnemy(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
+    {
+      var idx = Grid.GetIndex(gpos, map.width);
+      var pos = Grid.IndexToPos(idx, map.width, map.height);
+      var unit = Entities.create_enemy(ecs, prefab, pos, name);
       units[idx] = new Optional<Entity>(unit);
     }
 
@@ -41,10 +46,10 @@ namespace Wiggy
         units[i] = new Optional<Entity>();
 
       // set players at start spots
-      CreateUnit(ecs, data.player_prefab, map.srt_spots[0], "Wiggy");
-      CreateUnit(ecs, data.player_prefab, map.srt_spots[1], "Wallace");
-      CreateUnit(ecs, data.player_prefab, map.srt_spots[2], "Sherbert");
-      CreateUnit(ecs, data.player_prefab, map.srt_spots[3], "Grunbo");
+      CreatePlayer(ecs, data.player_prefab, map.srt_spots[0], "Wiggy");
+      CreatePlayer(ecs, data.player_prefab, map.srt_spots[1], "Wallace");
+      CreatePlayer(ecs, data.player_prefab, map.srt_spots[2], "Sherbert");
+      CreatePlayer(ecs, data.player_prefab, map.srt_spots[3], "Grunbo");
 
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
@@ -71,7 +76,7 @@ namespace Wiggy
           }
 
           var pos = Grid.IndexToPos(idx, map.width, map.height);
-          CreateUnit(ecs, data.enemy_prefab, pos, "Random Enemy");
+          CreateEnemy(ecs, data.enemy_prefab, pos, "Random Enemy");
           break;
         }
       }

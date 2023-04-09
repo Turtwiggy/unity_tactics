@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Wiggy
 {
-  class main : MonoBehaviour
+  public class main : MonoBehaviour
   {
     [Header("Entities")]
     public GameObject player_prefab;
@@ -17,19 +17,20 @@ namespace Wiggy
     private Vector2Int fov_pos = new(0, 0);
 
     // unity-based systems
-    input_handler input;
-    camera_handler camera;
-    map_manager map;
-    main_ui ui;
+    public input_handler input;
+    public camera_handler camera;
+    public map_manager map;
+    public main_ui ui;
 
     // ecs-based systems
-    Wiggy.registry ecs;
-    ActionSystem action_system;
-    ExtractionSystem extraction_system;
-    FovSystem fov_system;
-    InstantiateSystem instantiate_system;
-    SelectSystem select_system;
-    UnitSpawnSystem unit_spawn_system;
+    public Wiggy.registry ecs;
+    public ActionSystem action_system;
+    public EndTurnSystem end_turn_system;
+    public ExtractionSystem extraction_system;
+    public FovSystem fov_system;
+    public InstantiateSystem instantiate_system;
+    public SelectSystem select_system;
+    public UnitSpawnSystem unit_spawn_system;
 
     void Start()
     {
@@ -43,6 +44,7 @@ namespace Wiggy
       ecs.RegisterComponent<InstantiatedComponent>();
 
       action_system = ecs.RegisterSystem<ActionSystem>();
+      end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
       fov_system = ecs.RegisterSystem<FovSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
@@ -50,6 +52,7 @@ namespace Wiggy
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
 
       action_system.SetSignature(ecs);
+      end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
       fov_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
@@ -63,8 +66,6 @@ namespace Wiggy
 
       // HACK
       fov_pos = map.srt_spots[0];
-
-      // unity-based systems
 
       // map.seed = 0;
       // map.zone_seed = 0;
@@ -87,12 +88,15 @@ namespace Wiggy
         enemy_prefab = enemy_prefab
       };
 
-      action_system.Start(ecs, unit_spawn_system);
+      action_system.Start(ecs, this);
+      end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      fov_system.Start(ecs, map, fov_data);
+      fov_system.Start(ecs, fov_data);
       instantiate_system.Start(ecs, map);
-      select_system.Start(ecs, selected_cursor_prefab);
+      select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
       unit_spawn_system.Start(ecs, us_data);
+
+      ui.DoStart(this);
     }
 
     void Update()
@@ -104,7 +108,7 @@ namespace Wiggy
       // Input
       if (input.a_input)
       {
-        if (!select_system.HasSelected())
+        if (!select_system.HasAnySelected())
           select_system.Select();
         else
         {
@@ -133,16 +137,14 @@ namespace Wiggy
       if (input.d_pad_d || input.d_pad_u || input.d_pad_l || input.d_pad_r)
         fov_system.Update(ecs, fov_pos);
 
-      // Systems
+      // Systems that update every frame
       action_system.Update(ecs);
       extraction_system.Update(ecs, map.ext_spots);
       instantiate_system.Update(ecs);
       select_system.Update(ecs);
 
       // UI
-      main_ui_data ui_data = new();
-      ui_data.ready_for_extraction = extraction_system.ready_for_extraction;
-      ui.DoUpdate(ui_data);
+      ui.DoUpdate();
     }
 
     void LateUpdate()

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -7,8 +8,16 @@ using System.Collections.Generic;
 
 namespace Wiggy
 {
-  using Entity = System.Int32;
   using ComponentType = System.Int32;
+  public struct Entity
+  {
+    public int id;
+
+    public Entity(int id)
+    {
+      this.id = id;
+    }
+  };
 
   public class Signature
   {
@@ -42,7 +51,7 @@ namespace Wiggy
     public int size { get; private set; }
 
     private Dictionary<Entity, int> entity_to_index_map = new();
-    private Dictionary<Entity, int> index_to_entity_map = new();
+    private Dictionary<int, Entity> index_to_entity_map = new();
 
     public ComponentArray(int max_entities)
     {
@@ -51,7 +60,7 @@ namespace Wiggy
 
     public void Insert(Entity e, T component)
     {
-      var new_index = size;
+      int new_index = size;
 
       entity_to_index_map[e] = new_index;
       index_to_entity_map[new_index] = e;
@@ -105,7 +114,9 @@ namespace Wiggy
       for (int i = 0; i < signatures.Length; i++)
         signatures[i] = new();
 
-      available_entities = new(Enumerable.Range(0, max_entities));
+      available_entities = new Queue<Entity>();
+      for (int i = 0; i < max_entities; i++)
+        available_entities.Enqueue(new Entity(i));
     }
 
     public Entity Create()
@@ -117,7 +128,7 @@ namespace Wiggy
 
     public void Destroy(Entity e)
     {
-      signatures[e].Reset();
+      signatures[e.id].Reset();
       available_entities.Enqueue(e);
       alive--;
     }
@@ -131,12 +142,12 @@ namespace Wiggy
       // string str = string.Join("", bits);
       // Debug.Log("entity " + e + " signature set to: " + str);
 
-      signatures[e] = s;
+      signatures[e.id] = s;
     }
 
     public ref Signature GetSignature(Entity e)
     {
-      return ref signatures[e];
+      return ref signatures[e.id];
     }
   }
 

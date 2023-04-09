@@ -3,8 +3,6 @@ using UnityEngine;
 
 namespace Wiggy
 {
-  using Entity = System.Int32;
-
   public class TextEcs
   {
     [Test]
@@ -81,7 +79,7 @@ namespace Wiggy
     {
       // Arrange
       Wiggy.registry ecs = new();
-      ecs.RegisterComponent<ActionsComponent>();
+      ecs.RegisterComponent<GridPositionComponent>();
 
       // an entity without the component
       var wildcard_entity = ecs.Create();
@@ -89,12 +87,10 @@ namespace Wiggy
       Entity create_entity(int i)
       {
         var e = ecs.Create();
-        var a = new ActionsComponent
-        {
-          allowed_actions_per_turn = i,
-          done = new Action[5],
-          requested = new Action[5]
-        };
+        var a = new GridPositionComponent();
+        a.position = new();
+        a.position.x = i;
+        a.position.y = i;
         ecs.AddComponent(e, a);
         return e;
       }
@@ -107,14 +103,14 @@ namespace Wiggy
 
       // Assert
 
-      var a0 = ecs.GetComponent<ActionsComponent>(e0);
-      var a1 = ecs.GetComponent<ActionsComponent>(e1);
-      var a2 = ecs.GetComponent<ActionsComponent>(e2);
-      var a3 = ecs.GetComponent<ActionsComponent>(e3);
-      Assert.AreEqual(0, a0.allowed_actions_per_turn);
-      Assert.AreEqual(1, a1.allowed_actions_per_turn);
-      Assert.AreEqual(2, a2.allowed_actions_per_turn);
-      Assert.AreEqual(3, a3.allowed_actions_per_turn);
+      var a0 = ecs.GetComponent<GridPositionComponent>(e0);
+      var a1 = ecs.GetComponent<GridPositionComponent>(e1);
+      var a2 = ecs.GetComponent<GridPositionComponent>(e2);
+      var a3 = ecs.GetComponent<GridPositionComponent>(e3);
+      Assert.AreEqual(0, a0.position.x);
+      Assert.AreEqual(1, a1.position.x);
+      Assert.AreEqual(2, a2.position.x);
+      Assert.AreEqual(3, a3.position.x);
     }
 
   }

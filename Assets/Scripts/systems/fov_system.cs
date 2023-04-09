@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Wiggy
@@ -205,15 +204,15 @@ namespace Wiggy
       ecs.SetSystemSignature<FovSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, map_manager mm, FovSystemInit init)
+    public void Start(Wiggy.registry ecs, FovSystemInit init)
     {
-      map_manager = mm;
+      map_manager = Object.FindObjectOfType<map_manager>();
 
-      fov_map_live = new TileState[mm.obstacle_map.Length];
+      fov_map_live = new TileState[map_manager.obstacle_map.Length];
       for (int i = 0; i < fov_map_live.Length; i++)
         fov_map_live[i] = TileState.HIDDEN;
 
-      fov_map_mask = new TileState[mm.obstacle_map.Length];
+      fov_map_mask = new TileState[map_manager.obstacle_map.Length];
       for (int i = 0; i < fov_map_mask.Length; i++)
         fov_map_mask[i] = TileState.HIDDEN;
 
@@ -227,8 +226,8 @@ namespace Wiggy
       //
       for (int i = 0; i < fov_map_live.Length; i++)
       {
-        var gpos = Grid.IndexToPos(i, mm.width, mm.height);
-        var wpos = Grid.GridSpaceToWorldSpace(gpos, mm.size);
+        var gpos = Grid.IndexToPos(i, map_manager.width, map_manager.height);
+        var wpos = Grid.GridSpaceToWorldSpace(gpos, map_manager.size);
         Object.Instantiate(init.fov_grid_prefab, wpos, Quaternion.identity, fov_holder.transform);
       }
       fov_cursor_map = fov_holder.GetComponentsInChildren<SpriteRenderer>();
@@ -237,7 +236,7 @@ namespace Wiggy
       // Do the FOV once on start
       //
       Update(ecs, init.fov_pos); // update once...
-      var fov_wpos = Grid.GridSpaceToWorldSpace(init.fov_pos, mm.size);
+      var fov_wpos = Grid.GridSpaceToWorldSpace(init.fov_pos, map_manager.size);
       fov_debug_cursor.transform.position = fov_wpos;
     }
 
