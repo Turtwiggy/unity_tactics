@@ -53,19 +53,17 @@ namespace Wiggy
 
       if (to_contains_unit)
       {
+        ref var targets = ref ecs.GetComponent<TargetsComponent>(from_entity);
+        targets.targets.Clear();
+        targets.targets.Add(to_entity.Data);
+
         ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity);
-        Attack a = new();
-        a.from = from;
-        a.to = to;
-        actions.requested.Add(a);
+        actions.requested.Add(new Attack(ecs, from_entity));
       }
       else if (!to_contains_obstacle)
       {
         ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity);
-        Move m = new();
-        m.from = from;
-        m.to = to;
-        actions.requested.Add(m);
+        actions.requested.Add(new Move(ecs, from_entity));
       }
     }
 
@@ -79,11 +77,6 @@ namespace Wiggy
       Entity selected = select_system.GetSelected();
       ref var actions = ref ecs.GetComponent<ActionsComponent>(selected);
 
-      // warning: entity might not have these
-      // really should implement a try_get or something
-      ref var ammo = ref ecs.GetComponent<AmmoComponent>(selected);
-      ref var health = ref ecs.GetComponent<HealthComponent>(selected);
-
       T temp = new();
       Debug.Log("Action requested: " + temp.GetType());
 
@@ -94,17 +87,13 @@ namespace Wiggy
       //   actions.requested.Add(new Attack());
 
       if (temp.GetType() == typeof(Reload))
-      {
-        actions.requested.Add(new Reload(ammo));
-      }
+        actions.requested.Add(new Reload(ecs, selected));
+
       if (temp.GetType() == typeof(Overwatch))
-      {
-        actions.requested.Add(new Overwatch());
-      }
+        actions.requested.Add(new Overwatch(ecs, selected));
+
       if (temp.GetType() == typeof(Heal))
-      {
-        actions.requested.Add(new Heal(health));
-      }
+        actions.requested.Add(new Heal(ecs, selected));
     }
 
     public void Update(Wiggy.registry ecs)
@@ -132,78 +121,68 @@ namespace Wiggy
             }
           }
 
-          //
-          // Move Action
-          //
           if (action.GetType() == typeof(Move))
-          {
-            Debug.Log("moving..!");
-            Move a = (Move)action;
-
-            // Generate path
-            var cells = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
-            var path = a_star.generate_direct(cells, a.from, a.to, map.width);
-
-            if (path == null)
-              Debug.Log("no path...");
-            else
-            {
-              // Update representation
-              var go = unit_spawn_system.units[a.from].Data;
-              unit_spawn_system.units[a.to].Set(go);
-              unit_spawn_system.units[a.from].Reset();
-
-              // Update component data
-              ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(go);
-              grid_pos.position = Grid.IndexToPos(a.to, map.width, map.height);
-
-              // Start animation
-              if (animation_coroutine != null)
-              {
-                Debug.Log("Stopping coroutine");
-                main.StopCoroutine(animation_coroutine);
-
-                // Finish moving animation
-                animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
-              }
-              // convert astar_cells to Vector2Int[]
-              var path_vec2s = new Vector2Int[path.Length];
-              for (int i = 0; i < path.Length; i++)
-                path_vec2s[i] = path[i].pos;
-
-              Debug.Log("Starting coroutine");
-              var instance = ecs.GetComponent<InstantiatedComponent>(go);
-              animation_go = instance.instance;
-              animation_final = path[^1].pos;
-              animation_coroutine = Animate.AlongPath(animation_go, path_vec2s, map.size);
-              main.StartCoroutine(animation_coroutine);
-            }
-
-            Debug.Log("Move action done");
-          }
-          //
-          // Attack Action
-          //
+            MoveActionLogic(ecs, (Move)action);
           else if (action.GetType() == typeof(Attack))
-          {
-            Attack a = (Attack)action;
-            Debug.Log(string.Format("Request to attack from:{0} to:{1}", a.from, a.to));
-          }
-          //
-          // Overwatch action
-          //
+            Debug.Log("TODO: attack");
           else if (action.GetType() == typeof(Overwatch))
             Debug.Log("TODO: overwatch request");
-          //
-          // Reload action
-          //
           else if (action.GetType() == typeof(Reload))
             Debug.Log("TODO: reload request");
+          else if (action.GetType() == typeof(Heal))
+            Debug.Log("TODO: heal request");
+          else if (action.GetType() == typeof(Grenade))
+            Debug.Log("TODO: grenade request");
 
           done.Add(action);
           action_complete.Invoke();
         }
       }
+    }
+
+    private void MoveActionLogic(Wiggy.registry ecs, Move a)
+    {
+      Debug.Log("moving..!");
+
+      // Generate path
+      var cells = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
+      var path = a_star.generate_direct(cells, a.from, a.to, map.width);
+
+      if (path == null)
+        Debug.Log("no path...");
+      else
+      {
+        // Update representation
+        var go = unit_spawn_system.units[a.from].Data;
+        unit_spawn_system.units[a.to].Set(go);
+        unit_spawn_system.units[a.from].Reset();
+
+        // Update component data
+        ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(go);
+        grid_pos.position = Grid.IndexToPos(a.to, map.width, map.height);
+
+        // Start animation
+        if (animation_coroutine != null)
+        {
+          Debug.Log("Stopping coroutine");
+          main.StopCoroutine(animation_coroutine);
+
+          // Finish moving animation
+          animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
+        }
+        // convert astar_cells to Vector2Int[]
+        var path_vec2s = new Vector2Int[path.Length];
+        for (int i = 0; i < path.Length; i++)
+          path_vec2s[i] = path[i].pos;
+
+        Debug.Log("Starting coroutine");
+        var instance = ecs.GetComponent<InstantiatedComponent>(go);
+        animation_go = instance.instance;
+        animation_final = path[^1].pos;
+        animation_coroutine = Animate.AlongPath(animation_go, path_vec2s, map.size);
+        main.StartCoroutine(animation_coroutine);
+      }
+      Debug.Log("Move action done");
     }
   }
 }

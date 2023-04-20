@@ -39,11 +39,16 @@ namespace Wiggy
       ecs = new();
       ecs.RegisterComponent<InstantiatedComponent>();
       ecs.RegisterComponent<ToBeInstantiatedComponent>();
-      ecs.RegisterComponent<GridPositionComponent>();
-      // combat
+      // actions
       ecs.RegisterComponent<ActionsComponent>();
+      // movement
+      ecs.RegisterComponent<GridPositionComponent>();
+      ecs.RegisterComponent<AvailableSpotsComponent>();
+      // combat
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();
+      ecs.RegisterComponent<TargetsComponent>();
+      ecs.RegisterComponent<WeaponComponent>();
       // entity tags
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
@@ -98,7 +103,7 @@ namespace Wiggy
       };
 
       action_system.Start(ecs, this);
-      ai_system.Start(ecs);
+      ai_system.Start(ecs, unit_spawn_system);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
       fov_system.Start(ecs, fov_data);

@@ -22,7 +22,7 @@ namespace Wiggy
       var unit = Entities.create_player(ecs, prefab, pos, name);
       units[idx] = new Optional<Entity>(unit);
     }
-    
+
     private void CreateEnemy(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
     {
       var idx = Grid.GetIndex(gpos, map.width);
@@ -34,6 +34,7 @@ namespace Wiggy
     public void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
+      s.Set(ecs.GetComponentType<GridPositionComponent>());
       ecs.SetSystemSignature<UnitSpawnSystem>(s);
     }
 

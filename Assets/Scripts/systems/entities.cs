@@ -50,13 +50,26 @@ namespace Wiggy
 
       HealthComponent health = new();
       health.max = 100;
-      health.cur = 100;
+      health.cur = 50;
       ecs.AddComponent(e, health);
+
+      AvailableSpotsComponent spots = new();
+      spots.spots = new();
+      ecs.AddComponent(e, spots);
+
+      TargetsComponent targets = new();
+      targets.targets = new();
+      ecs.AddComponent(e, targets);
 
       AmmoComponent ammo = new();
       ammo.max = 100;
-      ammo.cur = 100;
+      ammo.cur = 50;
       ecs.AddComponent(e, ammo);
+
+      WeaponComponent weapon = new();
+      weapon.min_range = 0;
+      weapon.max_range = 3;
+      ecs.AddComponent(e, weapon);
 
       DefaultBrainComponent brain = AiBuilder.BuildDefaultAI(ecs, e);
       ecs.AddComponent(e, brain);
