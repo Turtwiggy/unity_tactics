@@ -25,6 +25,7 @@ namespace Wiggy
     // ecs-based systems
     public Wiggy.registry ecs;
     public ActionSystem action_system;
+    public AiSystem ai_system;
     public EndTurnSystem end_turn_system;
     public ExtractionSystem extraction_system;
     public FovSystem fov_system;
@@ -36,14 +37,21 @@ namespace Wiggy
     {
       // Register all components
       ecs = new();
-      ecs.RegisterComponent<ActionsComponent>();
-      ecs.RegisterComponent<PlayerComponent>();
-      ecs.RegisterComponent<CursorComponent>();
-      ecs.RegisterComponent<GridPositionComponent>();
-      ecs.RegisterComponent<ToBeInstantiatedComponent>();
       ecs.RegisterComponent<InstantiatedComponent>();
+      ecs.RegisterComponent<ToBeInstantiatedComponent>();
+      ecs.RegisterComponent<GridPositionComponent>();
+      // combat
+      ecs.RegisterComponent<ActionsComponent>();
+      ecs.RegisterComponent<AmmoComponent>();
+      ecs.RegisterComponent<HealthComponent>();
+      // entity tags
+      ecs.RegisterComponent<CursorComponent>();
+      ecs.RegisterComponent<PlayerComponent>();
+      // AI
+      ecs.RegisterComponent<DefaultBrainComponent>();
 
       action_system = ecs.RegisterSystem<ActionSystem>();
+      ai_system = ecs.RegisterSystem<AiSystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
       fov_system = ecs.RegisterSystem<FovSystem>();
@@ -52,6 +60,7 @@ namespace Wiggy
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
 
       action_system.SetSignature(ecs);
+      ai_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
       fov_system.SetSignature(ecs);
@@ -89,6 +98,7 @@ namespace Wiggy
       };
 
       action_system.Start(ecs, this);
+      ai_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
       fov_system.Start(ecs, fov_data);

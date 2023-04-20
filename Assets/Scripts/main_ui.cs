@@ -86,8 +86,11 @@ namespace Wiggy
       // Next turn UI
       next_turn_button.onClick.AddListener(() =>
       {
-        // Update System
+        // Update End Turn System
         main.end_turn_system.Update(main.ecs);
+
+        // Update AI system
+        main.ai_system.Update(main.ecs);
 
         // Update UI
         if (main.select_system.HasAnySelected())

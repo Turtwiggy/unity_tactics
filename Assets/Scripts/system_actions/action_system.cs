@@ -79,6 +79,11 @@ namespace Wiggy
       Entity selected = select_system.GetSelected();
       ref var actions = ref ecs.GetComponent<ActionsComponent>(selected);
 
+      // warning: entity might not have these
+      // really should implement a try_get or something
+      ref var ammo = ref ecs.GetComponent<AmmoComponent>(selected);
+      ref var health = ref ecs.GetComponent<HealthComponent>(selected);
+
       T temp = new();
       Debug.Log("Action requested: " + temp.GetType());
 
@@ -90,7 +95,7 @@ namespace Wiggy
 
       if (temp.GetType() == typeof(Reload))
       {
-        actions.requested.Add(new Reload());
+        actions.requested.Add(new Reload(ammo));
       }
       if (temp.GetType() == typeof(Overwatch))
       {
@@ -98,7 +103,7 @@ namespace Wiggy
       }
       if (temp.GetType() == typeof(Heal))
       {
-        actions.requested.Add(new Heal());
+        actions.requested.Add(new Heal(health));
       }
     }
 

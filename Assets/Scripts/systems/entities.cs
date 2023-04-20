@@ -48,6 +48,19 @@ namespace Wiggy
       actions.requested = new();
       ecs.AddComponent(e, actions);
 
+      HealthComponent health = new();
+      health.max = 100;
+      health.cur = 100;
+      ecs.AddComponent(e, health);
+
+      AmmoComponent ammo = new();
+      ammo.max = 100;
+      ammo.cur = 100;
+      ecs.AddComponent(e, ammo);
+
+      DefaultBrainComponent brain = AiBuilder.BuildDefaultAI(ecs, e);
+      ecs.AddComponent(e, brain);
+
       return e;
     }
 

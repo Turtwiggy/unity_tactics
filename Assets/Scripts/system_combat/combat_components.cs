@@ -7,7 +7,7 @@ namespace Wiggy
   //   List<Entity> targets;
   // }
 
-  stru ct WeaponComponent
+  struct WeaponComponent
   {
     // float attack_rate = 0.15f;
     // int use_cooldown = 1;
@@ -20,16 +20,19 @@ namespace Wiggy
     // float bullet_speed = 500.0f;
   }
 
-struct DefenceComponent
-{
-  int defence;
-}
+  struct DefenceComponent
+  {
+    int defence;
+  }
 
-struct HealthComponent
-{
-  int max_hp;
-  int hp;
-}
-
-
+  public struct HealthComponent
+  {
+    public int max;
+    public int cur;
+  }
+  public struct AmmoComponent
+  {
+    public int max;
+    public int cur;
+  }
 }
