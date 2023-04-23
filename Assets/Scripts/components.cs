@@ -12,6 +12,17 @@ namespace Wiggy
   {
   };
 
+  public enum Team
+  {
+    PLAYER,
+    ENEMY,
+    NEUTRAL,
+  };
+  public struct TeamComponent
+  {
+    public Team team;
+  };
+
   // Other
 
   public struct GridPositionComponent

@@ -11,30 +11,33 @@ namespace Wiggy
     }
 
     // x * y representation
-    public Optional<Entity>[] units { get; private set; }
+    public Optional<Entity>[] units { get; set; }
 
-    private map_manager map;
+    public map_manager map;
 
-    private void CreatePlayer(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
+    public Entity CreatePlayer(Wiggy.registry ecs, Vector2Int gpos, string name, Optional<GameObject> prefab)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_player(ecs, prefab, pos, name);
-      units[idx] = new Optional<Entity>(unit);
+      var unit = Entities.create_player(ecs, pos, name, prefab);
+      units[idx].Set(unit);
+      return units[idx].Data;
     }
 
-    private void CreateEnemy(Wiggy.registry ecs, GameObject prefab, Vector2Int gpos, string name)
+    public Entity CreateEnemy(Wiggy.registry ecs, Vector2Int gpos, string name, Optional<GameObject> prefab)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_enemy(ecs, prefab, pos, name);
-      units[idx] = new Optional<Entity>(unit);
+      var unit = Entities.create_enemy(ecs, pos, name, prefab);
+      units[idx].Set(unit);
+      return units[idx].Data;
     }
 
     public void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<GridPositionComponent>());
+      s.Set(ecs.GetComponentType<TeamComponent>());
       ecs.SetSystemSignature<UnitSpawnSystem>(s);
     }
 
@@ -47,10 +50,10 @@ namespace Wiggy
         units[i] = new Optional<Entity>();
 
       // set players at start spots
-      CreatePlayer(ecs, data.player_prefab, map.srt_spots[0], "Wiggy");
-      CreatePlayer(ecs, data.player_prefab, map.srt_spots[1], "Wallace");
-      CreatePlayer(ecs, data.player_prefab, map.srt_spots[2], "Sherbert");
-      CreatePlayer(ecs, data.player_prefab, map.srt_spots[3], "Grunbo");
+      CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));
+      CreatePlayer(ecs, map.srt_spots[1], "Wallace", new Optional<GameObject>(data.player_prefab));
+      CreatePlayer(ecs, map.srt_spots[2], "Sherbert", new Optional<GameObject>(data.player_prefab));
+      CreatePlayer(ecs, map.srt_spots[3], "Grunbo", new Optional<GameObject>(data.player_prefab));
 
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
@@ -77,7 +80,7 @@ namespace Wiggy
           }
 
           var pos = Grid.IndexToPos(idx, map.width, map.height);
-          CreateEnemy(ecs, data.enemy_prefab, pos, "Random Enemy");
+          CreateEnemy(ecs, pos, "Random Enemy", new Optional<GameObject>(data.enemy_prefab));
           break;
         }
       }

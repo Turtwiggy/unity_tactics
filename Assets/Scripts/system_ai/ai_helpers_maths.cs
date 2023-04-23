@@ -35,7 +35,7 @@ namespace Wiggy
     // }
 
     // vertex at (h, k)
-    // roots at r1, r2
+    // x-axis roots at r1, r2
     public static float Parabola(float x, float r1, float r2, float h, float k)
     {
       var y = -k / ((r1 - h) * (r2 - h) * Mathf.Pow(x - h, 2) + k);

@@ -17,9 +17,9 @@ namespace Wiggy
       var entity2 = ecs.Create();
 
       // Assert
-      Assert.AreEqual(entity0, 0);
-      Assert.AreEqual(entity1, 1);
-      Assert.AreEqual(entity2, 2);
+      Assert.AreEqual(entity0.id, 0);
+      Assert.AreEqual(entity1.id, 1);
+      Assert.AreEqual(entity2.id, 2);
       Assert.AreEqual(ecs.entity_manager.alive, 3);
     }
 
@@ -38,8 +38,8 @@ namespace Wiggy
       var entity2 = ecs.Create();
 
       // Assert
-      Assert.AreEqual(entity0, 0);
-      Assert.AreEqual(entity2, 2);
+      Assert.AreEqual(entity0.id, 0);
+      Assert.AreEqual(entity2.id, 2);
       Assert.AreEqual(ecs.entity_manager.alive, 2);
     }
 

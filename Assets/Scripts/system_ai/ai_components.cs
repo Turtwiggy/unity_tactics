@@ -86,11 +86,15 @@ namespace Wiggy
       if (targets.targets.Count == 0)
         return 0;
       if (targets.targets.Count > 1)
-        Debug.LogError("WeaponDistanceConsideration is not built for >1 target");
+        Debug.LogError("InsideWeaponDistanceConsideration is not built for >1 target");
 
       var to = targets.targets[0];
       var to_pos = ecs.GetComponent<GridPositionComponent>(to);
-      var x = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));
+      var dst = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));
+
+      // no utility in attacking; out of range!
+      if (dst < weapon.min_range || dst > weapon.max_range)
+        return 0;
 
       // model this as a negative quadratic parabola
       // where the optimal distance away from the target is the middle of the weapon range.
@@ -98,11 +102,70 @@ namespace Wiggy
       float r1 = weapon.min_range;
       float r2 = weapon.max_range;
       float h = optimal_distance; // x midpoint is optimal_distance
-      float k = 1; // clamps y to 0, 1
-      float utility = WiggyMath.Parabola(x, r1, r2, h, k);
+      float k = 1; // clamps y max at 1
+      float utility = WiggyMath.Parabola(dst, r1, r2, h, k);
       Debug.Log("(weapon_distance) " + utility);
 
       return Mathf.Clamp01(utility);
+    }
+  }
+
+  // Movement considerations
+  // Should I move in range (of weapon?)?
+  // Should I move offensively?
+  // Should I move defensively?
+  public class MoveConsiderations : Consideration
+  {
+    Wiggy.registry ecs;
+    Entity from;
+    GridPositionComponent pos;
+    TargetsComponent targets;
+    WeaponComponent weapon;
+
+    public MoveConsiderations(Wiggy.registry ecs, Entity from)
+    {
+      this.ecs = ecs;
+      this.from = from;
+      this.pos = ecs.GetComponent<GridPositionComponent>(from);
+      this.targets = ecs.GetComponent<TargetsComponent>(from);
+      this.weapon = ecs.GetComponent<WeaponComponent>(from);
+    }
+
+    public override float Evaluate()
+    {
+      // if (targets.targets.Count == 0)
+      //   return 0;
+      // if (targets.targets.Count > 1)
+      //   Debug.LogError("MoveConsiderations is not built for >1 target");
+
+      // var to = targets.targets[0];
+      // var to_pos = ecs.GetComponent<GridPositionComponent>(to);
+      // var dst = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));
+
+      // // if outside weapon distance, utility of moving becomes 1
+      // if (dst < weapon.min_range || dst > weapon.max_range)
+      //   return 1.0f;
+
+      // // model this as a 1 - negative quadratic parabola
+      // // where the optimal distance away from the target is the middle of the weapon range.
+
+      // float optimal_distance = (weapon.min_range + weapon.max_range) / 2.0f;
+      // float r1 = weapon.min_range;
+      // float r2 = weapon.max_range;
+      // float h = optimal_distance; // x midpoint is optimal_distance
+      // float k = 1; // clamps y max at 1
+      // float utility = WiggyMath.Parabola(dst, r1, r2, h, k);
+      // Debug.Log("(weapon_distance) " + utility);
+      // float gun_utility = 1.0f - Mathf.Clamp01(utility);
+
+      // e.g. are you in cover,
+      //  flanked, 
+      // is there better cover nearby that you can move to ?
+      // are you in cover?
+      // are you flanked?
+      // is the considered spot in cover?
+
+      return 0.0f;
     }
   }
 
@@ -139,12 +202,7 @@ namespace Wiggy
     public Move() { }
     public Move(Wiggy.registry ecs, Entity from)
     {
-      var targets = ecs.GetComponent<TargetsComponent>(from);
-      var spots = ecs.GetComponent<AvailableSpotsComponent>(from);
-      var weapon = ecs.GetComponent<WeaponComponent>(from);
-      // considerations.Add(new WeaponDistanceConsideration(targets, weapon));
-      // considerations.Add(new CurrentPositionQualityConsideration(from)); // e.g in cover, or flanked?
-      // considerations.Add(new NewPositionQualityConsideration(spots)); // e.g. nearby cover
+      considerations.Add(new MoveConsiderations(ecs, from));
     }
   }
 
@@ -234,7 +292,7 @@ namespace Wiggy
         {
           new Heal(ecs, e),
           new Reload(ecs, e),
-          // new Move(ecs, e),
+          new Move(ecs, e),
           new Attack(ecs, e),
           // new Overwatch(),
           // new Grenade(),

@@ -37,11 +37,4 @@ namespace Wiggy
   {
     public List<Entity> targets;
   }
-
-  // Where could this entity move?
-  public struct AvailableSpotsComponent
-  {
-    public List<int> spots;
-  }
-
 }

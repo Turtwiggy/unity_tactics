@@ -33,28 +33,28 @@ namespace Wiggy
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
 
-    void Start()
+    public void RegisterComponents(Wiggy.registry ecs)
     {
-      // Register all components
-      ecs = new();
       ecs.RegisterComponent<InstantiatedComponent>();
       ecs.RegisterComponent<ToBeInstantiatedComponent>();
       // actions
       ecs.RegisterComponent<ActionsComponent>();
       // movement
       ecs.RegisterComponent<GridPositionComponent>();
-      ecs.RegisterComponent<AvailableSpotsComponent>();
       // combat
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();
       ecs.RegisterComponent<TargetsComponent>();
       ecs.RegisterComponent<WeaponComponent>();
+      ecs.RegisterComponent<TeamComponent>();
       // entity tags
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
-
+    }
+    public void RegisterSystems(Wiggy.registry ecs)
+    {
       action_system = ecs.RegisterSystem<ActionSystem>();
       ai_system = ecs.RegisterSystem<AiSystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
@@ -63,7 +63,9 @@ namespace Wiggy
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
-
+    }
+    public void RegisterSystemSignatures(Wiggy.registry ecs)
+    {
       action_system.SetSignature(ecs);
       ai_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
@@ -72,6 +74,14 @@ namespace Wiggy
       instantiate_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
       unit_spawn_system.SetSignature(ecs);
+    }
+
+    void Start()
+    {
+      ecs = new();
+      RegisterComponents(ecs);
+      RegisterSystems(ecs);
+      RegisterSystemSignatures(ecs);
 
       map = FindObjectOfType<map_manager>();
       input = FindObjectOfType<input_handler>();
