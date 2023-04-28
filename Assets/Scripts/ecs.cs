@@ -45,17 +45,19 @@ namespace Wiggy
   public class ComponentArray<T> : IComponentArray
   {
     // Packed array of components
-    private T[] component_array;
+    public T[] component_array { get; private set; }
 
     // Size of valid entries in array
     public int size { get; private set; }
 
-    private Dictionary<Entity, int> entity_to_index_map = new();
-    private Dictionary<int, Entity> index_to_entity_map = new();
+    public Dictionary<Entity, int> entity_to_index_map { get; private set; }
+    public Dictionary<int, Entity> index_to_entity_map { get; private set; }
 
     public ComponentArray(int max_entities)
     {
       component_array = new T[max_entities];
+      entity_to_index_map = new();
+      index_to_entity_map = new();
     }
 
     public void Insert(Entity e, T component)
@@ -203,7 +205,7 @@ namespace Wiggy
       }
     }
 
-    private ComponentArray<T> GetComponentArray<T>()
+    public ComponentArray<T> GetComponentArray<T>()
     {
       var name = typeof(T).ToString();
       return component_arrays[name] as ComponentArray<T>;
@@ -325,6 +327,17 @@ namespace Wiggy
     public ref T GetComponent<T>(Entity e)
     {
       return ref component_manager.GetComponent<T>(e);
+    }
+
+    public Entity[] View<T>() where T : struct
+    {
+      ComponentArray<T> comp_array = component_manager.GetComponentArray<T>();
+
+      Entity[] entities = new Entity[comp_array.size];
+      for (int i = 0; i < comp_array.size; i++)
+        entities[i] = comp_array.index_to_entity_map[i];
+
+      return entities;
     }
 
     public ComponentType GetComponentType<T>()

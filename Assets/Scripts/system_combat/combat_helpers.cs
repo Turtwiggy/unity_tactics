@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -98,35 +99,24 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, UnitSpawnSystem spawner, Entity e, Vector2Int spot)
+    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Entity e, Vector2Int spot, Entity player, astar_cell[] path)
     {
-      var team = ecs.GetComponent<TeamComponent>(e);
-
       int quality = 0;
+
       bool spot_in_cover = SpotInCover(map, spot);
       if (spot_in_cover)
+        quality += 2;
+
+      // Does this spot move closer to player?
+      var different_pos = spot != ecs.GetComponent<GridPositionComponent>(e).position;
+      if (Array.Exists(path, e => e.pos == spot) && different_pos)
         quality += 5;
 
-      // Warning: this loops through all the spawned entities which is bad
-      foreach (var other in spawner.entities)
-      {
-        if (e.id == other.id)
-          continue; // dont compare self
-
-        // Defensive questions
-
-        // Would the spot be moving in to a vulnerable position?
-        var other_pos = ecs.GetComponent<GridPositionComponent>(other);
-        var other_team = ecs.GetComponent<TeamComponent>(other);
-        bool spot_is_flanked = SpotIsFlanked(map, spot, other_pos.position);
-        if (spot_is_flanked)
-        {
-          if (team.team != other_team.team)
-            quality -= 5;
-          else
-            quality += 2;
-        }
-      }
+      // Is a player flanking the potential spot?
+      var player_pos = ecs.GetComponent<GridPositionComponent>(player).position;
+      bool spot_is_flanked = SpotIsFlanked(map, player_pos, spot);
+      if (spot_is_flanked)
+        quality -= 1;
 
       return quality;
     }

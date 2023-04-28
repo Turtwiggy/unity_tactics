@@ -41,6 +41,8 @@ namespace Wiggy
       ecs.RegisterComponent<ActionsComponent>();
       // movement
       ecs.RegisterComponent<GridPositionComponent>();
+      // ai
+      ecs.RegisterComponent<AIMoveConsiderationComponent>();
       // combat
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();

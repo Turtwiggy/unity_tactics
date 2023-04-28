@@ -58,12 +58,16 @@ namespace Wiggy
         targets.targets.Add(to_entity.Data);
 
         ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity);
-        actions.requested.Add(new Attack(ecs, from_entity));
+        actions.requested.Add(new Attack());
       }
       else if (!to_contains_obstacle)
       {
         ref var actions = ref ecs.GetComponent<ActionsComponent>(from_entity);
-        actions.requested.Add(new Move(ecs, from_entity));
+
+        Move move = new Move();
+        move.from = from;
+        move.to = to;
+        actions.requested.Add(move);
       }
     }
 
@@ -87,13 +91,18 @@ namespace Wiggy
       //   actions.requested.Add(new Attack());
 
       if (temp.GetType() == typeof(Reload))
-        actions.requested.Add(new Reload(ecs, selected));
+        actions.requested.Add(new Reload());
 
       if (temp.GetType() == typeof(Overwatch))
-        actions.requested.Add(new Overwatch(ecs, selected));
+        actions.requested.Add(new Overwatch());
 
       if (temp.GetType() == typeof(Heal))
-        actions.requested.Add(new Heal(ecs, selected));
+        actions.requested.Add(new Heal());
+    }
+
+    public void RequestActionFromAI(Wiggy.registry ecs)
+    {
+      // TODO
     }
 
     public void Update(Wiggy.registry ecs)

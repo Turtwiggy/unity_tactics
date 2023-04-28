@@ -31,74 +31,101 @@ namespace Wiggy
         // Ai Entity
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         ref var targets = ref ecs.GetComponent<TargetsComponent>(e);
+        ref var move = ref ecs.GetComponent<AIMoveConsiderationComponent>(e);
         var brain = ecs.GetComponent<DefaultBrainComponent>(e);
         var position = ecs.GetComponent<GridPositionComponent>(e);
         var weapon = ecs.GetComponent<WeaponComponent>(e);
+
+        if (brain.brain_fsm == BRAIN_STATE.IDLE)
+        {
+          // ok!
+        }
 
         //
         // Before evaluating, 
         //
 
+        // Update valid targets
+        // Used by the WeaponDistanceConsideration
+
+        targets.targets.Clear();
+        {
+          var players = ecs.View<PlayerComponent>();
+          for (int i = 0; i < players.Length; i++)
+          {
+            var entity = players[i];
+            var entity_pos = ecs.GetComponent<GridPositionComponent>(entity);
+            var dst = Mathf.Abs(Vector2Int.Distance(position.position, entity_pos.position));
+            if (dst >= weapon.min_range && dst <= weapon.max_range)
+              targets.targets.Add(entity);
+          }
+        }
+
+        if (targets.targets.Count > 0)
+          Debug.Log(string.Format("Entity has {0} targets in range", targets.targets.Count));
+
         // Possible move spots.
+
         List<Vector2Int> spots = new();
+        var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
         {
           var movement_range = 3; // TODO: parameterize per unit
           var index = Grid.GetIndex(position.position, map.width);
-          var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
           var s = a_star.generate_accessible_areas(astar, index, movement_range, map.width, map.height);
           for (int i = 0; i < s.Length; i++)
-          {
-            var pos = s[i].pos;
-            if (pos == position.position)
-              continue; // skip start spot
-            spots.Add(pos);
-          }
+            spots.Add(s[i].pos);
         }
 
         // Evaluate quality of possible move spots
 
-        var best_spot = position.position;  // Assume best spot is current spot
-        var best_spot_quality = CombatHelpers.SpotQuality(ecs, map, spawner, e, best_spot);
+        // Create a path from current spot to player spot
+        var start_spot = position.position;
+        // var player = targets.targets[0]; // ai scanning range??
+        var player = ecs.View<PlayerComponent>()[0]; // assume first player
+        var player_pos = ecs.GetComponent<GridPositionComponent>(player).position;
+        var from = Grid.GetIndex(start_spot, map.width);
+        var to = Grid.GetIndex(player_pos, map.width);
+        var path = a_star.generate_direct(astar, from, to, map.width);
 
+        move.positions.Clear();
         for (int i = 0; i < spots.Count; i++)
         {
           var spot = spots[i];
-          int quality = CombatHelpers.SpotQuality(ecs, map, spawner, e, spot);
-          if (quality > best_spot_quality)
-          {
-            best_spot = spot;
-            best_spot_quality = quality;
-          }
+          int quality = CombatHelpers.SpotQuality(ecs, map, e, spot, player, path);
+          move.positions.Add((spot, quality));
         }
-
-        Debug.Log(string.Format("ai current spot:{0} best spot: {1}", position.position, best_spot));
-
-        // Update valid targets
-        targets.targets.Clear();
-        foreach (var other in spawner.entities)
-        {
-          if (e.id == other.id)
-            continue; // dont compare self
-          var other_pos = ecs.GetComponent<GridPositionComponent>(other);
-          var dst = Mathf.Abs(Vector2Int.Distance(position.position, other_pos.position));
-          if (dst >= weapon.min_range && dst <= weapon.max_range)
-            targets.targets.Add(other);
-        }
-        if (targets.targets.Count > 0)
-          Debug.Log(string.Format("Entity has {0} targets in range", targets.targets.Count));
+        move.positions.Sort((a, b) => a.Item2.CompareTo(b.Item2));
 
         //
         // Evaluate
         //
-        var action = Reasoner.Evaluate(brain);
+
+        var action = Reasoner.Evaluate(brain, ecs, e);
 
         if (action.IsSet)
         {
           var chosen = action.Data;
           Debug.Log(string.Format("EID: {0} decided: {1}", e.id, chosen.GetType().ToString()));
 
+          // Implement data?
+          if (chosen.GetType() == typeof(Move))
+          {
+            var different_pos = position.position != move.positions[^1].Item1;
+            var more_than_one_position = move.positions.Count > 1;
+            if (more_than_one_position && different_pos)
+            {
+              Move act = new();
+              act.from = Grid.GetIndex(position.position, map.width);
+              act.to = Grid.GetIndex(move.positions[^1].Item1, map.width);
+              actions.requested.Add(act);
+            }
+            else
+              Debug.Log("invalid move");
+          }
+
           // request action for entity
-          actions.requested.Add(chosen);
+          else
+            actions.requested.Add(chosen);
         }
         else
           Debug.Log("Ai brain cannot take any actions");

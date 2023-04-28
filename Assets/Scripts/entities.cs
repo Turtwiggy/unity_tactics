@@ -26,6 +26,20 @@ namespace Wiggy
       actions.requested = new();
       ecs.AddComponent(e, actions);
 
+      HealthComponent health = new();
+      health.max = 100;
+      health.cur = 50;
+      ecs.AddComponent(e, health);
+
+      TargetsComponent targets = new();
+      targets.targets = new();
+      ecs.AddComponent(e, targets);
+
+      AmmoComponent ammo = new();
+      ammo.max = 100;
+      ammo.cur = 50;
+      ecs.AddComponent(e, ammo);
+
       TeamComponent team = new();
       team.team = Team.PLAYER;
       ecs.AddComponent(e, team);
@@ -60,7 +74,7 @@ namespace Wiggy
 
       HealthComponent health = new();
       health.max = 100;
-      health.cur = 50;
+      health.cur = 100;
       ecs.AddComponent(e, health);
 
       TargetsComponent targets = new();
@@ -69,7 +83,7 @@ namespace Wiggy
 
       AmmoComponent ammo = new();
       ammo.max = 100;
-      ammo.cur = 50;
+      ammo.cur = 100;
       ecs.AddComponent(e, ammo);
 
       WeaponComponent weapon = new();
@@ -81,7 +95,11 @@ namespace Wiggy
       team.team = Team.ENEMY;
       ecs.AddComponent(e, team);
 
-      DefaultBrainComponent brain = AiBuilder.BuildDefaultAI(ecs, e);
+      AIMoveConsiderationComponent move = new();
+      move.positions = new();
+      ecs.AddComponent(e, move);
+
+      DefaultBrainComponent brain = AiBuilder.BuildDefaultAI();
       ecs.AddComponent(e, brain);
 
       return e;

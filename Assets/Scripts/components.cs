@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Wiggy
@@ -42,5 +43,10 @@ namespace Wiggy
   {
     public GameObject instance;
   };
+
+  public struct AIMoveConsiderationComponent
+  {
+    public List<(Vector2Int, int)> positions;
+  }
 
 };
