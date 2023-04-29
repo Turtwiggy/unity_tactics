@@ -26,10 +26,14 @@ namespace Wiggy
     public Wiggy.registry ecs;
     public ActionSystem action_system;
     public AiSystem ai_system;
+    public CombatSystem combat_system;
     public EndTurnSystem end_turn_system;
     public ExtractionSystem extraction_system;
-    public FovSystem fov_system;
+    // public FovSystem fov_system;
+    public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
+    public MoveSystem move_system;
+    public ReloadSystem reload_system;
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
 
@@ -54,15 +58,25 @@ namespace Wiggy
       ecs.RegisterComponent<PlayerComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
+      // Requests
+      ecs.RegisterComponent<WantsToAttack>();
+      ecs.RegisterComponent<WantsToHeal>();
+      ecs.RegisterComponent<WantsToMove>();
+      ecs.RegisterComponent<WantsToOverwatch>();
+      ecs.RegisterComponent<WantsToReload>();
     }
     public void RegisterSystems(Wiggy.registry ecs)
     {
       action_system = ecs.RegisterSystem<ActionSystem>();
       ai_system = ecs.RegisterSystem<AiSystem>();
+      combat_system = ecs.RegisterSystem<CombatSystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
-      fov_system = ecs.RegisterSystem<FovSystem>();
+      // fov_system = ecs.RegisterSystem<FovSystem>();
+      heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
+      move_system = ecs.RegisterSystem<MoveSystem>();
+      reload_system = ecs.RegisterSystem<ReloadSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
     }
@@ -70,10 +84,14 @@ namespace Wiggy
     {
       action_system.SetSignature(ecs);
       ai_system.SetSignature(ecs);
+      combat_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
-      fov_system.SetSignature(ecs);
+      // fov_system.SetSignature(ecs);
+      heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
+      move_system.SetSignature(ecs);
+      reload_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
       unit_spawn_system.SetSignature(ecs);
     }
@@ -91,7 +109,7 @@ namespace Wiggy
       ui = FindObjectOfType<main_ui>();
 
       // HACK
-      fov_pos = map.srt_spots[0];
+      // fov_pos = map.srt_spots[0];
 
       // map.seed = 0;
       // map.zone_seed = 0;
@@ -99,14 +117,14 @@ namespace Wiggy
 
       // ecs-based systems
 
-      FovSystem.FovSystemInit fov_data = new()
-      {
-        fov_pos = fov_pos,
-        fov_holder = fov_holder,
-        fov_cursor_prefab = fov_cursor_prefab,
-        fov_grid_prefab = fov_grid_prefab,
-        max_dst = fov_max_distance
-      };
+      // FovSystem.FovSystemInit fov_data = new()
+      // {
+      //   fov_pos = fov_pos,
+      //   fov_holder = fov_holder,
+      //   fov_cursor_prefab = fov_cursor_prefab,
+      //   fov_grid_prefab = fov_grid_prefab,
+      //   max_dst = fov_max_distance
+      // };
 
       UnitSpawnSystem.UnitSpawnSystemInit us_data = new()
       {
@@ -116,10 +134,14 @@ namespace Wiggy
 
       action_system.Start(ecs, this);
       ai_system.Start(ecs, unit_spawn_system);
+      combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      fov_system.Start(ecs, fov_data);
+      // fov_system.Start(ecs, fov_data);
+      heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
+      move_system.Start(ecs, this);
+      reload_system.Start(ecs);
       select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
       unit_spawn_system.Start(ecs, us_data);
 
@@ -161,13 +183,17 @@ namespace Wiggy
         fov_pos.x -= 1;
       if (input.d_pad_r)
         fov_pos.x += 1;
-      if (input.d_pad_d || input.d_pad_u || input.d_pad_l || input.d_pad_r)
-        fov_system.Update(ecs, fov_pos);
+      // if (input.d_pad_d || input.d_pad_u || input.d_pad_l || input.d_pad_r)
+      //   fov_system.Update(ecs, fov_pos);
 
       // Systems that update every frame
       action_system.Update(ecs);
+      combat_system.Update(ecs);
       extraction_system.Update(ecs, map.ext_spots);
+      heal_system.Update(ecs);
       instantiate_system.Update(ecs);
+      move_system.Update(ecs);
+      reload_system.Update(ecs);
       select_system.Update(ecs);
 
       // UI

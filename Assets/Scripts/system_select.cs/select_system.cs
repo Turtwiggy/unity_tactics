@@ -14,7 +14,7 @@ namespace Wiggy
     // data
     private Optional<Entity> selected = new();
 
-    public void SetSignature(Wiggy.registry ecs)
+    public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<PlayerComponent>());

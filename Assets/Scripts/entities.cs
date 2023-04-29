@@ -23,12 +23,11 @@ namespace Wiggy
       ActionsComponent actions = new();
       actions.allowed_actions_per_turn = 2;
       actions.done = new();
-      actions.requested = new();
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
       health.max = 100;
-      health.cur = 50;
+      health.cur = health.max;
       ecs.AddComponent(e, health);
 
       TargetsComponent targets = new();
@@ -37,7 +36,7 @@ namespace Wiggy
 
       AmmoComponent ammo = new();
       ammo.max = 100;
-      ammo.cur = 50;
+      ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
       TeamComponent team = new();
@@ -69,12 +68,11 @@ namespace Wiggy
       ActionsComponent actions = new();
       actions.allowed_actions_per_turn = 2;
       actions.done = new();
-      actions.requested = new();
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
       health.max = 100;
-      health.cur = 100;
+      health.cur = health.max;
       ecs.AddComponent(e, health);
 
       TargetsComponent targets = new();
@@ -83,7 +81,7 @@ namespace Wiggy
 
       AmmoComponent ammo = new();
       ammo.max = 100;
-      ammo.cur = 100;
+      ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
       WeaponComponent weapon = new();

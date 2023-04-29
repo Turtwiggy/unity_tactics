@@ -8,7 +8,7 @@ namespace Wiggy
   {
     public bool ready_for_extraction { get; private set; }
 
-    public void SetSignature(Wiggy.registry ecs)
+    public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<PlayerComponent>());

@@ -196,7 +196,7 @@ namespace Wiggy
     private Color previously_seen_colour = Color.yellow;
     private int max_dst;
 
-    public void SetSignature(Wiggy.registry ecs)
+    public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<GridPositionComponent>());

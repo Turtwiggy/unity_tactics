@@ -3,7 +3,7 @@ namespace Wiggy
 {
   public class EndTurnSystem : ECSSystem
   {
-    public void SetSignature(Wiggy.registry ecs)
+    public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<ActionsComponent>());
@@ -23,7 +23,6 @@ namespace Wiggy
       {
         var actions = ecs.GetComponent<ActionsComponent>(e);
         actions.done.Clear();
-        actions.requested.Clear();
       }
     }
   }

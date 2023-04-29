@@ -147,9 +147,6 @@ namespace Wiggy
 
   public class Move : Action
   {
-    public int from;
-    public int to;
-
     public Move()
     {
       considerations.Add(new MoveConsiderations());
@@ -226,6 +223,8 @@ namespace Wiggy
         brain_fsm = BRAIN_STATE.IDLE,
         actions = new()
         {
+          // Actions an AI could take
+          // Different ai could have different actions
           new Heal(),
           new Reload(),
           new Move(),

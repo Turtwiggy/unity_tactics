@@ -61,10 +61,10 @@ namespace Wiggy
           return button;
         }
         button_move = CreateActionButton<Move>("Move");
-        button_attack = CreateActionButton<Attack>("Attack");
-        button_overwatch = CreateActionButton<Overwatch>("Overwatch");
-        button_reload = CreateActionButton<Reload>("Reload");
         button_heal = CreateActionButton<Heal>("Heal");
+        button_attack = CreateActionButton<Attack>("Attack");
+        button_reload = CreateActionButton<Reload>("Reload");
+        button_overwatch = CreateActionButton<Overwatch>("Overwatch");
 
         //
         // Note: these refresh events below seem wrong and/or to manual
@@ -73,15 +73,6 @@ namespace Wiggy
         main.select_system.new_entity_selected.AddListener((selected) =>
         {
           RefreshActionUI(selected);
-        });
-
-        main.action_system.action_complete.AddListener(() =>
-        {
-          if (main.select_system.HasAnySelected())
-          {
-            var selected = main.select_system.GetSelected();
-            RefreshActionUI(selected);
-          }
         });
       }
 

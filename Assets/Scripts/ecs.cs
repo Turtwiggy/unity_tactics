@@ -258,6 +258,8 @@ namespace Wiggy
   public abstract class ECSSystem
   {
     public HashSet<Entity> entities = new();
+
+    public abstract void SetSignature(Wiggy.registry ecs);
   }
 
   public class registry
@@ -327,6 +329,19 @@ namespace Wiggy
     public ref T GetComponent<T>(Entity e)
     {
       return ref component_manager.GetComponent<T>(e);
+    }
+
+    public bool TryGetComponent<T>(Entity e, ref T t)
+    {
+      try
+      {
+        t = ref component_manager.GetComponent<T>(e);
+      }
+      catch
+      {
+        // component did not exist for that entity
+      }
+      return !t.Equals(default(T));
     }
 
     public Entity[] View<T>() where T : struct

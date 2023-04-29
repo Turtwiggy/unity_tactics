@@ -8,7 +8,7 @@ namespace Wiggy
     private map_manager map;
     private UnitSpawnSystem spawner;
 
-    public void SetSignature(Wiggy.registry ecs)
+    public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<DefaultBrainComponent>());
@@ -38,7 +38,7 @@ namespace Wiggy
 
         if (brain.brain_fsm == BRAIN_STATE.IDLE)
         {
-          // ok!
+          Debug.Log("brain in idle state... choosing action");
         }
 
         //
@@ -110,22 +110,11 @@ namespace Wiggy
           // Implement data?
           if (chosen.GetType() == typeof(Move))
           {
-            var different_pos = position.position != move.positions[^1].Item1;
-            var more_than_one_position = move.positions.Count > 1;
-            if (more_than_one_position && different_pos)
-            {
-              Move act = new();
-              act.from = Grid.GetIndex(position.position, map.width);
-              act.to = Grid.GetIndex(move.positions[^1].Item1, map.width);
-              actions.requested.Add(act);
-            }
-            else
-              Debug.Log("invalid move");
+            var to_idx = Grid.GetIndex(move.positions[^1].Item1, map.width);
+            ActionSystem.RequestAction(ecs, chosen, e, to_idx);
           }
-
-          // request action for entity
           else
-            actions.requested.Add(chosen);
+            ActionSystem.RequestAction(ecs, chosen, e);
         }
         else
           Debug.Log("Ai brain cannot take any actions");
