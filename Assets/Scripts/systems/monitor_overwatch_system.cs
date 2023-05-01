@@ -12,7 +12,6 @@ namespace Wiggy
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<OverwatchStatus>());
-      s.Set(ecs.GetComponentType<TeamComponent>());
       ecs.SetSystemSignature<MonitorOverwatchSystem>(s);
     }
 
@@ -24,19 +23,18 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      if (move_events.Count > 0)
-        Debug.Log("something moved!");
-
       foreach (var e in entities.ToArray()) // readonly as modified
       {
         // check if an entity moves in my weapon range!
 
         // may or may not have weapon equipped
-        WeaponComponent weapon = default;
-        var has_weapon = ecs.TryGetComponent(e, ref weapon);
-        if (!has_weapon)
+        WeaponComponent backup = default;
+        WeaponComponent weapon = ecs.TryGetComponent(e, ref backup);
+        bool has_weapon = !weapon.Equals(default);
+        if (has_weapon)
         {
-          Debug.Log("No weapon equipped for overwatch... ignoring overwatch");
+          Debug.Log("No weapon equipped for overwatch... processing overwatch action but it wont do anything");
+          ecs.RemoveComponent<OverwatchStatus>(e); // used it
           continue;
         }
 
@@ -52,7 +50,7 @@ namespace Wiggy
           var other = move_events[i].e;
           var other_team = ecs.GetComponent<TeamComponent>(other);
           if (my_team.team == other_team.team)
-            continue; // my friends are fish
+            continue; // friends are good
 
           var path = move_events[i].path;
           for (int p = 0; p < path.Length; p++)

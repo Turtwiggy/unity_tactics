@@ -113,5 +113,40 @@ namespace Wiggy
       Assert.AreEqual(3, a3.position.x);
     }
 
+    [Test]
+    public void TestEcs__TryGetSuccess()
+    {
+      // Arrange
+      Wiggy.registry ecs = new();
+      ecs.RegisterComponent<GridPositionComponent>();
+      ecs.RegisterComponent<TeamComponent>();
+
+      var e = ecs.Create();
+      {
+        ecs.AddComponent<GridPositionComponent>(e, new());
+
+        TeamComponent tc = new();
+        tc.team = Team.NEUTRAL;
+        ecs.AddComponent(e, tc);
+      }
+
+      // Act / Assert
+
+      // Get the component and modify it
+
+      {
+        TeamComponent backup = default;
+        ref var component = ref ecs.TryGetComponent(e, ref backup);
+        Assert.AreEqual(Team.NEUTRAL, component.team);
+
+        component.team = Team.PLAYER; // modify it
+      }
+
+      {
+        TeamComponent backup = default;
+        ref var component = ref ecs.TryGetComponent(e, ref backup);
+        Assert.AreEqual(Team.PLAYER, component.team);
+      }
+    }
   }
 }

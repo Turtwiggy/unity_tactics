@@ -17,7 +17,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      UnityEngine.Debug.Log("ending turn");
+      UnityEngine.Debug.Log("ending turn... (clearing allll actions)");
 
       foreach (var e in entities)
       {

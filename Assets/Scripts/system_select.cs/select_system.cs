@@ -53,7 +53,7 @@ namespace Wiggy
     {
       var camera_pos = camera.grid_index;
       var index = Grid.GetIndex(camera_pos, map.width);
-      Debug.Log("trying to select index: " + index);
+      // Debug.Log("trying to select index: " + index);
 
       if (HasAnySelected())
         return;

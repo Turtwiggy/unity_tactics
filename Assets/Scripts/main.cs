@@ -25,6 +25,7 @@ namespace Wiggy
     public ExtractionSystem extraction_system;
     public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
+    public MonitorCombatEventsSystem monitor_combat_events_system;
     public MonitorOverwatchSystem monitor_overwatch_system;
     public MoveSystem move_system;
     public OverwatchSystem overwatch_system;
@@ -42,6 +43,8 @@ namespace Wiggy
       ecs.RegisterComponent<GridPositionComponent>();
       // ai
       ecs.RegisterComponent<AIMoveConsiderationComponent>();
+      // events
+      ecs.RegisterComponent<AttackEvent>();
       // combat
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();
@@ -70,6 +73,7 @@ namespace Wiggy
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
       heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
+      monitor_combat_events_system = ecs.RegisterSystem<MonitorCombatEventsSystem>();
       monitor_overwatch_system = ecs.RegisterSystem<MonitorOverwatchSystem>();
       move_system = ecs.RegisterSystem<MoveSystem>();
       overwatch_system = ecs.RegisterSystem<OverwatchSystem>();
@@ -86,6 +90,7 @@ namespace Wiggy
       extraction_system.SetSignature(ecs);
       heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
+      monitor_combat_events_system.SetSignature(ecs);
       monitor_overwatch_system.SetSignature(ecs);
       move_system.SetSignature(ecs);
       overwatch_system.SetSignature(ecs);
@@ -128,6 +133,7 @@ namespace Wiggy
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
       move_system.Start(ecs, this);
+      monitor_combat_events_system.Start(ecs);
       monitor_overwatch_system.Start(ecs, move_system);
       overwatch_system.Start(ecs);
       reload_system.Start(ecs);
@@ -173,7 +179,8 @@ namespace Wiggy
       instantiate_system.Update(ecs);
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
-      monitor_overwatch_system.Update(ecs); // dep: ow sys
+      monitor_combat_events_system.Update(ecs);
+      monitor_overwatch_system.Update(ecs); // dep: overwatch_system
       reload_system.Update(ecs);
       select_system.Update(ecs);
 

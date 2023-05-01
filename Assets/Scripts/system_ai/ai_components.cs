@@ -83,7 +83,7 @@ namespace Wiggy
       float h = optimal_distance; // x midpoint is optimal_distance
       float k = 1; // clamps y max at 1
       float utility = WiggyMath.Parabola(dst, r1, r2, h, k);
-      Debug.Log("(weapon_distance) " + utility);
+      Debug.Log("(weapon_distance_utility) " + utility);
 
       return Mathf.Clamp01(utility);
     }

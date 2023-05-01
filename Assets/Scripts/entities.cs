@@ -39,6 +39,11 @@ namespace Wiggy
       ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
+      WeaponComponent weapon = new();
+      weapon.min_range = 0;
+      weapon.max_range = 3;
+      ecs.AddComponent(e, weapon);
+
       TeamComponent team = new();
       team.team = Team.PLAYER;
       ecs.AddComponent(e, team);

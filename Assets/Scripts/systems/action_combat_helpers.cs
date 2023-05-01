@@ -121,5 +121,38 @@ namespace Wiggy
       return quality;
     }
 
+    public static int CalculateDamage(Wiggy.registry ecs, map_manager map, Entity attacker, Entity defender)
+    {
+      // Weapon may or may not be equipped
+
+      WeaponComponent backup = default;
+      WeaponComponent weapon = ecs.TryGetComponent(attacker, ref backup);
+      bool has_component = !weapon.Equals(default);
+      if (has_component)
+        return 0;
+
+      int damage = 0;
+
+      // Check range
+      var atk_pos = ecs.GetComponent<GridPositionComponent>(attacker).position;
+      var def_pos = ecs.GetComponent<GridPositionComponent>(defender).position;
+      var dst = Mathf.Abs(Vector2Int.Distance(atk_pos, def_pos));
+      var in_weapon_range = dst <= weapon.max_range && dst >= weapon.min_range;
+      if (!in_weapon_range)
+        damage = 0;
+
+      // Check flanked
+      var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+      if (flanked)
+        damage *= 2;
+
+      // Check weaknesses
+      // TODO
+
+      // Random crit amount?
+      // TODO
+
+      return damage;
+    }
   }
 }

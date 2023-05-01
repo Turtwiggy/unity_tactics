@@ -84,6 +84,8 @@ namespace Wiggy
         // Update AI system
         main.ai_system.Update(main.ecs);
 
+        Debug.Log("AI Turn Done?");
+
         // Update UI
         if (main.select_system.HasAnySelected())
         {

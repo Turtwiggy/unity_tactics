@@ -51,9 +51,11 @@ namespace Wiggy
 
       // set players at start spots
       CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));
-      CreatePlayer(ecs, map.srt_spots[1], "Wallace", new Optional<GameObject>(data.player_prefab));
-      CreatePlayer(ecs, map.srt_spots[2], "Sherbert", new Optional<GameObject>(data.player_prefab));
-      CreatePlayer(ecs, map.srt_spots[3], "Grunbo", new Optional<GameObject>(data.player_prefab));
+      // CreatePlayer(ecs, map.srt_spots[1], "Wallace", new Optional<GameObject>(data.player_prefab));
+      // CreatePlayer(ecs, map.srt_spots[2], "Sherbert", new Optional<GameObject>(data.player_prefab));
+      // CreatePlayer(ecs, map.srt_spots[3], "Grunbo", new Optional<GameObject>(data.player_prefab));
+
+      int n = 0;
 
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
@@ -61,8 +63,13 @@ namespace Wiggy
 
       foreach (IndexList zone_idxs in voronoi_zones)
       {
+        if (n > 0)
+          break;
         foreach (int idx in zone_idxs.idxs)
         {
+          if (n > 0)
+            break;
+
           // validation checks
 
           // unit in zone?
@@ -81,6 +88,7 @@ namespace Wiggy
 
           var pos = Grid.IndexToPos(idx, map.width, map.height);
           CreateEnemy(ecs, pos, "Random Enemy", new Optional<GameObject>(data.enemy_prefab));
+          n++;
           break;
         }
       }

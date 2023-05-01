@@ -331,17 +331,17 @@ namespace Wiggy
       return ref component_manager.GetComponent<T>(e);
     }
 
-    public bool TryGetComponent<T>(Entity e, ref T t)
+    public ref T TryGetComponent<T>(Entity e, ref T def)
     {
       try
       {
-        t = ref component_manager.GetComponent<T>(e);
+        return ref component_manager.GetComponent<T>(e);
       }
       catch
       {
         // component did not exist for that entity
       }
-      return !t.Equals(default(T));
+      return ref def;
     }
 
     public Entity[] View<T>() where T : struct

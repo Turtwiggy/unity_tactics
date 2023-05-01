@@ -122,4 +122,16 @@ namespace Wiggy
   {
   };
 
+  public struct IsDeadStatus
+  {
+  };
+
+  // Events
+
+  public struct AttackEvent
+  {
+    public Entity from;
+    public Entity to;
+  }
+
 };
