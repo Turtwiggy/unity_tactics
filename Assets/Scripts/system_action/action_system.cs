@@ -55,7 +55,7 @@ namespace Wiggy
     {
       if (!select_system.HasAnySelected())
       {
-        Debug.Log("no unit selected!");
+        Debug.Log("(UI) no unit selected!");
         return;
       }
 
@@ -64,10 +64,16 @@ namespace Wiggy
       T temp = new();
 
       if (temp.GetType() == typeof(Attack)) // force use map
+      {
+        Debug.Log("Action ignored... need to use map");
         return;
+      }
 
       if (temp.GetType() == typeof(Move)) // force use map
+      {
+        Debug.Log("Action ignored... need to use map");
         return;
+      }
 
       RequestAction(ecs, temp, selected);
     }

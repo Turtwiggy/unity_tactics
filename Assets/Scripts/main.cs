@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Wiggy
 {
@@ -8,13 +9,6 @@ namespace Wiggy
     public GameObject player_prefab;
     public GameObject enemy_prefab;
     public GameObject selected_cursor_prefab;
-
-    [Header("FOV")]
-    private int fov_max_distance = 10;
-    public GameObject fov_holder;
-    public GameObject fov_cursor_prefab;
-    public GameObject fov_grid_prefab;
-    private Vector2Int fov_pos = new(0, 0);
 
     // unity-based systems
     public input_handler input;
@@ -29,10 +23,11 @@ namespace Wiggy
     public CombatSystem combat_system;
     public EndTurnSystem end_turn_system;
     public ExtractionSystem extraction_system;
-    // public FovSystem fov_system;
     public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
+    public MonitorOverwatchSystem monitor_overwatch_system;
     public MoveSystem move_system;
+    public OverwatchSystem overwatch_system;
     public ReloadSystem reload_system;
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
@@ -53,6 +48,7 @@ namespace Wiggy
       ecs.RegisterComponent<TargetsComponent>();
       ecs.RegisterComponent<WeaponComponent>();
       ecs.RegisterComponent<TeamComponent>();
+      ecs.RegisterComponent<OverwatchStatus>();
       // entity tags
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
@@ -72,10 +68,11 @@ namespace Wiggy
       combat_system = ecs.RegisterSystem<CombatSystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
-      // fov_system = ecs.RegisterSystem<FovSystem>();
       heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
+      monitor_overwatch_system = ecs.RegisterSystem<MonitorOverwatchSystem>();
       move_system = ecs.RegisterSystem<MoveSystem>();
+      overwatch_system = ecs.RegisterSystem<OverwatchSystem>();
       reload_system = ecs.RegisterSystem<ReloadSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
@@ -87,10 +84,11 @@ namespace Wiggy
       combat_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
-      // fov_system.SetSignature(ecs);
       heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
+      monitor_overwatch_system.SetSignature(ecs);
       move_system.SetSignature(ecs);
+      overwatch_system.SetSignature(ecs);
       reload_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
       unit_spawn_system.SetSignature(ecs);
@@ -109,22 +107,12 @@ namespace Wiggy
       ui = FindObjectOfType<main_ui>();
 
       // HACK
-      // fov_pos = map.srt_spots[0];
 
       // map.seed = 0;
       // map.zone_seed = 0;
       // map.GenerateMap();
 
       // ecs-based systems
-
-      // FovSystem.FovSystemInit fov_data = new()
-      // {
-      //   fov_pos = fov_pos,
-      //   fov_holder = fov_holder,
-      //   fov_cursor_prefab = fov_cursor_prefab,
-      //   fov_grid_prefab = fov_grid_prefab,
-      //   max_dst = fov_max_distance
-      // };
 
       UnitSpawnSystem.UnitSpawnSystemInit us_data = new()
       {
@@ -137,10 +125,11 @@ namespace Wiggy
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      // fov_system.Start(ecs, fov_data);
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
       move_system.Start(ecs, this);
+      monitor_overwatch_system.Start(ecs, move_system);
+      overwatch_system.Start(ecs);
       reload_system.Start(ecs);
       select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
       unit_spawn_system.Start(ecs, us_data);
@@ -155,7 +144,8 @@ namespace Wiggy
       camera.HandleCameraZoom();
 
       // Input
-      if (input.a_input)
+      var cursor_over_ui = EventSystem.current.IsPointerOverGameObject();
+      if (!cursor_over_ui && input.a_input)
       {
         if (!select_system.HasAnySelected())
           select_system.Select();
@@ -175,17 +165,6 @@ namespace Wiggy
       if (input.b_input)
         select_system.ClearSelect();
 
-      if (input.d_pad_u)
-        fov_pos.y += 1;
-      if (input.d_pad_d)
-        fov_pos.y -= 1;
-      if (input.d_pad_l)
-        fov_pos.x -= 1;
-      if (input.d_pad_r)
-        fov_pos.x += 1;
-      // if (input.d_pad_d || input.d_pad_u || input.d_pad_l || input.d_pad_r)
-      //   fov_system.Update(ecs, fov_pos);
-
       // Systems that update every frame
       action_system.Update(ecs);
       combat_system.Update(ecs);
@@ -193,6 +172,8 @@ namespace Wiggy
       heal_system.Update(ecs);
       instantiate_system.Update(ecs);
       move_system.Update(ecs);
+      overwatch_system.Update(ecs);
+      monitor_overwatch_system.Update(ecs); // dep: ow sys
       reload_system.Update(ecs);
       select_system.Update(ecs);
 

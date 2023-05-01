@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fbb37b43e59789747869f2e4c1cb298f
+guid: ae20490c802d7c541a3ac2b3092b952a
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -42,16 +42,16 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 512
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
-  alphaUsage: 0
-  alphaIsTransparency: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
   spriteTessellationDetail: -1
   textureType: 8
   textureShape: 1
@@ -113,32 +113,72 @@ TextureImporter:
     overridden: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: wall_sprite_bigger
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 480
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32b484e6b1560434890ea08169f94c23
+      internalID: -1141139150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 1baeb4a34e6d8c44db3d971974f19832
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      monochrome_wall_packed_15: -1190577690
+      monochrome_wall_packed_26: -1708624254
+      monochrome_wall_packed_11: 1263608284
+      monochrome_wall_packed_12: 1306666179
+      monochrome_wall_packed_21: 536287444
+      monochrome_wall_packed_7: 464944771
+      wall_try_this: 1752539241
+      wall_sprite_bigger: -1141139150
+      monochrome_wall_packed_0: 1109316419
+      monochrome_wall_packed_14: -1767575930
+      monochrome_wall_packed_16: 339812191
+      monochrome_wall_packed_24: 1968696863
+      monochrome_wall_packed_2: -1789843982
+      monochrome_wall_packed_28: -392307733
+      monochrome_wall_packed_23: -1351816333
+      monochrome_wall_packed_6: 1542110143
+      monochrome_wall_packed_10: 1187937288
+      monochrome_wall_packed_5: 415736695
+      monochrome_wall_packed_22: 2139480253
+      monochrome_wall_packed_13: 951947841
+      monochrome_wall_packed_8: -1607289838
+      monochrome_wall_packed_18: 954817894
+      monochrome_wall_packed_1: -2082157252
+      monochrome_wall_packed_19: 163917686
+      monochrome_wall_packed_25: 861841435
+      monochrome_wall_packed_17: -840759802
+      monochrome_wall_packed_27: -156599830
+      monochrome_wall_packed_4: -849162432
+      monochrome_wall_packed_3: 1333596025
+      monochrome_wall_packed_20: -617595093
+      monochrome_wall_packed_9: -1814595288
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

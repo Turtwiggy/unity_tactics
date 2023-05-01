@@ -57,7 +57,7 @@ namespace Wiggy
 
           // Check range
           var dst = Mathf.Abs(Vector2Int.Distance(attacker.position, defender_pos));
-          var in_weapon_range = dst <= weapon.max_range || dst >= weapon.min_range;
+          var in_weapon_range = dst <= weapon.max_range && dst >= weapon.min_range;
           if (!in_weapon_range)
             damage = 0;
 

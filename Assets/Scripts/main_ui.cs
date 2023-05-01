@@ -17,7 +17,6 @@ namespace Wiggy
     [Header("Selected Unit Info")]
     public TextMeshProUGUI selected_text;
     public TextMeshProUGUI hovered_text;
-    private Vector2Int last_hovered_grid_index;
 
     [Header("Selected Unit Actions")]
     public GameObject action_holder;
@@ -110,19 +109,15 @@ namespace Wiggy
       //
       // Hover UI
       //
-      if (last_hovered_grid_index != main.camera.grid_index)
+      var index = Grid.GetIndex(main.camera.grid_index, main.map.width);
+      var entity = main.unit_spawn_system.units[index];
+      if (entity.IsSet)
       {
-        var index = Grid.GetIndex(main.camera.grid_index, main.map.width);
-        var entity = main.unit_spawn_system.units[index];
-        if (entity.IsSet)
-        {
-          var unity = main.ecs.GetComponent<InstantiatedComponent>(entity.Data);
-          hovered_text.SetText(unity.instance.name);
-          last_hovered_grid_index = main.camera.grid_index;
-        }
-        else
-          hovered_text.SetText("Nothing hovered");
+        var unity = main.ecs.GetComponent<InstantiatedComponent>(entity.Data);
+        hovered_text.SetText(unity.instance.name);
       }
+      else
+        hovered_text.SetText("Nothing hovered");
     }
 
     void RefreshActionUI(Entity selected)

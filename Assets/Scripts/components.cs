@@ -116,4 +116,10 @@ namespace Wiggy
   {
   }
 
+  // Status effects e.g. poisoned, stunned, reduced armour
+
+  public struct OverwatchStatus
+  {
+  };
+
 };

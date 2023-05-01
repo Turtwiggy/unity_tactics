@@ -31,13 +31,13 @@ namespace Wiggy
 #if DEBUG
     void Update()
     {
-      // try use lmb to fix lookat point
-      if (Mouse.current.leftButton.wasPressedThisFrame)
-        fixed_lookat_point = cursor.transform.position;
+      // // try use lmb to fix lookat point
+      // if (Mouse.current.leftButton.wasPressedThisFrame)
+      //   fixed_lookat_point = cursor.transform.position;
 
-      // try use to remove lookat point
-      if (Mouse.current.rightButton.wasPressedThisFrame)
-        fixed_lookat_point = Vector3.zero;
+      // // try use to remove lookat point
+      // if (Mouse.current.rightButton.wasPressedThisFrame)
+      //   fixed_lookat_point = Vector3.zero;
     }
 #endif
 
