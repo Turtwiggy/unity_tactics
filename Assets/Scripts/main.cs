@@ -14,6 +14,7 @@ namespace Wiggy
     public input_handler input;
     public camera_handler camera;
     public map_manager map;
+    public map_visual_manager mvm;
     public main_ui ui;
 
     // ecs-based systems
@@ -110,8 +111,7 @@ namespace Wiggy
       input = FindObjectOfType<input_handler>();
       camera = FindObjectOfType<camera_handler>();
       ui = FindObjectOfType<main_ui>();
-
-      // HACK
+      mvm = FindObjectOfType<map_visual_manager>();
 
       // map.seed = 0;
       // map.zone_seed = 0;
@@ -119,7 +119,7 @@ namespace Wiggy
 
       // ecs-based systems
 
-      UnitSpawnSystem.UnitSpawnSystemInit us_data = new()
+      UnitSpawnSystem.UnitSpawnSystemInit uss_data = new()
       {
         player_prefab = player_prefab,
         enemy_prefab = enemy_prefab
@@ -138,8 +138,9 @@ namespace Wiggy
       overwatch_system.Start(ecs);
       reload_system.Start(ecs);
       select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
-      unit_spawn_system.Start(ecs, us_data);
+      unit_spawn_system.Start(ecs, uss_data);
 
+      mvm.DoStart();
       ui.DoStart(this);
     }
 

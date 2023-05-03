@@ -154,16 +154,7 @@ namespace Wiggy
             var pos = Grid.IndexToPos(i, width, height);
             var wpos = Grid.GridSpaceToWorldSpace(pos, size);
             var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
-
-            var renderer = go.GetComponent<obstacle>().object_when_active.GetComponent<Renderer>();
-            var material = renderer.sharedMaterial;
-            material.SetInt("SpriteX", Random.Range(0, 48));
-            material.SetInt("SpriteY", Random.Range(0, 22));
-
-            // MaterialPropertyBlock block = new();
-            // block.SetInt("sprite_x", Random.Range(0, 48));
-            // block.SetInt("sprite_y", Random.Range(0, 22));
-            // Graphics.DrawMeshInstanced(mesh, go.transform.position, Quaternion.identity, materiral)
+            go.transform.name = "ObjectIndex: " + i;
 
             // This should probably be removed for the ecs system
             map[i].instantiated.Add(go);

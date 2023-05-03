@@ -2,12 +2,14 @@ Shader "Custom/spritesheet"
 {
   Properties
   {
-    _Color ("Color", Color) = (1,1,1,1)
+    _Color("Color", Color) = (0, 0, 0, 1)
     _MainTex ("Albedo (RGB)", 2D) = "white" {}
     _Glossiness ("Smoothness", Range(0,1)) = 0.5
     _Metallic ("Metallic", Range(0,1)) = 0.0
-    _SpriteX("SpriteX", Int) = 0
-    _SpriteY("SpriteY", Int) = 0
+    _WallSpriteX("WallSpriteX", int) = 0
+    _WallSpriteY("WallSpriteY", int) = 0
+    [PerRendererData] _SpriteX("SpriteX", int) = 0
+    [PerRendererData] _SpriteY("SpriteY", int) = 0
   }
 
   SubShader
@@ -17,7 +19,8 @@ Shader "Custom/spritesheet"
 
     CGPROGRAM
     // Physically based Standard lighting model, and enable shadows on all light types
-    #pragma surface surf Standard fullforwardshadows
+    #pragma surface surf Standard fullforwardshadows 
+    // #pragma multi_compile_instancing
 
     // Use shader model 3.0 target, to get nicer looking lighting
     #pragma target 3.0
@@ -30,17 +33,19 @@ Shader "Custom/spritesheet"
       float3 worldNormal;
     };
 
+    fixed4 _Color;
     half _Glossiness;
     half _Metallic;
-    fixed4 _Color;
-    int _SpriteX;
-    int _SpriteY;
+
+    int _WallSpriteX;
+    int _WallSpriteY;
 
     // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
     // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-    // #pragma instancing_options assumeuniformscaling
+    #pragma instancing_options assumeuniformscaling
     UNITY_INSTANCING_BUFFER_START(Props)
-    // put more per-instance properties here
+    UNITY_DEFINE_INSTANCED_PROP(int, _SpriteX)
+    UNITY_DEFINE_INSTANCED_PROP(int, _SpriteY)
     UNITY_INSTANCING_BUFFER_END(Props)
 
     void surf (Input IN, inout SurfaceOutputStandard o)
@@ -52,39 +57,45 @@ Shader "Custom/spritesheet"
       const float scale_x = 1.0f / sprite_x;
       const float scale_y = 1.0f / sprite_y;
 
+      const int WALL_SPRITE_X = _WallSpriteX;
+      const int WALL_SPRITE_Y = sprite_y - _WallSpriteY - 1;
+
+      const int SPRITE_X = UNITY_ACCESS_INSTANCED_PROP(Props, _SpriteX);
+      const int SPRITE_Y = UNITY_ACCESS_INSTANCED_PROP(Props, _SpriteY);
+
       // chosen sprite
-      int sprite_pos_x =_SpriteX;
-      int sprite_pos_y =sprite_y - _SpriteY - 1;
+      int sprite_pos_x = 0;
+      int sprite_pos_y = 0;
 
       if(IN.worldNormal.x > 0) // RIGHT/XAXIS
       {
-        sprite_pos_y = 1;
-        sprite_pos_x = 11;
+        sprite_pos_x = WALL_SPRITE_X;
+        sprite_pos_y = WALL_SPRITE_Y;
       }
-      else if(IN.worldNormal.y > 0) // UP?
+      else if(IN.worldNormal.y > 0) // UP
       {
-        sprite_pos_x = _SpriteX;
-        sprite_pos_y = _SpriteY;
+        sprite_pos_x = SPRITE_X;
+        sprite_pos_y = sprite_y - SPRITE_Y - 1;
       }
       else if(IN.worldNormal.z > 0) // FORWARD/ZAXIS
       {
-        sprite_pos_x = 15;
-        sprite_pos_y = 3;
+        sprite_pos_x = WALL_SPRITE_X;
+        sprite_pos_y = WALL_SPRITE_Y;
       }
       else if(IN.worldNormal.x <  0)  // LEFT/-XAXIS
       {
-        sprite_pos_x = 10;
-        sprite_pos_y = 4;
+        sprite_pos_x = WALL_SPRITE_X;
+        sprite_pos_y = WALL_SPRITE_Y;
       }
-      else if(IN.worldNormal.y < 0) // DOWN??
+      else if(IN.worldNormal.y < 0) // DOWN
       {
-        sprite_pos_x = 11;
-        sprite_pos_y = 5;
+        sprite_pos_x = WALL_SPRITE_X;
+        sprite_pos_y = WALL_SPRITE_Y;
       }
       else if(IN.worldNormal.z < 0) // BACKWARDS/-ZAXIS
       {        
-        sprite_pos_x = 15;
-        sprite_pos_y = 6;
+        sprite_pos_x = WALL_SPRITE_X;
+        sprite_pos_y = WALL_SPRITE_Y;
       }
       
       float2 sprite_uv = float2(

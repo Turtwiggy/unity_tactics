@@ -10,10 +10,10 @@ namespace Wiggy
     E = 2,
     S = 4,
     W = 8,
-    NE = 3,
-    SE = 6,
-    SW = 12,
-    NW = 9
+    NE = N | E,
+    SE = S | E,
+    SW = S | W,
+    NW = N | W,
   }
 
   public static class square_direction_extensions
