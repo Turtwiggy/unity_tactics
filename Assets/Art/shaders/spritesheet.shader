@@ -52,8 +52,8 @@ Shader "Custom/spritesheet"
     {
       float2 uv = IN.uv_MainTex;
 
-      const float sprite_x = 48; // kennynl
-      const float sprite_y = 22; // kennynl
+      const float sprite_x = 64; // 1024x1024
+      const float sprite_y = 64; // 1024x1024
       const float scale_x = 1.0f / sprite_x;
       const float scale_y = 1.0f / sprite_y;
 

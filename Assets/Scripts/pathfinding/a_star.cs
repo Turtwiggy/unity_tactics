@@ -10,10 +10,10 @@ namespace Wiggy
     E = 2,
     S = 4,
     W = 8,
-    NE = N | E,
-    SE = S | E,
-    SW = S | W,
-    NW = N | W,
+    NE = 16,
+    SE = 32,
+    SW = 64,
+    NW = 128,
   }
 
   public static class square_direction_extensions
@@ -52,6 +52,16 @@ namespace Wiggy
       if (desired == square_direction.W)
         return a == square_direction.W || a == square_direction.NW || a == square_direction.SW;
       return false;
+    }
+
+    public static bool IsDiagonal(this square_direction d)
+    {
+      bool is_diagonal = false;
+      is_diagonal |= d == square_direction.NE;
+      is_diagonal |= d == square_direction.SE;
+      is_diagonal |= d == square_direction.SW;
+      is_diagonal |= d == square_direction.NW;
+      return is_diagonal;
     }
   }
 
