@@ -312,20 +312,19 @@ namespace Wiggy
         for (int iidx = 0; iidx < map_manager.obstacle_map[i].instantiated.Count; iidx++)
         {
           var instance = map_manager.obstacle_map[i].instantiated[iidx];
-          var settings = instance.GetComponent<obstacle>(); // BAD
 
-          settings.object_when_active.SetActive(false);
-          settings.object_when_was_seen.SetActive(false);
-          settings.object_when_hidden.SetActive(false);
+          instance.SetActive(false);
+          // settings.object_when_was_seen.SetActive(false);
+          // settings.object_when_hidden.SetActive(false);
 
           if (fov_map_mask[i] == TileState.VISIBLE)
-            settings.object_when_active.SetActive(true);
+            instance.SetActive(true);
 
-          if (fov_map_mask[i] == TileState.HIDDEN)
-            settings.object_when_hidden.SetActive(false);
+          // if (fov_map_mask[i] == TileState.HIDDEN)
+          //   settings.object_when_hidden.SetActive(false);
 
-          if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
-            settings.object_when_was_seen.SetActive(true);
+          // if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
+          //   settings.object_when_was_seen.SetActive(true);
         }
       }
 

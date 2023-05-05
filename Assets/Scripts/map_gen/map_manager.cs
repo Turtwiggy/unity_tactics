@@ -153,7 +153,9 @@ namespace Wiggy
           {
             var pos = Grid.IndexToPos(i, width, height);
             var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-            var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
+            wpos.y += 0.5f; // hmm
+
+            var go = Instantiate(prefab, wpos, prefab.transform.rotation, parent);
             go.transform.name = "ObjectIndex: " + i;
 
             // This should probably be removed for the ecs system

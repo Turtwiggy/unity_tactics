@@ -50,10 +50,7 @@ namespace Wiggy
         }
 
         var (sprite_x, sprite_y) = GetWallSprite(wall_mask, floor_mask);
-        var script = obstacle.GetComponent<obstacle>();
-        var active = script.object_when_active;
-
-        var r = active.GetComponent<Renderer>();
+        var r = obstacle.GetComponent<Renderer>();
         property[i].SetInt("_SpriteX", sprite_x);
         property[i].SetInt("_SpriteY", sprite_y);
         r.SetPropertyBlock(property[i]);

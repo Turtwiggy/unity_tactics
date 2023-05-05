@@ -19,7 +19,9 @@ namespace Wiggy
       }
 
       if (GUILayout.Button("Generate Map"))
+      {
         map.GenerateMap();
+      }
     }
   }
 }

@@ -11,11 +11,11 @@ namespace Wiggy
     public GameObject selected_cursor_prefab;
 
     // unity-based systems
-    public input_handler input;
-    public camera_handler camera;
-    public map_manager map;
-    public map_visual_manager mvm;
-    public main_ui ui;
+    [HideInInspector] public input_handler input;
+    [HideInInspector] public camera_handler camera;
+    [HideInInspector] public map_manager map;
+    [HideInInspector] public map_visual_manager mvm;
+    [HideInInspector] public main_ui ui;
 
     // ecs-based systems
     public Wiggy.registry ecs;
@@ -141,6 +141,7 @@ namespace Wiggy
       unit_spawn_system.Start(ecs, uss_data);
 
       mvm.DoStart();
+      // mvm.RefreshVisuals();
       ui.DoStart(this);
     }
 
