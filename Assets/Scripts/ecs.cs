@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -337,7 +336,7 @@ namespace Wiggy
       {
         return ref component_manager.GetComponent<T>(e);
       }
-      catch
+      catch (System.Exception)
       {
         // component did not exist for that entity
       }

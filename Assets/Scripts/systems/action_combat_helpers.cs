@@ -126,8 +126,8 @@ namespace Wiggy
       // Weapon may or may not be equipped
 
       WeaponComponent backup = default;
-      WeaponComponent weapon = ecs.TryGetComponent(attacker, ref backup);
-      bool has_component = !weapon.Equals(default);
+      ref WeaponComponent weapon = ref ecs.TryGetComponent(attacker, ref backup);
+      bool has_component = !weapon.Equals(backup);
       if (has_component)
         return 0;
 

@@ -141,7 +141,7 @@ namespace Wiggy
       unit_spawn_system.Start(ecs, uss_data);
 
       mvm.DoStart();
-      // mvm.RefreshVisuals();
+      mvm.RefreshVisuals();
       ui.DoStart(this);
     }
 

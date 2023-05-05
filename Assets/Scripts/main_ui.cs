@@ -16,7 +16,8 @@ namespace Wiggy
 
     [Header("Selected Unit Info")]
     public TextMeshProUGUI selected_text;
-    public TextMeshProUGUI hovered_text;
+    public TextMeshProUGUI hovered_friendly_text;
+    public TextMeshProUGUI hovered_enemy_text;
 
     [Header("Selected Unit Actions")]
     public GameObject action_holder;
@@ -116,10 +117,17 @@ namespace Wiggy
       if (entity.IsSet)
       {
         var unity = main.ecs.GetComponent<InstantiatedComponent>(entity.Data);
-        hovered_text.SetText(unity.instance.name);
+        var team = main.ecs.GetComponent<TeamComponent>(entity.Data);
+        if (team.team == Team.ENEMY)
+          hovered_enemy_text.SetText(unity.instance.name);
+        else
+          hovered_friendly_text.SetText(unity.instance.name);
       }
       else
-        hovered_text.SetText("Nothing hovered");
+      {
+        hovered_enemy_text.SetText("Nothing hovered");
+        hovered_friendly_text.SetText("Nothing hovered");
+      }
     }
 
     void RefreshActionUI(Entity selected)

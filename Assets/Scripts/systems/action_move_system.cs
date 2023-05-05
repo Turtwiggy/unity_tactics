@@ -60,11 +60,12 @@ namespace Wiggy
         // Check this unit does not have the overwatch status
         // (otherwise, you'd be immobalized)
         OverwatchStatus backup = default;
-        OverwatchStatus component = ecs.TryGetComponent(e, ref backup);
-        bool has_component = !component.Equals(default);
+        ref OverwatchStatus component = ref ecs.TryGetComponent(e, ref backup);
+        bool has_component = !component.Equals(backup);
         if (has_component)
         {
           Debug.Log("you cant move, you have overwatch status!");
+          ecs.RemoveComponent<WantsToMove>(e);
           continue;
         }
 

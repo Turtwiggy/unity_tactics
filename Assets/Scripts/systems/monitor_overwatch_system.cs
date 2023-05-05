@@ -29,8 +29,8 @@ namespace Wiggy
 
         // may or may not have weapon equipped
         WeaponComponent backup = default;
-        WeaponComponent weapon = ecs.TryGetComponent(e, ref backup);
-        bool has_weapon = !weapon.Equals(default);
+        ref WeaponComponent weapon = ref ecs.TryGetComponent(e, ref backup);
+        bool has_weapon = !weapon.Equals(backup);
         if (has_weapon)
         {
           Debug.Log("No weapon equipped for overwatch... processing overwatch action but it wont do anything");

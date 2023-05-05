@@ -27,11 +27,12 @@ namespace Wiggy
       {
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         actions.done.Add(a);
-        ecs.RemoveComponent<R>(e);
         Debug.Log($"Request valid: {a.GetType()}");
       }
       else
-        Debug.Log($"Request invalid: {a.GetType()}");
+        Debug.Log($"Request invalid, removed request: {a.GetType()}");
+
+      ecs.RemoveComponent<R>(e);
     }
   }
 }
