@@ -7,6 +7,7 @@ namespace Wiggy
   {
     private map_manager map;
     private UnitSpawnSystem spawner;
+    private ActionSystem action_system;
 
     public override void SetSignature(Wiggy.registry ecs)
     {
@@ -16,10 +17,11 @@ namespace Wiggy
       ecs.SetSystemSignature<AiSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, UnitSpawnSystem spawner)
+    public void Start(Wiggy.registry ecs, UnitSpawnSystem spawner, ActionSystem action_system)
     {
       this.map = Object.FindObjectOfType<map_manager>();
       this.spawner = spawner;
+      this.action_system = action_system;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -104,17 +106,22 @@ namespace Wiggy
 
         if (action.IsSet)
         {
-          var chosen = action.Data;
-          Debug.Log(string.Format("EID: {0} decided: {1}", e.id, chosen.GetType().ToString()));
+          var a = action.Data;
+          Debug.Log(string.Format("EID: {0} decided: {1}", e.id, a.GetType().ToString()));
 
           // Implement data?
-          if (chosen.GetType() == typeof(Move))
+          if (a.GetType() == typeof(Move))
           {
             var to_idx = Grid.GetIndex(move.positions[^1].Item1, map.width);
-            ActionSystem.RequestAction(ecs, chosen, e, to_idx);
+            action_system.RequestMoveAction(ecs, e, to_idx);
           }
+          else if (a.GetType() == typeof(Attack))
+            action_system.RequestAttackAction(ecs, e);
+          else if (a.GetType() == typeof(Grenade))
+            // currently unknown how ai handles grenade spot choosing
+            action_system.RequestGrenadeAction(ecs, e, -1);
           else
-            ActionSystem.RequestAction(ecs, chosen, e);
+            action_system.RequestActionIfImmediate(ecs, a, e);
         }
         else
           Debug.Log("Ai brain cannot take any actions");

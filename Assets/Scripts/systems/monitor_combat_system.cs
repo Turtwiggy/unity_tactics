@@ -21,8 +21,10 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      foreach (var e in entities.ToArray()) // readonly because this is modified
+      var array = entities.ToArray();
+      for (int i = 0; i < array.Length; i++) // readonly because this is modified
       {
+        var e = array[i];
         var evt = ecs.GetComponent<AttackEvent>(e);
 
         var attacker = evt.from;
@@ -36,7 +38,8 @@ namespace Wiggy
         defender_health.cur = Mathf.Max(defender_health.cur, 0);
         Debug.Log($"defender took damage: {damage}");
 
-        ecs.Destroy(e); // processed event
+        ecs.RemoveComponent<AttackEvent>(e);
+        ecs.Destroy(e); // destroy event (not unit)
       }
     }
   }

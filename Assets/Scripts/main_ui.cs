@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,17 +17,15 @@ namespace Wiggy
 
     [Header("Selected Unit Info")]
     public TextMeshProUGUI selected_text;
-    public TextMeshProUGUI hovered_friendly_text;
+    public TextMeshProUGUI hovered_text;
     public TextMeshProUGUI hovered_enemy_text;
+    public TextMeshProUGUI action_text;
 
     [Header("Selected Unit Actions")]
     public GameObject action_holder;
     public GameObject action_prefab;
-    private Button button_move;
-    private Button button_attack;
-    private Button button_overwatch;
-    private Button button_reload;
-    private Button button_heal;
+
+    private List<(Button, Action)> action_buttons = new();
 
     [Header("Next Turn")]
     public Button next_turn_button;
@@ -47,7 +46,7 @@ namespace Wiggy
       {
         foreach (Transform t in action_holder.transform)
           Destroy(t.gameObject);
-        Button CreateActionButton<T>(string name) where T : Action, new()
+        void CreateActionButton<T>(string name) where T : Action, new()
         {
           var go = Instantiate(action_prefab, Vector3.zero, Quaternion.identity, action_holder.transform);
           go.transform.name = name;
@@ -58,13 +57,15 @@ namespace Wiggy
           {
             main.action_system.RequestActionFromUI<T>(main.ecs);
           });
-          return button;
+
+          action_buttons.Add((button, new T()));
         }
-        button_move = CreateActionButton<Move>("Move");
-        button_heal = CreateActionButton<Heal>("Heal");
-        button_attack = CreateActionButton<Attack>("Attack");
-        button_reload = CreateActionButton<Reload>("Reload");
-        button_overwatch = CreateActionButton<Overwatch>("Overwatch");
+        CreateActionButton<Move>("Move");
+        CreateActionButton<Heal>("Heal");
+        CreateActionButton<Attack>("Attack");
+        CreateActionButton<Reload>("Reload");
+        CreateActionButton<Overwatch>("Overwatch");
+        CreateActionButton<Grenade>("Grenade");
 
         //
         // Note: these refresh events below seem wrong and/or to manual
@@ -108,6 +109,8 @@ namespace Wiggy
       //
       if (!main.select_system.HasAnySelected())
         selected_text.SetText("Nothing selected");
+      else
+        RefreshActionUI(main.select_system.GetSelected());
 
       //
       // Hover UI
@@ -121,13 +124,19 @@ namespace Wiggy
         if (team.team == Team.ENEMY)
           hovered_enemy_text.SetText(unity.instance.name);
         else
-          hovered_friendly_text.SetText(unity.instance.name);
+          hovered_text.SetText(unity.instance.name);
       }
       else
       {
-        hovered_enemy_text.SetText("Nothing hovered");
-        hovered_friendly_text.SetText("Nothing hovered");
+        hovered_text.SetText("Nothing hovered");
+        hovered_enemy_text.SetText("");
       }
+
+      // Debug which action is selected from UI
+      if (main.action_system.action_selected_from_ui)
+        action_text.SetText(main.action_system.action_selected.GetType().ToString());
+      else
+        action_text.SetText("No Action");
     }
 
     void RefreshActionUI(Entity selected)
@@ -139,22 +148,21 @@ namespace Wiggy
       // Refresh Actions UI
       var actions = main.ecs.GetComponent<ActionsComponent>(selected);
 
-      void DisableButtonIfActionIsDone<T>(Button b, ActionsComponent actions)
+      static void DisableButtonIfActionIsDone(Button b, ActionsComponent actions, Action a)
       {
         bool action_is_done = false;
-
         for (int i = 0; i < actions.done.Count; i++)
-          if (actions.done[i].GetType() == typeof(T))
+          if (actions.done[i].GetType() == a.GetType())
             action_is_done = true;
-
         // Can click button if action is still available
         b.interactable = !action_is_done;
       }
-      DisableButtonIfActionIsDone<Move>(button_move, actions);
-      DisableButtonIfActionIsDone<Attack>(button_attack, actions);
-      DisableButtonIfActionIsDone<Overwatch>(button_overwatch, actions);
-      DisableButtonIfActionIsDone<Reload>(button_reload, actions);
-      DisableButtonIfActionIsDone<Heal>(button_heal, actions);
+
+      for (int i = 0; i < action_buttons.Count; i++)
+      {
+        var (button, action) = action_buttons[i];
+        DisableButtonIfActionIsDone(button, actions, action);
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ namespace Wiggy
     private Plane ground_plane;
     private Camera view_camera;
 
+    private float minimum_y = 5;
     private float camera_move_speed = 20.0f;
     private Vector3 fixed_lookat_point;
 
@@ -122,6 +123,15 @@ namespace Wiggy
 
       if (mouse_y < -0.05f)
         camera_follow.transform.position -= Vector3.up;
+
+      // Keep camera above a certain y level
+      var y = camera_follow.transform.position.y;
+      var pos = camera_follow.transform.position;
+      if (y < minimum_y)
+      {
+        pos.y = minimum_y;
+        camera_follow.transform.position = pos;
+      }
     }
   }
 } // namespace Wiggy

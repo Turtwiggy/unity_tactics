@@ -24,6 +24,7 @@ namespace Wiggy
     public CombatSystem combat_system;
     public EndTurnSystem end_turn_system;
     public ExtractionSystem extraction_system;
+    public GrenadeSystem grenade_system;
     public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
     public MonitorCombatEventsSystem monitor_combat_events_system;
@@ -60,6 +61,7 @@ namespace Wiggy
       ecs.RegisterComponent<DefaultBrainComponent>();
       // Requests
       ecs.RegisterComponent<WantsToAttack>();
+      ecs.RegisterComponent<WantsToGrenade>();
       ecs.RegisterComponent<WantsToHeal>();
       ecs.RegisterComponent<WantsToMove>();
       ecs.RegisterComponent<WantsToOverwatch>();
@@ -72,6 +74,7 @@ namespace Wiggy
       combat_system = ecs.RegisterSystem<CombatSystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
+      grenade_system = ecs.RegisterSystem<GrenadeSystem>();
       heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
       monitor_combat_events_system = ecs.RegisterSystem<MonitorCombatEventsSystem>();
@@ -89,6 +92,7 @@ namespace Wiggy
       combat_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
+      grenade_system.SetSignature(ecs);
       heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
       monitor_combat_events_system.SetSignature(ecs);
@@ -126,10 +130,11 @@ namespace Wiggy
       };
 
       action_system.Start(ecs, this);
-      ai_system.Start(ecs, unit_spawn_system);
+      ai_system.Start(ecs, unit_spawn_system, action_system);
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
+      grenade_system.Start(ecs);
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
       move_system.Start(ecs, this);
@@ -166,17 +171,20 @@ namespace Wiggy
           // The user wouldnt be able to click anything on the map to make them reload.
           //
           var from = select_system.GetSelected();
-          var to = Grid.GetIndex(camera.grid_index, map.width);
-          action_system.RequestActionFromMap(ecs, from, to);
+          action_system.RequestMapInteraction(ecs, from);
         }
       }
       if (input.b_input)
+      {
         select_system.ClearSelect();
+        action_system.ClearInteraction();
+      }
 
       // Systems that update every frame
       action_system.Update(ecs);
       combat_system.Update(ecs);
       extraction_system.Update(ecs, map.ext_spots);
+      grenade_system.Update(ecs);
       heal_system.Update(ecs);
       instantiate_system.Update(ecs);
       move_system.Update(ecs);

@@ -28,14 +28,18 @@ namespace Wiggy
     {
       // Setup
       Wiggy.registry ecs = new();
+      ecs.RegisterComponent<GridPositionComponent>();
 
       // Act
       var entity0 = ecs.Create();
+      ecs.AddComponent<GridPositionComponent>(entity0, new());
       {
         var entity1 = ecs.Create();
+        ecs.AddComponent<GridPositionComponent>(entity1, new());
         ecs.Destroy(entity1);
       }
       var entity2 = ecs.Create();
+      ecs.AddComponent<GridPositionComponent>(entity2, new());
 
       // Assert
       Assert.AreEqual(entity0.id, 0);

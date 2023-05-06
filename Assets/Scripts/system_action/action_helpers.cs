@@ -21,7 +21,7 @@ namespace Wiggy
     }
 
     public static void Complete<R>(Wiggy.registry ecs, Entity e, Action a)
-      where R : Request
+      where R : Request, new()
     {
       if (Valid<R>(ecs, e, a))
       {

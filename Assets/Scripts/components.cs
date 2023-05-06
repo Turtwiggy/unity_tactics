@@ -95,25 +95,22 @@ namespace Wiggy
 
   public interface Request { };
 
-  public struct WantsToAttack : Request
-  {
-  }
+  public struct WantsToAttack : Request { }
 
-  public struct WantsToHeal : Request
-  {
-  }
+  public struct WantsToHeal : Request { }
 
   public struct WantsToMove : Request
   {
     public int to;
   }
 
-  public struct WantsToOverwatch : Request
-  {
-  }
+  public struct WantsToOverwatch : Request { }
 
-  public struct WantsToReload : Request
+  public struct WantsToReload : Request { }
+
+  public struct WantsToGrenade : Request
   {
+    public int index;
   }
 
   // Status effects e.g. poisoned, stunned, reduced armour
@@ -128,6 +125,7 @@ namespace Wiggy
 
   // Events
 
+  // attack event does the attack
   public struct AttackEvent
   {
     public Entity from;
