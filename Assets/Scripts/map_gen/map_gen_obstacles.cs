@@ -65,6 +65,9 @@ namespace Wiggy
     {
       for (int idx = 0; idx < map.Length; idx++)
       {
+        if (idx == 526)
+          Debug.Log("wait!");
+
         var xy = Grid.IndexToPos(idx, width, height);
         var neighbours_info = a_star.square_neighbour_indicies_with_diagonals(xy.x, xy.y, width, height);
 

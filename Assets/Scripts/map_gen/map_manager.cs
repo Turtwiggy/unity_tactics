@@ -128,6 +128,38 @@ namespace Wiggy
       if (remove_isolated)
         map_gen_obstacles.ObstaclePostProcessing(obstacle_map, remove_isolated_count, width, height);
 
+      // Make borders of map obstacles
+      for (int y = 0; y < height; y++)
+      {
+        for (int x = 0; x < width; x++)
+        {
+          int idx = Grid.GetIndex(x, y, width);
+
+          if (y == 0) // bottom
+          {
+            obstacle_map[idx].entities.Clear();
+            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+          }
+          if (x == width - 1) // right
+          {
+            obstacle_map[idx].entities.Clear();
+            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+          }
+
+          if (x == 0) // left
+          {
+            obstacle_map[idx].entities.Clear();
+            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+          }
+
+          if (y == height - 1) // top
+          {
+            obstacle_map[idx].entities.Clear();
+            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+          }
+        }
+      }
+
       // Generate Start/End Points
       int players = 4;
       var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
@@ -155,7 +187,8 @@ namespace Wiggy
             var wpos = Grid.GridSpaceToWorldSpace(pos, size);
             wpos.y += 0.5f; // hmm
 
-            var go = Instantiate(prefab, wpos, prefab.transform.rotation, parent);
+            var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
+            go.transform.rotation = Quaternion.Euler(0, 180, 0);
             go.transform.name = "ObjectIndex: " + i;
 
             // This should probably be removed for the ecs system

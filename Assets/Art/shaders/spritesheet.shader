@@ -16,6 +16,7 @@ Shader "Custom/spritesheet"
   {
     Tags { "RenderType"="Opaque" }
     LOD 200
+    Cull Back
 
     CGPROGRAM
     // Physically based Standard lighting model, and enable shadows on all light types
