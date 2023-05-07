@@ -118,11 +118,6 @@ namespace Wiggy
       generated_obstacle_holder = new GameObject("Obstacle Holder").transform;
       generated_obstacle_holder.parent = generated_map_holder;
 
-      // Generate a floor
-      // GameObject go = new("Floor");
-      // go.transform.parent = generated_map_holder;
-      // quad.Create(go, width * size, height * size);
-
       // Generate Obstacles
       obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
       if (remove_isolated)
@@ -188,7 +183,7 @@ namespace Wiggy
             wpos.y += 0.5f; // hmm
 
             var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
-            go.transform.rotation = Quaternion.Euler(0, 180, 0);
+            go.transform.rotation = Quaternion.Euler(0, 180, 0); // 180 because the default unity cube is upsidedown
             go.transform.name = "ObjectIndex: " + i;
 
             // This should probably be removed for the ecs system
@@ -201,7 +196,9 @@ namespace Wiggy
         for (int i = 0; i < spots.Count; i++)
         {
           var wpos = Grid.GridSpaceToWorldSpace(spots[i], size);
-          Instantiate(prefab, wpos, Quaternion.identity, generated_map_holder);
+          var obj = Instantiate(prefab);
+          obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
+          obj.transform.parent = generated_map_holder;
         }
       }
       void InstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
@@ -211,7 +208,9 @@ namespace Wiggy
           var idx = idxs[j];
           var pos = Grid.IndexToPos(idx, width, height);
           var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-          Instantiate(prefab, wpos, Quaternion.identity, generated_map_holder);
+          var obj = Instantiate(prefab);
+          obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
+          obj.transform.parent = generated_map_holder;
         }
       }
 

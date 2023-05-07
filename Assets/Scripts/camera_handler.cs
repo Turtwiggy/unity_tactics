@@ -17,7 +17,8 @@ namespace Wiggy
     public Vector2Int grid_index { get; private set; }
     public GameObject camera_follow;
     public GameObject camera_lookat;
-    public GameObject cursor;
+    public GameObject cursor_prefab;
+    private GameObject cursor_instance;
 
     bool camera_z_lock;
     public float camera_follow_z_lock = 8f;
@@ -27,6 +28,8 @@ namespace Wiggy
       map = FindObjectOfType<map_manager>();
       ground_plane = new Plane(Vector3.up, Vector3.zero);
       view_camera = Camera.main;
+      cursor_instance = Instantiate(cursor_prefab);
+      cursor_instance.name = "Cursor Instance";
     }
 
 #if DEBUG
@@ -51,7 +54,7 @@ namespace Wiggy
         var point = ray.GetPoint(ray_distance);
 
         // TODO: should probably use smoothdamp or something
-        cursor.transform.position = new Vector3(point.x, cursor.transform.position.y, point.z);
+        cursor_instance.transform.position = new Vector3(point.x, cursor_instance.transform.position.y, point.z);
       }
     }
 
@@ -66,7 +69,7 @@ namespace Wiggy
         var world_space = Grid.GridSpaceToWorldSpace(grid_index, map.size);
 
         // TODO: should probably use smoothdamp or something
-        cursor.transform.position = world_space;
+        cursor_instance.transform.position = world_space;
 
         this.grid_index = grid_index;
       }

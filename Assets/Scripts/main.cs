@@ -16,6 +16,7 @@ namespace Wiggy
     [HideInInspector] public map_manager map;
     [HideInInspector] public map_visual_manager mvm;
     [HideInInspector] public main_ui ui;
+    [HideInInspector] public scene_manager scene_manager;
 
     // ecs-based systems
     public Wiggy.registry ecs;
@@ -27,6 +28,7 @@ namespace Wiggy
     public GrenadeSystem grenade_system;
     public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
+    public IsDeadSystem is_dead_system;
     public MonitorCombatEventsSystem monitor_combat_events_system;
     public MonitorOverwatchSystem monitor_overwatch_system;
     public MoveSystem move_system;
@@ -54,6 +56,7 @@ namespace Wiggy
       ecs.RegisterComponent<WeaponComponent>();
       ecs.RegisterComponent<TeamComponent>();
       ecs.RegisterComponent<OverwatchStatus>();
+      ecs.RegisterComponent<IsDeadComponent>();
       // entity tags
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
@@ -77,6 +80,7 @@ namespace Wiggy
       grenade_system = ecs.RegisterSystem<GrenadeSystem>();
       heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
+      is_dead_system = ecs.RegisterSystem<IsDeadSystem>();
       monitor_combat_events_system = ecs.RegisterSystem<MonitorCombatEventsSystem>();
       monitor_overwatch_system = ecs.RegisterSystem<MonitorOverwatchSystem>();
       move_system = ecs.RegisterSystem<MoveSystem>();
@@ -95,6 +99,7 @@ namespace Wiggy
       grenade_system.SetSignature(ecs);
       heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
+      is_dead_system.SetSignature(ecs);
       monitor_combat_events_system.SetSignature(ecs);
       monitor_overwatch_system.SetSignature(ecs);
       move_system.SetSignature(ecs);
@@ -111,11 +116,12 @@ namespace Wiggy
       RegisterSystems(ecs);
       RegisterSystemSignatures(ecs);
 
-      map = FindObjectOfType<map_manager>();
-      input = FindObjectOfType<input_handler>();
       camera = FindObjectOfType<camera_handler>();
+      map = FindObjectOfType<map_manager>();
       ui = FindObjectOfType<main_ui>();
       mvm = FindObjectOfType<map_visual_manager>();
+      input = new GameObject("input_handler").AddComponent<input_handler>();
+      scene_manager = new GameObject("scene_manager").AddComponent<scene_manager>();
 
       // map.seed = 0;
       // map.zone_seed = 0;
@@ -137,6 +143,7 @@ namespace Wiggy
       grenade_system.Start(ecs);
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
+      is_dead_system.Start(ecs);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs);
       monitor_overwatch_system.Start(ecs, move_system);
@@ -187,6 +194,7 @@ namespace Wiggy
       grenade_system.Update(ecs);
       heal_system.Update(ecs);
       instantiate_system.Update(ecs);
+      is_dead_system.Update(ecs);
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
       monitor_combat_events_system.Update(ecs);

@@ -350,6 +350,7 @@ namespace Wiggy
       }
       catch (System.Exception)
       {
+        Debug.Log($"entity did not have component of type: {def.GetType()}");
         // component did not exist for that entity
       }
       return ref def;

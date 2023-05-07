@@ -30,17 +30,13 @@ namespace Wiggy
     [Header("Next Turn")]
     public Button next_turn_button;
 
-    private scene_manager scene;
-
     public void DoStart(main main)
     {
-      scene = new GameObject("scene_manager").AddComponent<scene_manager>();
-
       // all the game/data
       this.main = main;
 
       // ui events
-      extraction_button.onClick.AddListener(() => scene.LoadMenu());
+      extraction_button.onClick.AddListener(() => main.scene_manager.LoadMenu());
 
       // Actions UI
       {
@@ -66,15 +62,6 @@ namespace Wiggy
         CreateActionButton<Reload>("Reload");
         CreateActionButton<Overwatch>("Overwatch");
         CreateActionButton<Grenade>("Grenade");
-
-        //
-        // Note: these refresh events below seem wrong and/or to manual
-        //
-
-        main.select_system.new_entity_selected.AddListener((selected) =>
-        {
-          RefreshActionUI(selected);
-        });
       }
 
       // Next turn UI
@@ -86,14 +73,8 @@ namespace Wiggy
         // Update AI system
         main.ai_system.Update(main.ecs);
 
-        Debug.Log("AI Turn Done?");
-
-        // Update UI
-        if (main.select_system.HasAnySelected())
-        {
-          var selected = main.select_system.GetSelected();
-          RefreshActionUI(selected);
-        }
+        // End AI turn
+        main.end_turn_system.EndAiTurn(main.ecs);
       });
     }
 

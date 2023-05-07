@@ -7,6 +7,7 @@ namespace Wiggy
     {
       Signature s = new();
       s.Set(ecs.GetComponentType<ActionsComponent>());
+      s.Set(ecs.GetComponentType<TeamComponent>());
       ecs.SetSystemSignature<EndTurnSystem>(s);
     }
 
@@ -22,8 +23,24 @@ namespace Wiggy
       foreach (var e in entities)
       {
         var actions = ecs.GetComponent<ActionsComponent>(e);
-        actions.done.Clear();
+        var team = ecs.GetComponent<TeamComponent>(e);
+
+        if (team.team == Team.PLAYER)
+          actions.done.Clear();
       }
     }
+
+    public void EndAiTurn(Wiggy.registry ecs)
+    {
+      foreach (var e in entities)
+      {
+        var actions = ecs.GetComponent<ActionsComponent>(e);
+        var team = ecs.GetComponent<TeamComponent>(e);
+
+        if (team.team == Team.ENEMY)
+          actions.done.Clear();
+      }
+    }
+
   }
 }

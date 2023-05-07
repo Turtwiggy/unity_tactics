@@ -94,6 +94,11 @@ namespace Wiggy
         {
           var spot = spots[i];
           int quality = CombatHelpers.SpotQuality(ecs, map, e, spot, player, path);
+
+          if (spot.x == player_pos.x && spot.y == player_pos.y)
+            continue; // do not move to players position
+                      // NOTE: SHOULD CONSIDER ALL ENTITIES
+
           move.positions.Add((spot, quality));
         }
         move.positions.Sort((a, b) => a.Item2.CompareTo(b.Item2));
@@ -108,24 +113,26 @@ namespace Wiggy
         {
           var a = action.Data;
           Debug.Log(string.Format("EID: {0} decided: {1}", e.id, a.GetType().ToString()));
-
-          // Implement data?
-          if (a.GetType() == typeof(Move))
-          {
-            var to_idx = Grid.GetIndex(move.positions[^1].Item1, map.width);
-            action_system.RequestMoveAction(ecs, e, to_idx);
-          }
-          else if (a.GetType() == typeof(Attack))
-            action_system.RequestAttackAction(ecs, e);
-          else if (a.GetType() == typeof(Grenade))
-            // currently unknown how ai handles grenade spot choosing
-            action_system.RequestGrenadeAction(ecs, e, -1);
-          else
-            action_system.RequestActionIfImmediate(ecs, a, e);
+          RequestAction(ecs, e, move, a);
         }
         else
           Debug.Log("Ai brain cannot take any actions");
       }
+    }
+
+    private void RequestAction(registry ecs, Entity e, AIMoveConsiderationComponent move, Action a)
+    {
+      if (a.GetType() == typeof(Move))
+      {
+        var to_idx = Grid.GetIndex(move.positions[^1].Item1, map.width);
+        action_system.RequestMoveAction(ecs, e, to_idx);
+      }
+      else if (a.GetType() == typeof(Attack))
+        action_system.RequestAttackAction(ecs, e);
+      else if (a.GetType() == typeof(Grenade))
+        action_system.RequestGrenadeAction(ecs, e, -1); // -1 because currently unknown how ai handles grenade spot choosing
+      else
+        action_system.RequestActionIfImmediate(ecs, a, e);
     }
   }
 }

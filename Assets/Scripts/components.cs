@@ -11,6 +11,7 @@ namespace Wiggy
 
   public struct CursorComponent
   {
+    //
   };
 
   public enum Team
@@ -43,6 +44,10 @@ namespace Wiggy
   public struct InstantiatedComponent
   {
     public GameObject instance;
+  };
+
+  public struct IsDeadComponent
+  {
   };
 
   public struct AIMoveConsiderationComponent

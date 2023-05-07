@@ -42,6 +42,7 @@ namespace Wiggy
       WeaponComponent weapon = new();
       weapon.min_range = 0;
       weapon.max_range = 3;
+      weapon.damage = 100;
       ecs.AddComponent(e, weapon);
 
       TeamComponent team = new();
@@ -76,7 +77,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 100;
+      health.max = 10;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -92,6 +93,7 @@ namespace Wiggy
       WeaponComponent weapon = new();
       weapon.min_range = 0;
       weapon.max_range = 3;
+      weapon.damage = 10;
       ecs.AddComponent(e, weapon);
 
       TeamComponent team = new();

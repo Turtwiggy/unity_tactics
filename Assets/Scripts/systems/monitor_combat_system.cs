@@ -38,6 +38,9 @@ namespace Wiggy
         defender_health.cur = Mathf.Max(defender_health.cur, 0);
         Debug.Log($"defender took damage: {damage}");
 
+        if (defender_health.cur <= 0)
+          ecs.AddComponent(defender, new IsDeadComponent());
+
         ecs.RemoveComponent<AttackEvent>(e);
         ecs.Destroy(e); // destroy event (not unit)
       }

@@ -129,9 +129,12 @@ namespace Wiggy
       ref WeaponComponent weapon = ref ecs.TryGetComponent(attacker, ref backup);
       bool has_component = !weapon.Equals(backup);
       if (has_component)
+      {
+        Debug.Log("attacker doesnt have weapon equipped");
         return 0;
+      }
 
-      int damage = 0;
+      int damage = weapon.damage;
 
       // Check range
       var atk_pos = ecs.GetComponent<GridPositionComponent>(attacker).position;
@@ -142,7 +145,7 @@ namespace Wiggy
         damage = 0;
 
       // Check flanked
-      var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+      var flanked = SpotIsFlanked(map, atk_pos, def_pos);
       if (flanked)
         damage *= 2;
 

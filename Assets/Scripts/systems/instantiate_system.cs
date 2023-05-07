@@ -28,7 +28,8 @@ namespace Wiggy
         var r = ecs.GetComponent<ToBeInstantiatedComponent>(e);
 
         var wpos = Grid.GridSpaceToWorldSpace(p.position, map.size);
-        var obj = Object.Instantiate(r.prefab, wpos, Quaternion.identity);
+        var obj = Object.Instantiate(r.prefab);
+        obj.transform.SetPositionAndRotation(wpos, r.prefab.transform.rotation);
         obj.name = r.name;
 
         // Done with request
