@@ -25,6 +25,9 @@ namespace Wiggy
     public GameObject action_holder;
     public GameObject action_prefab;
 
+    [Header("Move Actions UI")]
+    public TextMeshProUGUI move_actions_left_text;
+
     private List<(Button, Action)> action_buttons = new();
 
     [Header("Next Turn")]
@@ -89,7 +92,10 @@ namespace Wiggy
       // Selected UI
       //
       if (!main.select_system.HasAnySelected())
+      {
         selected_text.SetText("Nothing selected");
+        move_actions_left_text.gameObject.SetActive(false);
+      }
       else
         RefreshActionUI(main.select_system.GetSelected());
 
@@ -144,6 +150,11 @@ namespace Wiggy
         var (button, action) = action_buttons[i];
         DisableButtonIfActionIsDone(button, actions, action);
       }
+
+      // Refresh Actions To Take UI
+      move_actions_left_text.gameObject.SetActive(true);
+      var actions_left = actions.allowed_actions_per_turn - actions.done.Count;
+      move_actions_left_text.SetText($"Actions Left: {actions_left}");
     }
   }
 }
