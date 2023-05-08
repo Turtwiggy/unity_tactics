@@ -31,7 +31,7 @@ namespace Wiggy
         WeaponComponent backup = default;
         ref WeaponComponent weapon = ref ecs.TryGetComponent(e, ref backup);
         bool has_weapon = !weapon.Equals(backup);
-        if (has_weapon)
+        if (!has_weapon)
         {
           Debug.Log("No weapon equipped for overwatch... processing overwatch action but it wont do anything");
           ecs.RemoveComponent<OverwatchStatus>(e); // used it
@@ -42,7 +42,9 @@ namespace Wiggy
         var min = weapon.min_range;
         var max = weapon.max_range;
         var my_team = ecs.GetComponent<TeamComponent>(e);
+
         bool activated_overwatch = false;
+        Entity entity_that_activated = default;
 
         // Check if something moved through a path thats in my range...
         for (int i = 0; i < move_events.Count; i++)
@@ -60,6 +62,7 @@ namespace Wiggy
             var in_weapon_range = dst >= min && dst <= max;
             if (in_weapon_range)
             {
+              entity_that_activated = other;
               activated_overwatch = true;
               break;
             }
@@ -68,7 +71,15 @@ namespace Wiggy
 
         if (activated_overwatch)
         {
-          Debug.Log("TODO: You activated an overwatch attack -- implement damage & animations");
+          Debug.Log("sending damage event for overwatch");
+
+          // Send a damage event
+          var evt = new AttackEvent();
+          evt.from = e;
+          evt.to = entity_that_activated;
+          var ent = ecs.Create();
+          ecs.AddComponent(ent, evt);
+
           ecs.RemoveComponent<OverwatchStatus>(e); // used it
         }
       }

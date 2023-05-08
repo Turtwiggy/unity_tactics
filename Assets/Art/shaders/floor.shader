@@ -64,8 +64,8 @@ Shader "Custom/floor"
       float2 noise_uv = IN.uv_NoiseTex + float2(_Time.y/_XSpeed, _Time.y/_YSpeed);
       fixed noise = tex2D(_NoiseTex, noise_uv);
 
-      fixed x_bar = step(uv.x, x_post) - step(uv.x, x_post - noise/k);
-      fixed y_bar = step(uv.y, y_post) - step(uv.y, y_post - noise/k);
+      fixed x_bar = step(uv.x, x_post) - step(uv.x, x_post - 0.001f - noise/k);
+      fixed y_bar = step(uv.y, y_post) - step(uv.y, y_post - 0.001f - noise/k);
       fixed3 x_col = (1 - x_bar) + x_bar * _LineColour;
       fixed3 y_col = (1 - y_bar) + y_bar * _LineColour;
 

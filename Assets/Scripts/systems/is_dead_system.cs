@@ -18,7 +18,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      foreach (var e in entities)
+      foreach (var e in entities.ToArray())
       {
         Debug.Log("something died!");
 

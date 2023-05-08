@@ -6,6 +6,7 @@ namespace Wiggy
 {
   public static class Animate
   {
+    // Warning, GO could be deleted while animating
     public static IEnumerator AlongPath(GameObject go, Vector2Int[] path, int size)
     {
       if (path.Length <= 1)
@@ -41,7 +42,11 @@ namespace Wiggy
 
         var a = Grid.GridSpaceToWorldSpace(this_cell, size);
         var b = Grid.GridSpaceToWorldSpace(next_cell, size);
-        go.transform.localPosition = Vector3.Lerp(a, b, scaled_percentage_amount);
+
+        if (go == null)
+          yield break;
+        else
+          go.transform.localPosition = Vector3.Lerp(a, b, scaled_percentage_amount);
 
         // Rotation?
         //  var dir = (next_cell.transform.position - this_cell.transform.position).normalized;
