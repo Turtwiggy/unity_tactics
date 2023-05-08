@@ -42,7 +42,7 @@ namespace Wiggy
     public abstract void EntityDestroyed(Entity e);
   }
 
-  public class ComponentArray<T> : IComponentArray where T : new()
+  public class ComponentArray<T> : IComponentArray
   {
     // Packed array of components
     public T[] component_array { get; private set; }
@@ -73,20 +73,16 @@ namespace Wiggy
 
     public void Remove(Entity e)
     {
-      var exists = entity_to_index_map.TryGetValue(e, out var component);
-      T temp = new();
+      var exists = entity_to_index_map.TryGetValue(e, out _);
       if (!exists)
       {
         // Debug.Log($"{temp.GetType()} does not exist for destroyed entity");
         return;
       }
-      else
-      {
-        Debug.Log($"{temp.GetType()} did exist for destroyed entity");
-      }
 
       var index_of_removed_entity = entity_to_index_map[e];
       var index_of_last_element = size - 1;
+
       // keep it packed
       component_array[index_of_removed_entity] = component_array[index_of_last_element];
 
@@ -176,7 +172,7 @@ namespace Wiggy
       this.max_entities = max_entities;
     }
 
-    public void RegisterComponent<T>() where T : new()
+    public void RegisterComponent<T>()
     {
       var name = typeof(T).ToString();
       component_types[name] = next_component_type;
@@ -190,17 +186,17 @@ namespace Wiggy
       return component_types[name];
     }
 
-    public void AddComponent<T>(Entity e, T component) where T : new()
+    public void AddComponent<T>(Entity e, T component)
     {
       GetComponentArray<T>().Insert(e, component);
     }
 
-    public void RemoveComponent<T>(Entity e) where T : new()
+    public void RemoveComponent<T>(Entity e)
     {
       GetComponentArray<T>().Remove(e);
     }
 
-    public ref T GetComponent<T>(Entity e) where T : new()
+    public ref T GetComponent<T>(Entity e)
     {
       var name = typeof(T).ToString();
       return ref (component_arrays[name] as ComponentArray<T>).Get(e);
@@ -216,7 +212,7 @@ namespace Wiggy
       }
     }
 
-    public ComponentArray<T> GetComponentArray<T>() where T : new()
+    public ComponentArray<T> GetComponentArray<T>()
     {
       var name = typeof(T).ToString();
       return component_arrays[name] as ComponentArray<T>;
@@ -308,12 +304,12 @@ namespace Wiggy
     // Component Methods
     //
 
-    public void RegisterComponent<T>() where T : new()
+    public void RegisterComponent<T>()
     {
       component_manager.RegisterComponent<T>();
     }
 
-    public void AddComponent<T>(Entity e, T component) where T : new()
+    public void AddComponent<T>(Entity e, T component)
     {
       component_manager.AddComponent<T>(e, component);
 
@@ -325,7 +321,7 @@ namespace Wiggy
       system_manager.EntitySignatureChanged(e, signature);
     }
 
-    public void RemoveComponent<T>(Entity e) where T : new()
+    public void RemoveComponent<T>(Entity e)
     {
       component_manager.RemoveComponent<T>(e);
 
@@ -337,12 +333,12 @@ namespace Wiggy
       system_manager.EntitySignatureChanged(e, signature);
     }
 
-    public ref T GetComponent<T>(Entity e) where T : new()
+    public ref T GetComponent<T>(Entity e)
     {
       return ref component_manager.GetComponent<T>(e);
     }
 
-    public ref T TryGetComponent<T>(Entity e, ref T def) where T : new()
+    public ref T TryGetComponent<T>(Entity e, ref T def)
     {
       try
       {

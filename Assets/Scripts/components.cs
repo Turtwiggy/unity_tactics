@@ -135,6 +135,6 @@ namespace Wiggy
   {
     public Entity from;
     public Entity to;
-  }
+  };
 
 };

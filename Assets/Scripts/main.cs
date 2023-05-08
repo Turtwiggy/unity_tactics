@@ -140,7 +140,7 @@ namespace Wiggy
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      grenade_system.Start(ecs);
+      grenade_system.Start(ecs, unit_spawn_system);
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
       is_dead_system.Start(ecs);

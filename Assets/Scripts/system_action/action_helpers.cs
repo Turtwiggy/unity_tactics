@@ -5,7 +5,7 @@ namespace Wiggy
   public static class ActionHelpers
   {
     public static bool Valid<R>(Wiggy.registry ecs, Entity e, Action a)
-      where R : Request
+      where R : Request, new()
     {
       ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
 
@@ -17,7 +17,13 @@ namespace Wiggy
           return false;
       }
 
-      return actions.done.Count < actions.allowed_actions_per_turn;
+      var valid = actions.done.Count < actions.allowed_actions_per_turn;
+
+      // Remove request if invalid
+      if (!valid)
+        ecs.RemoveComponent<R>(e);
+
+      return valid;
     }
 
     public static void Complete<R>(Wiggy.registry ecs, Entity e, Action a)
@@ -29,10 +35,6 @@ namespace Wiggy
         actions.done.Add(a);
         Debug.Log($"Request valid: {a.GetType()}");
       }
-      else
-        Debug.Log($"Request invalid, removed request: {a.GetType()}");
-
-      ecs.RemoveComponent<R>(e);
     }
   }
 }

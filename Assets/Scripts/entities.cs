@@ -110,6 +110,31 @@ namespace Wiggy
       return e;
     }
 
+    public static Entity create_grenade(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    {
+      var e = ecs.Create();
+
+      GridPositionComponent gpc = new();
+      gpc.position = spot;
+      ecs.AddComponent(e, gpc);
+
+      if (prefab.IsSet)
+      {
+        ToBeInstantiatedComponent tbic = new();
+        tbic.prefab = prefab.Data;
+        tbic.name = name;
+        ecs.AddComponent(e, tbic);
+      }
+
+      WeaponComponent weapon = new();
+      weapon.damage = 5;
+      weapon.min_range = 0;
+      weapon.max_range = 1;
+      ecs.AddComponent(e, weapon);
+
+      return e;
+    }
+
     public static Entity create_cursor(Wiggy.registry ecs, GameObject prefab)
     {
       var e = ecs.Create();

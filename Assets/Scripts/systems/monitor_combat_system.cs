@@ -41,8 +41,7 @@ namespace Wiggy
         if (defender_health.cur <= 0)
           ecs.AddComponent(defender, new IsDeadComponent());
 
-        ecs.RemoveComponent<AttackEvent>(e);
-        ecs.Destroy(e); // destroy event (not unit)
+        ecs.Destroy(e); // destroys event (not unit)
       }
     }
   }
