@@ -5,6 +5,9 @@ namespace Wiggy
 {
   public class IsDeadSystem : ECSSystem
   {
+    private UnitSpawnSystem units;
+    private map_manager map;
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -12,8 +15,10 @@ namespace Wiggy
       ecs.SetSystemSignature<IsDeadSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs)
+    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss)
     {
+      units = uss;
+      map = GameObject.FindObjectOfType<map_manager>();
     }
 
     public void Update(Wiggy.registry ecs)
@@ -30,6 +35,11 @@ namespace Wiggy
         bool has_instance = !instance.Equals(backup);
         if (has_instance)
           Object.Destroy(instance.instance);
+
+        // Remove units record
+        var pos = ecs.GetComponent<GridPositionComponent>(e);
+        var idx = Grid.GetIndex(pos.position.x, pos.position.y, map.width);
+        units.units[idx].Reset();
 
         // Remove ecs record
         ecs.Destroy(e);

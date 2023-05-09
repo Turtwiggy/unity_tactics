@@ -143,7 +143,7 @@ namespace Wiggy
       grenade_system.Start(ecs, unit_spawn_system);
       heal_system.Start(ecs);
       instantiate_system.Start(ecs, map);
-      is_dead_system.Start(ecs);
+      is_dead_system.Start(ecs, unit_spawn_system);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs);
       monitor_overwatch_system.Start(ecs, move_system);
