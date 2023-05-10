@@ -154,5 +154,26 @@ namespace Wiggy
       return e;
     }
 
+    public static Entity create_effect(Wiggy.registry ecs, Vector2Int spot, GameObject prefab, string name)
+    {
+      var e = ecs.Create();
+
+      ToBeInstantiatedComponent effect = new()
+      {
+        name = name,
+        prefab = prefab
+      };
+      ecs.AddComponent(e, effect);
+
+      GridPositionComponent effect_position = new()
+      {
+        position = spot
+      };
+      ecs.AddComponent(e, effect_position);
+
+      return e;
+    }
+
+
   }
 }

@@ -142,7 +142,10 @@ namespace Wiggy
       var dst = Mathf.Abs(Vector2Int.Distance(atk_pos, def_pos));
       var in_weapon_range = dst <= weapon.max_range && dst >= weapon.min_range;
       if (!in_weapon_range)
+      {
+        Debug.Log("attack out of range.. nulling damage");
         damage = 0;
+      }
 
       // Check flanked
       var flanked = SpotIsFlanked(map, atk_pos, def_pos);

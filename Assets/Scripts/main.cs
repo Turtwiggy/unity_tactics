@@ -37,6 +37,13 @@ namespace Wiggy
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
 
+    [SerializeField]
+    private GameObject vfx_grenade;
+    private GameObject vfx_overwatch;
+    private GameObject vfx_heal;
+    private GameObject vfx_death;
+    private GameObject vfx_reload;
+
     public void RegisterComponents(Wiggy.registry ecs)
     {
       ecs.RegisterComponent<InstantiatedComponent>();
@@ -135,20 +142,27 @@ namespace Wiggy
         enemy_prefab = enemy_prefab
       };
 
+      // load resources
+      vfx_grenade = Resources.Load("Prefabs/Grenade") as GameObject;
+      vfx_overwatch = Resources.Load("Prefabs/Overwatch") as GameObject;
+      vfx_heal = Resources.Load("Prefabs/Heal") as GameObject;
+      vfx_death = Resources.Load("Prefabs/Death") as GameObject;
+      vfx_reload = Resources.Load("Prefabs/Reload") as GameObject;
+
       action_system.Start(ecs, this);
       ai_system.Start(ecs, unit_spawn_system, action_system);
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      grenade_system.Start(ecs, unit_spawn_system);
-      heal_system.Start(ecs);
+      grenade_system.Start(ecs, unit_spawn_system, vfx_grenade);
+      heal_system.Start(ecs, vfx_heal);
       instantiate_system.Start(ecs, map);
-      is_dead_system.Start(ecs, unit_spawn_system);
+      is_dead_system.Start(ecs, unit_spawn_system, vfx_death);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs);
       monitor_overwatch_system.Start(ecs, move_system);
-      overwatch_system.Start(ecs);
-      reload_system.Start(ecs);
+      overwatch_system.Start(ecs, vfx_overwatch);
+      reload_system.Start(ecs, vfx_reload);
       select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
       unit_spawn_system.Start(ecs, uss_data);
 

@@ -8,6 +8,7 @@ namespace Wiggy
   {
     private map_manager map;
     private UnitSpawnSystem units;
+    private GameObject vfx_grenade;
 
     public override void SetSignature(Wiggy.registry ecs)
     {
@@ -16,10 +17,11 @@ namespace Wiggy
       ecs.SetSystemSignature<GrenadeSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss)
+    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss, GameObject vfx_grenade)
     {
       map = Object.FindObjectOfType<map_manager>();
       units = uss;
+      this.vfx_grenade = vfx_grenade;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -32,13 +34,15 @@ namespace Wiggy
           continue;
 
         Debug.Log("grenade!");
-
         var grenade_idx = request.index;
         var grenade_pos = Grid.IndexToPos(grenade_idx, map.width, map.height);
         var grenade = Entities.create_grenade(ecs, grenade_pos, "Grenade", new Optional<GameObject>());
 
         // TODO: when is grenade cleaned up??
         Debug.LogWarning("Grenade created; currently never cleaned up");
+
+        // Grenade Effects
+        Entities.create_effect(ecs, grenade_pos, vfx_grenade, "Grenade Effect");
 
         List<Vector2Int> positions_to_take_damage = new();
         {
@@ -61,11 +65,15 @@ namespace Wiggy
             var defender_entity = units.units[damage_idx].Data;
 
             Debug.Log("grenading entity!");
-            AttackEvent evt = new();
-            evt.from = grenade;
-            evt.to = defender_entity;
-            var ent = ecs.Create();
-            ecs.AddComponent(ent, evt);
+            {
+              AttackEvent evt = new()
+              {
+                from = grenade,
+                to = defender_entity
+              };
+              var ent = ecs.Create();
+              ecs.AddComponent(ent, evt);
+            }
           }
         }
 

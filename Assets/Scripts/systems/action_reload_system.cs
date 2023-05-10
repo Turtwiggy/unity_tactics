@@ -5,6 +5,8 @@ namespace Wiggy
 {
   public class ReloadSystem : ECSSystem
   {
+    private GameObject vfx_reload;
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -14,9 +16,9 @@ namespace Wiggy
       ecs.SetSystemSignature<ReloadSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs)
+    public void Start(Wiggy.registry ecs, GameObject vfx_reload)
     {
-
+      this.vfx_reload = vfx_reload;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -29,9 +31,13 @@ namespace Wiggy
           continue;
 
         ref var ammo = ref ecs.GetComponent<AmmoComponent>(e);
+        var pos = ecs.GetComponent<GridPositionComponent>(e);
 
         ammo.cur = ammo.max;
         Debug.Log("entity reloaded");
+
+        // Reload Effect
+        Entities.create_effect(ecs, pos.position, vfx_reload, "Reload Effect");
 
         ActionHelpers.Complete<WantsToReload>(ecs, e, action);
       }

@@ -7,6 +7,7 @@ namespace Wiggy
   {
     private UnitSpawnSystem units;
     private map_manager map;
+    private GameObject vfx_death;
 
     public override void SetSignature(Wiggy.registry ecs)
     {
@@ -15,10 +16,11 @@ namespace Wiggy
       ecs.SetSystemSignature<IsDeadSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss)
+    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss, GameObject vfx_death)
     {
       units = uss;
       map = GameObject.FindObjectOfType<map_manager>();
+      this.vfx_death = vfx_death;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -41,10 +43,12 @@ namespace Wiggy
         var idx = Grid.GetIndex(pos.position.x, pos.position.y, map.width);
         units.units[idx].Reset();
 
+        // Death Effects
+        Entities.create_effect(ecs, pos.position, vfx_death, "Death Effect");
+
         // Remove ecs record
         ecs.Destroy(e);
       }
-
     }
   }
 }
