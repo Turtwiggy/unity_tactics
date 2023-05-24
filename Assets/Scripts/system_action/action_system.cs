@@ -128,6 +128,7 @@ namespace Wiggy
 
     public void RequestMoveAction(Wiggy.registry ecs, Entity e, int to)
     {
+      Debug.Log($"EID: {e.id} wants to move to: {to}");
       ecs.AddComponent<WantsToMove>(e, new() { to = to });
     }
 

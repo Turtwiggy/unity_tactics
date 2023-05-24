@@ -6,18 +6,27 @@ namespace Wiggy
   {
     empty,
 
-    // actor_player,
-    // actor_enemy,
+    actor_player,
+    actor_enemy,
+    actor_barrel,
     // actor_bat,
     // actor_troll,
     // actor_shopkeeper,
 
     tile_type_wall,
     tile_type_floor,
-    // tile_type_exit,
+    tile_type_exit,
+    tile_type_door,
+    tile_type_trap,
 
-    // equipment
-    // sword,
+    // offensive equipment
+    pistol,
+    sniper,
+    shotgun,
+    rifle,
+    sword,
+    grenade,
+
     // shield,
 
     // consumable

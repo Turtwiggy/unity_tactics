@@ -26,7 +26,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      Debug.Log("decising best action for entity...");
+      // Debug.Log("decising best action for entity...");
 
       foreach (var e in entities)
       {
@@ -40,7 +40,7 @@ namespace Wiggy
 
         if (brain.brain_fsm == BRAIN_STATE.IDLE)
         {
-          Debug.Log("brain in idle state... choosing action");
+          // Debug.Log("brain in idle state... choosing action");
         }
 
         //
@@ -64,7 +64,7 @@ namespace Wiggy
         }
 
         if (targets.targets.Count > 0)
-          Debug.Log(string.Format("Entity has {0} targets in range", targets.targets.Count));
+          Debug.Log($"EID: {e.id} has {targets.targets.Count} targets in range");
 
         // Possible move spots.
 
@@ -112,7 +112,7 @@ namespace Wiggy
         if (action.IsSet)
         {
           var a = action.Data;
-          Debug.Log(string.Format("EID: {0} decided: {1}", e.id, a.GetType().ToString()));
+          Debug.Log($"EID: {e.id} decided: {a.GetType()}");
           RequestAction(ecs, e, move, a);
         }
         else

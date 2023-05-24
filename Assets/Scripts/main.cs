@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,6 +10,7 @@ namespace Wiggy
     public GameObject player_prefab;
     public GameObject enemy_prefab;
     public GameObject selected_cursor_prefab;
+    public Texture2D map_texture;
 
     // unity-based systems
     [HideInInspector] public input_handler input;
@@ -31,18 +33,19 @@ namespace Wiggy
     public IsDeadSystem is_dead_system;
     public MonitorCombatEventsSystem monitor_combat_events_system;
     public MonitorOverwatchSystem monitor_overwatch_system;
+    public MonitorParticleEffectSystem monitor_particle_effect_system;
     public MoveSystem move_system;
     public OverwatchSystem overwatch_system;
     public ReloadSystem reload_system;
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
 
-    [SerializeField]
-    private GameObject vfx_grenade;
-    private GameObject vfx_overwatch;
-    private GameObject vfx_heal;
     private GameObject vfx_death;
+    private GameObject vfx_grenade;
+    private GameObject vfx_heal;
+    private GameObject vfx_overwatch;
     private GameObject vfx_reload;
+    private GameObject vfx_take_damage;
 
     public void RegisterComponents(Wiggy.registry ecs)
     {
@@ -67,6 +70,7 @@ namespace Wiggy
       // entity tags
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
+      ecs.RegisterComponent<ParticleEffectComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
       // Requests
@@ -90,6 +94,7 @@ namespace Wiggy
       is_dead_system = ecs.RegisterSystem<IsDeadSystem>();
       monitor_combat_events_system = ecs.RegisterSystem<MonitorCombatEventsSystem>();
       monitor_overwatch_system = ecs.RegisterSystem<MonitorOverwatchSystem>();
+      monitor_particle_effect_system = ecs.RegisterSystem<MonitorParticleEffectSystem>();
       move_system = ecs.RegisterSystem<MoveSystem>();
       overwatch_system = ecs.RegisterSystem<OverwatchSystem>();
       reload_system = ecs.RegisterSystem<ReloadSystem>();
@@ -109,6 +114,7 @@ namespace Wiggy
       is_dead_system.SetSignature(ecs);
       monitor_combat_events_system.SetSignature(ecs);
       monitor_overwatch_system.SetSignature(ecs);
+      monitor_particle_effect_system.SetSignature(ecs);
       move_system.SetSignature(ecs);
       overwatch_system.SetSignature(ecs);
       reload_system.SetSignature(ecs);
@@ -130,9 +136,10 @@ namespace Wiggy
       input = new GameObject("input_handler").AddComponent<input_handler>();
       scene_manager = new GameObject("scene_manager").AddComponent<scene_manager>();
 
-      // map.seed = 0;
-      // map.zone_seed = 0;
-      // map.GenerateMap();
+      var texture_map_entities = LoadMapFromTexture();
+      map.seed = 0;
+      map.zone_seed = 0;
+      map.GenerateMap(texture_map_entities);
 
       // ecs-based systems
 
@@ -143,11 +150,12 @@ namespace Wiggy
       };
 
       // load resources
-      vfx_grenade = Resources.Load("Prefabs/Grenade") as GameObject;
-      vfx_overwatch = Resources.Load("Prefabs/Overwatch") as GameObject;
-      vfx_heal = Resources.Load("Prefabs/Heal") as GameObject;
       vfx_death = Resources.Load("Prefabs/Death") as GameObject;
+      vfx_grenade = Resources.Load("Prefabs/Grenade") as GameObject;
+      vfx_heal = Resources.Load("Prefabs/Heal") as GameObject;
+      vfx_overwatch = Resources.Load("Prefabs/Overwatch") as GameObject;
       vfx_reload = Resources.Load("Prefabs/Reload") as GameObject;
+      vfx_take_damage = Resources.Load("Prefabs/TakeDamage") as GameObject;
 
       action_system.Start(ecs, this);
       ai_system.Start(ecs, unit_spawn_system, action_system);
@@ -159,8 +167,9 @@ namespace Wiggy
       instantiate_system.Start(ecs, map);
       is_dead_system.Start(ecs, unit_spawn_system, vfx_death);
       move_system.Start(ecs, this);
-      monitor_combat_events_system.Start(ecs);
+      monitor_combat_events_system.Start(ecs, vfx_take_damage);
       monitor_overwatch_system.Start(ecs, move_system);
+      monitor_particle_effect_system.Start(ecs);
       overwatch_system.Start(ecs, vfx_overwatch);
       reload_system.Start(ecs, vfx_reload);
       select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
@@ -213,6 +222,7 @@ namespace Wiggy
       overwatch_system.Update(ecs);
       monitor_combat_events_system.Update(ecs);
       monitor_overwatch_system.Update(ecs); // dep: overwatch_system
+      monitor_particle_effect_system.Update(ecs);
       reload_system.Update(ecs);
       select_system.Update(ecs);
 
@@ -226,6 +236,58 @@ namespace Wiggy
       input.DoLateUpdate();
       camera.HandleCameraMovement(delta, input.l_analogue);
       camera.HandleCameraLookAt();
+    }
+
+    List<(int, EntityType)> LoadMapFromTexture()
+    {
+      ColorUtility.TryParseHtmlString("#ffffff", out var player_colour);
+      ColorUtility.TryParseHtmlString("#222034", out var wall_colour);
+      ColorUtility.TryParseHtmlString("#6abe30", out var cover_colour);
+      ColorUtility.TryParseHtmlString("#5fcde4", out var barrel_colour);
+      ColorUtility.TryParseHtmlString("#ac3232", out var enemy_colour);
+      ColorUtility.TryParseHtmlString("#d77bba", out var exit_colour);
+      ColorUtility.TryParseHtmlString("#fbf236", out var door_colour);
+      ColorUtility.TryParseHtmlString("#639bff", out var trap_colour);
+
+      List<(Color, EntityType)> colour_to_entity_type_association = new()
+      {
+        new(player_colour, EntityType.actor_player),
+        new(wall_colour, EntityType.tile_type_wall),
+        new(cover_colour, EntityType.tile_type_wall),
+        new(barrel_colour, EntityType.actor_barrel),
+        new(enemy_colour, EntityType.actor_enemy),
+        new(exit_colour, EntityType.tile_type_exit),
+        new(door_colour, EntityType.tile_type_door),
+        new(trap_colour, EntityType.tile_type_trap)
+      };
+
+      List<(int, EntityType)> entities = new();
+
+      for (int x = 0; x < map.width; x++)
+      {
+        for (int y = 0; y < map.height; y++)
+        {
+          var pixel = map_texture.GetPixel(x, y);
+          if (pixel.a == 0.0f)
+            continue;
+
+          for (int i = 0; i < colour_to_entity_type_association.Count; i++)
+          {
+            var e = colour_to_entity_type_association[i];
+            if (e.Item1 == pixel)
+            {
+              var entity = e.Item2;
+              var pos = new Vector2Int(x, y);
+              var idx = Grid.GetIndex(pos, map.width);
+              entities.Add((idx, entity));
+
+              break;
+            }
+          }
+        }
+      }
+
+      return entities;
     }
   }
 }

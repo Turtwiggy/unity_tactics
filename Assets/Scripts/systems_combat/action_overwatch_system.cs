@@ -27,7 +27,11 @@ namespace Wiggy
         var action = new Overwatch();
 
         if (!ActionHelpers.Valid<WantsToOverwatch>(ecs, e, action))
+        {
+          Debug.Log("WantsToOverwatch invalid action");
+          ecs.RemoveComponent<WantsToOverwatch>(e);
           continue;
+        }
 
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         var pos = ecs.GetComponent<GridPositionComponent>(e);

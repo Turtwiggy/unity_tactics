@@ -55,19 +55,20 @@ namespace Wiggy
       // CreatePlayer(ecs, map.srt_spots[2], "Sherbert", new Optional<GameObject>(data.player_prefab));
       // CreatePlayer(ecs, map.srt_spots[3], "Grunbo", new Optional<GameObject>(data.player_prefab));
 
-      int n = 0;
-
       // TODO: map_gen_items_and_enemies
       var voronoi_map = map.voronoi_map;
       var voronoi_zones = map.voronoi_zones;
 
+      int n = 0;
+
       foreach (IndexList zone_idxs in voronoi_zones)
       {
-        if (n > 0)
+        if (n >= 1)
           break;
+
         foreach (int idx in zone_idxs.idxs)
         {
-          if (n > 0)
+          if (n >= 1)
             break;
 
           // validation checks

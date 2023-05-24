@@ -24,17 +24,20 @@ namespace Wiggy
       foreach (var e in entities.ToArray()) // readonly because this is modified
       {
         var action = new Attack();
+        ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
 
         if (!ActionHelpers.Valid<WantsToAttack>(ecs, e, action))
+        {
+          Debug.Log("WantsToAttack invalid action");
+          ecs.RemoveComponent<WantsToAttack>(e);
           continue;
-
-        ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
+        }
 
         var targets = ecs.GetComponent<TargetsComponent>(e);
         if (targets.targets.Count == 0)
         {
           Debug.Log("No targets to attack!");
-          ActionHelpers.Complete<WantsToAttack>(ecs, e, action);
+          ecs.RemoveComponent<WantsToAttack>(e);
           continue;
         }
 

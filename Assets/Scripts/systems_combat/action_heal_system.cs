@@ -28,7 +28,11 @@ namespace Wiggy
         var action = new Heal();
 
         if (!ActionHelpers.Valid<WantsToHeal>(ecs, e, action))
+        {
+          Debug.Log("WantsToHeal invalid action");
+          ecs.RemoveComponent<WantsToHeal>(e);
           continue;
+        }
 
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         ref var hp = ref ecs.GetComponent<HealthComponent>(e);

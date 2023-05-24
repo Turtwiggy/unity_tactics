@@ -6,6 +6,7 @@ namespace Wiggy
   public class MonitorCombatEventsSystem : ECSSystem
   {
     private map_manager map;
+    private GameObject vfx_take_damage;
 
     public override void SetSignature(Wiggy.registry ecs)
     {
@@ -14,9 +15,10 @@ namespace Wiggy
       ecs.SetSystemSignature<MonitorCombatEventsSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs)
+    public void Start(Wiggy.registry ecs, GameObject vfx_take_damage)
     {
       map = Object.FindObjectOfType<map_manager>();
+      this.vfx_take_damage = vfx_take_damage;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -37,6 +39,13 @@ namespace Wiggy
         defender_health.cur -= damage;
         defender_health.cur = Mathf.Max(defender_health.cur, 0);
         Debug.Log($"defender took damage: {damage}");
+
+        // Damage Effects
+        if (damage > 0 && defender_health.cur > 0)
+        {
+          var pos_clone = ecs.GetComponent<GridPositionComponent>(defender);
+          Entities.create_effect(ecs, pos_clone.position, vfx_take_damage, "Damage Effect");
+        }
 
         if (defender_health.cur <= 0)
           ecs.AddComponent(defender, new IsDeadComponent());

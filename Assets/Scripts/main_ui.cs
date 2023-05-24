@@ -20,6 +20,8 @@ namespace Wiggy
     public TextMeshProUGUI hovered_text;
     public TextMeshProUGUI hovered_enemy_text;
     public TextMeshProUGUI action_text;
+    public TextMeshProUGUI hovered_player_hp_text;
+    public TextMeshProUGUI hovered_player_weapon_text;
 
     [Header("Selected Unit Actions")]
     public GameObject action_holder;
@@ -60,11 +62,11 @@ namespace Wiggy
           action_buttons.Add((button, new T()));
         }
         CreateActionButton<Move>("Move");
-        CreateActionButton<Heal>("Heal");
         CreateActionButton<Attack>("Attack");
-        CreateActionButton<Reload>("Reload");
-        CreateActionButton<Overwatch>("Overwatch");
-        CreateActionButton<Grenade>("Grenade");
+        // CreateActionButton<Heal>("Heal");
+        // CreateActionButton<Reload>("Reload");
+        // CreateActionButton<Overwatch>("Overwatch");
+        // CreateActionButton<Grenade>("Grenade");
       }
 
       // Next turn UI
@@ -111,12 +113,22 @@ namespace Wiggy
         if (team.team == Team.ENEMY)
           hovered_enemy_text.SetText(unity.instance.name);
         else
+        {
           hovered_text.SetText(unity.instance.name);
+
+          var hp = main.ecs.GetComponent<HealthComponent>(entity.Data);
+          hovered_player_hp_text.SetText(hp.cur.ToString());
+
+          var weapon = main.ecs.GetComponent<WeaponComponent>(entity.Data);
+          hovered_player_weapon_text.SetText(weapon.GetType().ToString());
+        }
       }
       else
       {
         hovered_text.SetText("Nothing hovered");
         hovered_enemy_text.SetText("");
+        hovered_player_hp_text.SetText("");
+        hovered_player_weapon_text.SetText("");
       }
 
       // Debug which action is selected from UI

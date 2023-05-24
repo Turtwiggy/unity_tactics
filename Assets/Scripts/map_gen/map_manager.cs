@@ -48,6 +48,7 @@ namespace Wiggy
     public int size = 1;
 
     [Header("Cell Automata Obstacles")]
+    public bool generate_obstacles = false;
     public int iterations = 5;
     public int seed = 0;
     public bool remove_isolated = true;
@@ -104,7 +105,7 @@ namespace Wiggy
       return spots;
     }
 
-    public void GenerateMap()
+    public void GenerateMap(List<(int, EntityType)> loaded_map_entities = null)
     {
       // Generate Map Holder
       string holder_name = "Generated Map";
@@ -118,12 +119,109 @@ namespace Wiggy
       generated_obstacle_holder = new GameObject("Obstacle Holder").transform;
       generated_obstacle_holder.parent = generated_map_holder;
 
-      // Generate Obstacles
-      obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
+      // make entirely floor
+      obstacle_map = map_manager.CreateBlankMap(width * height);
+
+      if (generate_obstacles)
+        obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
+
       if (remove_isolated)
         map_gen_obstacles.ObstaclePostProcessing(obstacle_map, remove_isolated_count, width, height);
 
+      for (int i = 0; i < loaded_map_entities.Count; i++)
+      {
+        var ent = loaded_map_entities[i];
+        var idx = ent.Item1;
+        var et = ent.Item2;
+
+        if (et == EntityType.tile_type_wall)
+        {
+          obstacle_map[idx].entities.Clear();
+          obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+        }
+      }
+
       // Make borders of map obstacles
+      // GenerateWallBorders();
+
+      // Generate Start/End Points
+      int players = 4;
+      var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
+      var ext = map_gen_obstacles.ExitPoint(obstacle_map, width, height);
+      srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
+      ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
+
+      // Map Zones
+      var poisson_points = voronoi.GeneratePoissonPoints(srt, zone_size, zone_seed, width, height, size);
+      var voronoi_graph = voronoi.Generate(poisson_points, width, height, 0);
+      voronoi_map = voronoi.GetVoronoiRepresentation(voronoi_graph, width, height, size);
+      voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
+
+      // 
+      // Unity side of things
+      //
+
+      InstantiateMapEntry(obstacle_map, EntityType.tile_type_wall, wall_prefab, generated_obstacle_holder);
+      // InstantiateMapEntry(voronoi_map, EntityType.tile_type_wall, debug_zone_edge_prefab, map_holder.transform);
+      InstantiateSpots(poisson_points, debug_zone_core_prefab);
+      InstantiateSpots(srt_spots, debug_start_points_prefab);
+      InstantiateSpots(ext_spots, debug_end_points_prefab);
+
+      // Visualize the zones
+      // Random.InitState(1);
+      // for (int i = 0; i < voronoi_zones.Count; i++)
+      // {
+      //   var sr = debug_zone_edge_prefab.GetComponentInChildren<SpriteRenderer>();
+      //   sr.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+      //   InstantiateSpotsFromIdxs(voronoi_map, voronoi_zones[i], debug_zone_edge_prefab);
+      // }
+    }
+
+    public void InstantiateMapEntry(MapEntry[] map, EntityType type, GameObject prefab, Transform parent)
+    {
+      for (int i = 0; i < map.Length; i++)
+      {
+        var entry = map[i];
+        if (entry.entities.Contains(type))
+        {
+          var pos = Grid.IndexToPos(i, width, height);
+          var wpos = Grid.GridSpaceToWorldSpace(pos, size);
+          wpos.y += 0.5f; // hmm
+
+          var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
+          go.transform.rotation = Quaternion.Euler(0, 180, 0); // 180 because the default unity cube is upsidedown
+          go.transform.name = "ObjectIndex: " + i;
+
+          // This should probably be removed for the ecs system
+          map[i].instantiated.Add(go);
+        }
+      }
+    }
+    public void InstantiateSpots(List<Vector2Int> spots, GameObject prefab)
+    {
+      for (int i = 0; i < spots.Count; i++)
+      {
+        var wpos = Grid.GridSpaceToWorldSpace(spots[i], size);
+        var obj = Instantiate(prefab);
+        obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
+        obj.transform.parent = generated_map_holder;
+      }
+    }
+    public void InstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
+    {
+      for (int j = 0; j < idxs.Count; j++)
+      {
+        var idx = idxs[j];
+        var pos = Grid.IndexToPos(idx, width, height);
+        var wpos = Grid.GridSpaceToWorldSpace(pos, size);
+        var obj = Instantiate(prefab);
+        obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
+        obj.transform.parent = generated_map_holder;
+      }
+    }
+
+    private void GenerateWallBorders()
+    {
       for (int y = 0; y < height; y++)
       {
         for (int x = 0; x < width; x++)
@@ -154,80 +252,6 @@ namespace Wiggy
           }
         }
       }
-
-      // Generate Start/End Points
-      int players = 4;
-      var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
-      var ext = map_gen_obstacles.ExitPoint(obstacle_map, width, height);
-      srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
-      ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
-
-      // Map Zones
-      var poisson_points = voronoi.GeneratePoissonPoints(srt, zone_size, zone_seed, width, height, size);
-      var voronoi_graph = voronoi.Generate(poisson_points, width, height, 0);
-      voronoi_map = voronoi.GetVoronoiRepresentation(voronoi_graph, width, height, size);
-      voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
-
-      // 
-      // Unity side of things
-      //
-      void InstantiateMapEntry(MapEntry[] map, EntityType type, GameObject prefab, Transform parent)
-      {
-        for (int i = 0; i < map.Length; i++)
-        {
-          var entry = map[i];
-          if (entry.entities.Contains(type))
-          {
-            var pos = Grid.IndexToPos(i, width, height);
-            var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-            wpos.y += 0.5f; // hmm
-
-            var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
-            go.transform.rotation = Quaternion.Euler(0, 180, 0); // 180 because the default unity cube is upsidedown
-            go.transform.name = "ObjectIndex: " + i;
-
-            // This should probably be removed for the ecs system
-            map[i].instantiated.Add(go);
-          }
-        }
-      }
-      void InstantiateSpots(List<Vector2Int> spots, GameObject prefab)
-      {
-        for (int i = 0; i < spots.Count; i++)
-        {
-          var wpos = Grid.GridSpaceToWorldSpace(spots[i], size);
-          var obj = Instantiate(prefab);
-          obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
-          obj.transform.parent = generated_map_holder;
-        }
-      }
-      void InstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
-      {
-        for (int j = 0; j < idxs.Count; j++)
-        {
-          var idx = idxs[j];
-          var pos = Grid.IndexToPos(idx, width, height);
-          var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-          var obj = Instantiate(prefab);
-          obj.transform.SetPositionAndRotation(wpos, prefab.transform.rotation);
-          obj.transform.parent = generated_map_holder;
-        }
-      }
-
-      InstantiateMapEntry(obstacle_map, EntityType.tile_type_wall, wall_prefab, generated_obstacle_holder);
-      // InstantiateMapEntry(voronoi_map, EntityType.tile_type_wall, debug_zone_edge_prefab, map_holder.transform);
-      InstantiateSpots(poisson_points, debug_zone_core_prefab);
-      InstantiateSpots(srt_spots, debug_start_points_prefab);
-      InstantiateSpots(ext_spots, debug_end_points_prefab);
-
-      // Visualize the zones
-      // Random.InitState(1);
-      // for (int i = 0; i < voronoi_zones.Count; i++)
-      // {
-      //   var sr = debug_zone_edge_prefab.GetComponentInChildren<SpriteRenderer>();
-      //   sr.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-      //   InstantiateSpotsFromIdxs(voronoi_map, voronoi_zones[i], debug_zone_edge_prefab);
-      // }
     }
   }
 } // namespace Wiggy

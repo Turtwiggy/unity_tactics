@@ -39,11 +39,7 @@ namespace Wiggy
       ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
-      WeaponComponent weapon = new();
-      weapon.min_range = 0;
-      weapon.max_range = 3;
-      weapon.damage = 100;
-      ecs.AddComponent(e, weapon);
+      add_weapon_component(ecs, e, EntityType.pistol);
 
       TeamComponent team = new();
       team.team = Team.PLAYER;
@@ -77,7 +73,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 10;
+      health.max = 100;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -90,11 +86,7 @@ namespace Wiggy
       ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
-      WeaponComponent weapon = new();
-      weapon.min_range = 0;
-      weapon.max_range = 3;
-      weapon.damage = 10;
-      ecs.AddComponent(e, weapon);
+      add_weapon_component(ecs, e, EntityType.shotgun);
 
       TeamComponent team = new();
       team.team = Team.ENEMY;
@@ -126,11 +118,7 @@ namespace Wiggy
         ecs.AddComponent(e, tbic);
       }
 
-      WeaponComponent weapon = new();
-      weapon.damage = 5;
-      weapon.min_range = 0;
-      weapon.max_range = 1;
-      ecs.AddComponent(e, weapon);
+      add_weapon_component(ecs, e, EntityType.grenade);
 
       return e;
     }
@@ -171,9 +159,73 @@ namespace Wiggy
       };
       ecs.AddComponent(e, effect_position);
 
+      ParticleEffectComponent pfe = new();
+      ecs.AddComponent(e, pfe);
+
       return e;
     }
 
+    // weapons
 
+    public static void add_weapon_component(Wiggy.registry ecs, Entity e, EntityType weapon)
+    {
+      WeaponComponent comp = new();
+      comp.min_range = 0;
+      comp.max_range = 0;
+      comp.damage = 0;
+
+      if (weapon == EntityType.pistol)
+      {
+        // w.attacks = 1;
+        // w.range = 12;
+        // w.strength = 4;
+        // w.damage = 1;
+        comp.min_range = 0;
+        comp.max_range = 5;
+        comp.damage = 18;
+      }
+      else if (weapon == EntityType.sniper)
+      {
+        comp.min_range = 5;
+        comp.max_range = 20;
+        comp.damage = 15;
+      }
+      else if (weapon == EntityType.shotgun)
+      {
+        comp.min_range = 0;
+        comp.max_range = 10;
+        comp.damage = 12;
+      }
+      else if (weapon == EntityType.grenade)
+      {
+        // str: 3
+        // dmg: 1
+        // attacks: 1d6
+        // range: 6
+        comp.min_range = 0;
+        comp.max_range = 6;
+        comp.damage = 5;
+      }
+      else if (weapon == EntityType.rifle)
+      {
+        // attacks: 2
+        // range: 18
+        // str: 4
+        // dmg: 1
+        comp.min_range = 2;
+        comp.max_range = 15;
+        comp.damage = 12;
+      }
+      else if (weapon == EntityType.sword)
+      {
+        // w.range = -1;
+        // w.strength = -1; // user
+        // w.damage = 1;
+      }
+      else
+        Debug.LogError("WeaponType not implemented");
+
+      ecs.AddComponent(e, comp);
+    }
   }
 }

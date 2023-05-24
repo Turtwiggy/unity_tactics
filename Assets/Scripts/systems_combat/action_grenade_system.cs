@@ -31,7 +31,11 @@ namespace Wiggy
         var request = ecs.GetComponent<WantsToGrenade>(e);
         var action = new Grenade();
         if (!ActionHelpers.Valid<WantsToGrenade>(ecs, e, action))
+        {
+          Debug.Log("WantsToGrenade invalid action");
+          ecs.RemoveComponent<WantsToGrenade>(e);
           continue;
+        }
 
         Debug.Log("grenade!");
         var grenade_idx = request.index;

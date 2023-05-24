@@ -47,7 +47,11 @@ namespace Wiggy
         var action = new Move();
 
         if (!ActionHelpers.Valid<WantsToMove>(ecs, e, action))
+        {
+          Debug.Log("WantsToMove invalid action");
+          ecs.RemoveComponent<WantsToMove>(e);
           continue;
+        }
 
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         var request = ecs.GetComponent<WantsToMove>(e);
@@ -90,6 +94,18 @@ namespace Wiggy
         return;
       }
 
+      if (unit_spawn_system.units[to].IsSet)
+      {
+        Debug.Log($"EID: {unit_spawn_system.units[from].Data.id} tried to move to already full spot");
+        return;
+      }
+
+      if (!unit_spawn_system.units[from].IsSet)
+      {
+        Debug.Log("Entity tried to move 'from' a spot that doesnt contain an entity");
+        return;
+      }
+
       // Update representation
       var go = unit_spawn_system.units[from].Data;
       unit_spawn_system.units[to].Set(go);
@@ -108,12 +124,13 @@ namespace Wiggy
       // Start animation
       if (animation_coroutine != null)
       {
-        Debug.Log("Stopping coroutine");
+        Debug.Log("Stopping existing coroutine");
         main.StopCoroutine(animation_coroutine);
 
         // Finish moving animation
         animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
       }
+
       // convert astar_cells to Vector2Int[]
       var path_vec2s = new Vector2Int[path.Length];
       for (int i = 0; i < path.Length; i++)

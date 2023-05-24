@@ -26,7 +26,7 @@ namespace Wiggy
       // because the less ammo we have, 
       // the more important it becomes to reload
       var utility = WiggyMath.ExponentialDecay(percent01);
-      Debug.Log("(ammo) " + utility);
+      // Debug.Log("(ammo) " + utility);
 
       return Mathf.Clamp01(utility);
     }
@@ -45,7 +45,7 @@ namespace Wiggy
       // because it's ok to have some damage taken,
       // but the more damage we take, the more urgent it becomes to heal
       var utility = WiggyMath.Logistic(percent01);
-      Debug.Log("(health) " + utility);
+      // Debug.Log("(health) " + utility);
 
       return Mathf.Clamp01(utility);
     }
@@ -63,27 +63,37 @@ namespace Wiggy
       float optimal_distance = (weapon.min_range + weapon.max_range) / 2.0f;
 
       if (targets.targets.Count == 0)
+      {
+        Debug.Log("no targets; not attacking");
         return 0;
+      }
       if (targets.targets.Count > 1)
         Debug.LogError("InsideWeaponDistanceConsideration is not built for >1 target");
 
       var to = targets.targets[0];
       var to_pos = ecs.GetComponent<GridPositionComponent>(to);
       var dst = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));
+      Debug.Log($"(WeaponDistanceConsideration) dst: {dst}");
 
       // no utility in attacking; out of range!
       if (dst < weapon.min_range || dst > weapon.max_range)
+      {
+        Debug.Log("ai weapon out of range; not attacking!");
         return 0;
+      }
 
       // model this as a negative quadratic parabola
       // where the optimal distance away from the target is the middle of the weapon range.
+
+      // note: we are already in range, so this has to count for something.
+      float utility = 0.55f;
 
       float r1 = weapon.min_range;
       float r2 = weapon.max_range;
       float h = optimal_distance; // x midpoint is optimal_distance
       float k = 1; // clamps y max at 1
-      float utility = WiggyMath.Parabola(dst, r1, r2, h, k);
-      Debug.Log("(weapon_distance_utility) " + utility);
+      utility += WiggyMath.Parabola(dst, r1, r2, h, k);
+      Debug.Log($"WeaponDistanceConsideration: {utility}");
 
       return Mathf.Clamp01(utility);
     }
@@ -225,10 +235,10 @@ namespace Wiggy
         {
           // Actions an AI could take
           // Different ai could have different actions
-          new Heal(),
-          new Reload(),
           new Move(),
           new Attack(),
+          // new Heal(),
+          // new Reload(),
           // new Overwatch(),
           // new Grenade(),
         }
@@ -247,7 +257,7 @@ namespace Wiggy
       foreach (var a in b.actions)
       {
         float score = a.Evaluate(ecs, e);
-        Debug.Log(string.Format("action: {0} score: {1}", a.GetType(), score));
+        Debug.Log($"action: {a.GetType()} score: {score}");
 
         if (score > 0)
           sorted_actions.Add(score, a);

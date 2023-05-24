@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
 
 // This is heavily based off of:
 // https://austinmorlan.com/posts/entity_component_system/
@@ -346,7 +345,7 @@ namespace Wiggy
       }
       catch (System.Exception)
       {
-        Debug.Log($"entity did not have component of type: {def.GetType()}");
+        // Debug.Log($"entity did not have component of type: {def.GetType()}");
         // component did not exist for that entity
       }
       return ref def;

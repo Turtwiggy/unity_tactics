@@ -28,13 +28,16 @@ namespace Wiggy
         var action = new Reload();
 
         if (!ActionHelpers.Valid<WantsToReload>(ecs, e, action))
+        {
+          Debug.Log("WantsToReload invalid action");
+          ecs.RemoveComponent<WantsToReload>(e);
           continue;
+        }
 
         ref var ammo = ref ecs.GetComponent<AmmoComponent>(e);
         var pos = ecs.GetComponent<GridPositionComponent>(e);
 
         ammo.cur = ammo.max;
-        Debug.Log("entity reloaded");
 
         // Reload Effect
         Entities.create_effect(ecs, pos.position, vfx_reload, "Reload Effect");
