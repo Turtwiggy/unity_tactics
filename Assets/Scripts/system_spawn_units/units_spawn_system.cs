@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Wiggy
@@ -8,27 +9,29 @@ namespace Wiggy
     {
       public GameObject player_prefab;
       public GameObject enemy_prefab;
+      public List<(int, EntityType)> entities;
     }
 
     // x * y representation
     public Optional<Entity>[] units { get; set; }
 
     public map_manager map;
+    private UnitSpawnSystemInit data;
 
-    public Entity CreatePlayer(Wiggy.registry ecs, Vector2Int gpos, string name, Optional<GameObject> prefab)
+    public Entity CreatePlayer(Wiggy.registry ecs, Vector2Int gpos, string name)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_player(ecs, pos, name, prefab);
+      var unit = Entities.create_player(ecs, pos, name, new Optional<GameObject>(data.player_prefab));
       units[idx].Set(unit);
       return units[idx].Data;
     }
 
-    public Entity CreateEnemy(Wiggy.registry ecs, Vector2Int gpos, string name, Optional<GameObject> prefab)
+    public Entity CreateEnemy(Wiggy.registry ecs, Vector2Int gpos, string name)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_enemy(ecs, pos, name, prefab);
+      var unit = Entities.create_enemy(ecs, pos, name, new Optional<GameObject>(data.enemy_prefab));
       units[idx].Set(unit);
       return units[idx].Data;
     }
@@ -43,14 +46,29 @@ namespace Wiggy
 
     public void Start(Wiggy.registry ecs, UnitSpawnSystemInit data)
     {
+      this.data = data;
       map = Object.FindObjectOfType<map_manager>();
 
       units = new Optional<Entity>[map.width * map.height];
       for (int i = 0; i < map.width * map.height; i++)
         units[i] = new Optional<Entity>();
 
+      var players_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_player);
+      foreach (var player in players_to_spawn)
+      {
+        var spot = Grid.IndexToPos(player.Item1, map.width, map.height);
+        CreatePlayer(ecs, spot, "Player");
+      }
+
+      var enemies_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_enemy);
+      foreach (var enemy in enemies_to_spawn)
+      {
+        var spot = Grid.IndexToPos(enemy.Item1, map.width, map.height);
+        CreateEnemy(ecs, spot, "Enemy");
+      }
+
       // set players at start spots
-      CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));
+      // CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));
       // CreatePlayer(ecs, map.srt_spots[1], "Wallace", new Optional<GameObject>(data.player_prefab));
       // CreatePlayer(ecs, map.srt_spots[2], "Sherbert", new Optional<GameObject>(data.player_prefab));
       // CreatePlayer(ecs, map.srt_spots[3], "Grunbo", new Optional<GameObject>(data.player_prefab));
@@ -88,7 +106,7 @@ namespace Wiggy
           }
 
           var pos = Grid.IndexToPos(idx, map.width, map.height);
-          CreateEnemy(ecs, pos, "Random Enemy", new Optional<GameObject>(data.enemy_prefab));
+          // CreateEnemy(ecs, pos, "Random Enemy", new Optional<GameObject>(data.enemy_prefab));
           n++;
           break;
         }

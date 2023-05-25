@@ -29,6 +29,7 @@ namespace Wiggy
 
   public struct WeaponComponent
   {
+    public string display_name;
     public int min_range; // e.g. melee: 0 gun: 5
     public int max_range; // e.g. melee: 3 gun: 10
     public int damage;

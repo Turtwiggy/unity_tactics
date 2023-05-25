@@ -7,25 +7,31 @@ namespace Wiggy
     public bool update_effect_time = false;
     public float effect_time = 2;
     public float pause = 1;
-    private ParticleSystem ps;
+
+    [SerializeField]
+    private ParticleSystem _ps;
+
     // public AnimationCurve fadeIn;
 
     public bool IsDone
     {
       get
       {
-        return !ps.IsAlive();
+        if (_ps == null)
+          _ps = GetComponentInChildren<ParticleSystem>();
+        return !_ps.IsAlive();
       }
     }
 
     public void Start()
     {
       // shaderProperty = Shader.PropertyToID("_cutoff");
-      ps = GetComponentInChildren<ParticleSystem>();
+      _ps = GetComponentInChildren<ParticleSystem>();
+      _ps.Stop();
 
-      var main = ps.main;
+      var main = _ps.main;
       main.duration = effect_time;
-      ps.Play();
+      _ps.Play();
     }
   }
 }

@@ -42,8 +42,8 @@ namespace Wiggy
       units.units = new Optional<Entity>[MAP_SIZE];
       for (int i = 0; i < units.units.Length; i++)
         units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player", new Optional<GameObject>());
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>());
+      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player");
+      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -89,8 +89,8 @@ namespace Wiggy
       units.units = new Optional<Entity>[MAP_SIZE];
       for (int i = 0; i < units.units.Length; i++)
         units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player", new Optional<GameObject>());
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>());
+      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player");
+      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -135,8 +135,8 @@ namespace Wiggy
       units.units = new Optional<Entity>[MAP_SIZE];
       for (int i = 0; i < units.units.Length; i++)
         units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(0, 2), "Player", new Optional<GameObject>());
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>());
+      var atk = units.CreatePlayer(main.ecs, new Vector2Int(0, 2), "Player");
+      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -180,7 +180,7 @@ namespace Wiggy
         map.obstacle_map[i] = new() { entities = new() };
 
       // Generate all neighbours around a unit
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 1), "Enemy", new Optional<GameObject>());
+      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 1), "Enemy");
       var def_pos = main.ecs.GetComponent<GridPositionComponent>(def).position;
       var idxs = a_star.square_neighbour_indicies_with_diagonals(1, 1, map.width, map.height);
 

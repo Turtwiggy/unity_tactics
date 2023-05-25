@@ -105,6 +105,8 @@ namespace Wiggy
       return spots;
     }
 
+
+
     public void GenerateMap(List<(int, EntityType)> loaded_map_entities = null)
     {
       // Generate Map Holder
@@ -128,17 +130,13 @@ namespace Wiggy
       if (remove_isolated)
         map_gen_obstacles.ObstaclePostProcessing(obstacle_map, remove_isolated_count, width, height);
 
-      for (int i = 0; i < loaded_map_entities.Count; i++)
+      var walls = GetFilteredMapEntities(loaded_map_entities, EntityType.tile_type_wall);
+      foreach (var wall in walls)
       {
-        var ent = loaded_map_entities[i];
-        var idx = ent.Item1;
-        var et = ent.Item2;
-
-        if (et == EntityType.tile_type_wall)
-        {
-          obstacle_map[idx].entities.Clear();
-          obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
-        }
+        var idx = wall.Item1;
+        var ent = wall.Item2;
+        obstacle_map[idx].entities.Clear();
+        obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
       }
 
       // Make borders of map obstacles
@@ -252,6 +250,18 @@ namespace Wiggy
           }
         }
       }
+    }
+
+    public static List<(int, EntityType)> GetFilteredMapEntities(List<(int, EntityType)> loaded_map_entities, EntityType type)
+    {
+      var entities = new List<(int, EntityType)>();
+      for (int i = 0; i < loaded_map_entities.Count; i++)
+      {
+        var ent = loaded_map_entities[i];
+        if (ent.Item2 == type)
+          entities.Add(ent);
+      }
+      return entities;
     }
   }
 } // namespace Wiggy

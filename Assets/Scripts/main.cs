@@ -146,7 +146,8 @@ namespace Wiggy
       UnitSpawnSystem.UnitSpawnSystemInit uss_data = new()
       {
         player_prefab = player_prefab,
-        enemy_prefab = enemy_prefab
+        enemy_prefab = enemy_prefab,
+        entities = texture_map_entities
       };
 
       // load resources

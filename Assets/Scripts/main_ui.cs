@@ -120,7 +120,7 @@ namespace Wiggy
           hovered_player_hp_text.SetText(hp.cur.ToString());
 
           var weapon = main.ecs.GetComponent<WeaponComponent>(entity.Data);
-          hovered_player_weapon_text.SetText(weapon.GetType().ToString());
+          hovered_player_weapon_text.SetText(weapon.display_name);
         }
       }
       else

@@ -180,18 +180,21 @@ namespace Wiggy
         // w.range = 12;
         // w.strength = 4;
         // w.damage = 1;
+        comp.display_name = "Pistol";
         comp.min_range = 0;
         comp.max_range = 5;
         comp.damage = 18;
       }
       else if (weapon == EntityType.sniper)
       {
+        comp.display_name = "Sniper";
         comp.min_range = 5;
         comp.max_range = 20;
         comp.damage = 15;
       }
       else if (weapon == EntityType.shotgun)
       {
+        comp.display_name = "Shotgun";
         comp.min_range = 0;
         comp.max_range = 10;
         comp.damage = 12;
@@ -202,6 +205,7 @@ namespace Wiggy
         // dmg: 1
         // attacks: 1d6
         // range: 6
+        comp.display_name = "Grenade";
         comp.min_range = 0;
         comp.max_range = 6;
         comp.damage = 5;
@@ -212,12 +216,14 @@ namespace Wiggy
         // range: 18
         // str: 4
         // dmg: 1
+        comp.display_name = "Rifle";
         comp.min_range = 2;
         comp.max_range = 15;
         comp.damage = 12;
       }
       else if (weapon == EntityType.sword)
       {
+        comp.display_name = "Sword";
         // w.range = -1;
         // w.strength = -1; // user
         // w.damage = 1;
