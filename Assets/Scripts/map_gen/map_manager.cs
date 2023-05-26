@@ -105,8 +105,6 @@ namespace Wiggy
       return spots;
     }
 
-
-
     public void GenerateMap(List<(int, EntityType)> loaded_map_entities = null)
     {
       // Generate Map Holder
@@ -136,24 +134,24 @@ namespace Wiggy
         var idx = wall.Item1;
         var ent = wall.Item2;
         obstacle_map[idx].entities.Clear();
-        obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
+        obstacle_map[idx].entities.Add(ent);
       }
 
       // Make borders of map obstacles
       // GenerateWallBorders();
 
       // Generate Start/End Points
-      int players = 4;
-      var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
-      var ext = map_gen_obstacles.ExitPoint(obstacle_map, width, height);
-      srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
-      ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
+      // int players = 4;
+      // var srt = map_gen_obstacles.StartPoint(obstacle_map, width, height);
+      // var ext = map_gen_obstacles.ExitPoint(obstacle_map, width, height);
+      // srt_spots = GenerateConnectedSpots(obstacle_map, srt, players);
+      // ext_spots = GenerateConnectedSpots(obstacle_map, ext, players);
 
       // Map Zones
-      var poisson_points = voronoi.GeneratePoissonPoints(srt, zone_size, zone_seed, width, height, size);
-      var voronoi_graph = voronoi.Generate(poisson_points, width, height, 0);
-      voronoi_map = voronoi.GetVoronoiRepresentation(voronoi_graph, width, height, size);
-      voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
+      // var poisson_points = voronoi.GeneratePoissonPoints(srt, zone_size, zone_seed, width, height, size);
+      // var voronoi_graph = voronoi.Generate(poisson_points, width, height, 0);
+      // voronoi_map = voronoi.GetVoronoiRepresentation(voronoi_graph, width, height, size);
+      // voronoi_zones = voronoi.GetZones(poisson_points, voronoi_map, width, height);
 
       // 
       // Unity side of things
@@ -161,7 +159,7 @@ namespace Wiggy
 
       InstantiateMapEntry(obstacle_map, EntityType.tile_type_wall, wall_prefab, generated_obstacle_holder);
       // InstantiateMapEntry(voronoi_map, EntityType.tile_type_wall, debug_zone_edge_prefab, map_holder.transform);
-      InstantiateSpots(poisson_points, debug_zone_core_prefab);
+      // InstantiateSpots(poisson_points, debug_zone_core_prefab);
       InstantiateSpots(srt_spots, debug_start_points_prefab);
       InstantiateSpots(ext_spots, debug_end_points_prefab);
 

@@ -48,6 +48,7 @@ namespace Wiggy
         // Grenade Effects
         Entities.create_effect(ecs, grenade_pos, vfx_grenade, "Grenade Effect");
 
+        // AOE damage
         List<Vector2Int> positions_to_take_damage = new();
         {
           // grenade spot takes damage
@@ -59,6 +60,7 @@ namespace Wiggy
             positions_to_take_damage.Add(Grid.IndexToPos(neighbours[i].Item2, map.width, map.height));
         }
 
+        // deal damage
         for (int i = 0; i < positions_to_take_damage.Count; i++)
         {
           var damage_pos = positions_to_take_damage[i];

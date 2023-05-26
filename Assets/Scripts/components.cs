@@ -14,6 +14,16 @@ namespace Wiggy
     //
   };
 
+  public struct TrapComponent
+  {
+    //
+  };
+
+  public struct BarrelComponent
+  {
+    //
+  };
+
   public struct ParticleEffectComponent
   {
     //

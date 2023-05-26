@@ -142,6 +142,8 @@ namespace Wiggy
       return e;
     }
 
+    // vfx
+
     public static Entity create_effect(Wiggy.registry ecs, Vector2Int spot, GameObject prefab, string name)
     {
       var e = ecs.Create();
@@ -233,5 +235,60 @@ namespace Wiggy
 
       ecs.AddComponent(e, comp);
     }
+
+    // environment
+
+    public static Entity create_barrel(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    {
+      var e = ecs.Create();
+
+      GridPositionComponent gpc = new();
+      gpc.position = spot;
+      ecs.AddComponent(e, gpc);
+
+      if (prefab.IsSet)
+      {
+        ToBeInstantiatedComponent tbic = new();
+        tbic.prefab = prefab.Data;
+        tbic.name = name;
+        ecs.AddComponent(e, tbic);
+      }
+
+      BarrelComponent barrel = new();
+      ecs.AddComponent(e, barrel);
+
+      TeamComponent team = new();
+      team.team = Team.NEUTRAL;
+      ecs.AddComponent(e, team);
+
+      return e;
+    }
+
+    public static Entity create_trap(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    {
+      var e = ecs.Create();
+
+      GridPositionComponent gpc = new();
+      gpc.position = spot;
+      ecs.AddComponent(e, gpc);
+
+      if (prefab.IsSet)
+      {
+        ToBeInstantiatedComponent tbic = new();
+        tbic.prefab = prefab.Data;
+        tbic.name = name;
+        ecs.AddComponent(e, tbic);
+      }
+
+      TrapComponent trap = new();
+      ecs.AddComponent(e, trap);
+
+      TeamComponent team = new();
+      team.team = Team.NEUTRAL;
+      ecs.AddComponent(e, team);
+
+      return e;
+    }
+
   }
 }

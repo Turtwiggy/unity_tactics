@@ -9,6 +9,8 @@ namespace Wiggy
     {
       public GameObject player_prefab;
       public GameObject enemy_prefab;
+      public GameObject barrel_prefab;
+      public GameObject trap_prefab;
       public List<(int, EntityType)> entities;
     }
 
@@ -36,6 +38,24 @@ namespace Wiggy
       return units[idx].Data;
     }
 
+    public Entity CreateBarrel(Wiggy.registry ecs, Vector2Int gpos, string name)
+    {
+      var idx = Grid.GetIndex(gpos, map.width);
+      var pos = Grid.IndexToPos(idx, map.width, map.height);
+      var unit = Entities.create_barrel(ecs, pos, name, new Optional<GameObject>(data.barrel_prefab));
+      units[idx].Set(unit);
+      return units[idx].Data;
+    }
+
+    public Entity CreateTrap(Wiggy.registry ecs, Vector2Int gpos, string name)
+    {
+      var idx = Grid.GetIndex(gpos, map.width);
+      var pos = Grid.IndexToPos(idx, map.width, map.height);
+      var unit = Entities.create_trap(ecs, pos, name, new Optional<GameObject>(data.trap_prefab));
+      units[idx].Set(unit);
+      return units[idx].Data;
+    }
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -53,6 +73,7 @@ namespace Wiggy
       for (int i = 0; i < map.width * map.height; i++)
         units[i] = new Optional<Entity>();
 
+      // Spawn players
       var players_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_player);
       foreach (var player in players_to_spawn)
       {
@@ -60,11 +81,28 @@ namespace Wiggy
         CreatePlayer(ecs, spot, "Player");
       }
 
+      // Spawn enemies
       var enemies_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_enemy);
       foreach (var enemy in enemies_to_spawn)
       {
         var spot = Grid.IndexToPos(enemy.Item1, map.width, map.height);
         CreateEnemy(ecs, spot, "Enemy");
+      }
+
+      // Spawn explosive barrels
+      var barrels_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_barrel);
+      foreach (var barrel in barrels_to_spawn)
+      {
+        var spot = Grid.IndexToPos(barrel.Item1, map.width, map.height);
+        CreateBarrel(ecs, spot, "Explosive Barrel");
+      }
+
+      // Spawn traps
+      var trap_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.tile_type_trap);
+      foreach (var trap in trap_to_spawn)
+      {
+        var spot = Grid.IndexToPos(trap.Item1, map.width, map.height);
+        CreateTrap(ecs, spot, "Trap");
       }
 
       // set players at start spots

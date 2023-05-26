@@ -9,6 +9,8 @@ namespace Wiggy
     [Header("Entities")]
     public GameObject player_prefab;
     public GameObject enemy_prefab;
+    public GameObject barrel_prefab;
+    public GameObject trap_prefab;
     public GameObject selected_cursor_prefab;
     public Texture2D map_texture;
 
@@ -68,9 +70,11 @@ namespace Wiggy
       ecs.RegisterComponent<OverwatchStatus>();
       ecs.RegisterComponent<IsDeadComponent>();
       // entity tags
+      ecs.RegisterComponent<BarrelComponent>();
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<PlayerComponent>();
       ecs.RegisterComponent<ParticleEffectComponent>();
+      ecs.RegisterComponent<TrapComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
       // Requests
@@ -147,6 +151,8 @@ namespace Wiggy
       {
         player_prefab = player_prefab,
         enemy_prefab = enemy_prefab,
+        barrel_prefab = barrel_prefab,
+        trap_prefab = trap_prefab,
         entities = texture_map_entities
       };
 
