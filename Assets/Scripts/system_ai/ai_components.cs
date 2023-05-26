@@ -218,7 +218,7 @@ namespace Wiggy
     ANIMATE,
   };
 
-  public struct DefaultBrainComponent
+  public class DefaultBrainComponent
   {
     public List<Action> actions;
     public BRAIN_STATE brain_fsm;

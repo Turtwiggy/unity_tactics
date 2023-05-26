@@ -28,9 +28,8 @@ namespace Wiggy
         // check if an entity moves in my weapon range!
 
         // may or may not have weapon equipped
-        WeaponComponent backup = default;
-        ref WeaponComponent weapon = ref ecs.TryGetComponent(e, ref backup);
-        bool has_weapon = !weapon.Equals(backup);
+        WeaponComponent weapon_default = default;
+        ref var weapon = ref ecs.TryGetComponent(e, ref weapon_default, out var has_weapon);
         if (!has_weapon)
         {
           Debug.Log("No weapon equipped for overwatch... processing overwatch action but it wont do anything");

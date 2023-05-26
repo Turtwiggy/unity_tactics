@@ -56,7 +56,7 @@ namespace Wiggy
 
       if (to_contains_unit)
       {
-        Debug.Log("user wants to attack unit");
+        Debug.Log("TO contained unit");
         ref var targets = ref ecs.GetComponent<TargetsComponent>(from_entity);
         targets.targets.Clear();
         targets.targets.Add(to_entity.Data);
@@ -65,13 +65,13 @@ namespace Wiggy
       if (action_selected.GetType() == typeof(Move) && to_contains_unit)
       {
         Debug.Log("cant move to another unit position");
-        return; // cant move to another unit
+        return; // cant move to another unit position
       }
 
       if (action_selected.GetType() == typeof(Attack) && to_contains_obstacle)
       {
-        Debug.Log("cant attack obstacles");
-        return; // cant attack obstacles?
+        Debug.Log("cant attack walls?");
+        return; // cant attack walls??
       }
 
       var a = action_selected;

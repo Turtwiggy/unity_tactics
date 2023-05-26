@@ -140,16 +140,20 @@ namespace Wiggy
 
       {
         TeamComponent backup = default;
-        ref var component = ref ecs.TryGetComponent(e, ref backup);
-        Assert.AreEqual(Team.NEUTRAL, component.team);
+        ref TeamComponent team = ref ecs.TryGetComponent(e, ref backup, out var success);
 
-        component.team = Team.PLAYER; // modify it
+        Assert.AreEqual(true, success);
+        Assert.AreEqual(Team.NEUTRAL, team.team);
+
+        team.team = Team.PLAYER; // modify it
       }
 
       {
         TeamComponent backup = default;
-        ref var component = ref ecs.TryGetComponent(e, ref backup);
-        Assert.AreEqual(Team.PLAYER, component.team);
+        ref TeamComponent team = ref ecs.TryGetComponent(e, ref backup, out var success);
+
+        Assert.AreEqual(true, success);
+        Assert.AreEqual(Team.PLAYER, team.team);
       }
     }
   }

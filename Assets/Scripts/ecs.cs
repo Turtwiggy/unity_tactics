@@ -98,6 +98,9 @@ namespace Wiggy
 
     public ref T Get(Entity e)
     {
+      // var exists = entity_to_index_map.TryGetValue(e, out _);
+      // if (!exists)
+      //   Debug.LogError($"{typeof(T)} does not exist");
       return ref component_array[entity_to_index_map[e]];
     }
 
@@ -337,10 +340,11 @@ namespace Wiggy
       return ref component_manager.GetComponent<T>(e);
     }
 
-    public ref T TryGetComponent<T>(Entity e, ref T def)
+    public ref T TryGetComponent<T>(Entity e, ref T def, out bool success)
     {
       try
       {
+        success = true;
         return ref component_manager.GetComponent<T>(e);
       }
       catch (System.Exception)
@@ -348,8 +352,10 @@ namespace Wiggy
         // Debug.Log($"entity did not have component of type: {def.GetType()}");
         // component did not exist for that entity
       }
+      success = false;
       return ref def;
     }
+
 
     public Entity[] View<T>() where T : struct
     {

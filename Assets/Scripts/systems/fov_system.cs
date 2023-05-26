@@ -172,7 +172,7 @@ namespace Wiggy
 
   public class FovSystem : ECSSystem
   {
-    public struct FovSystemInit
+    public class FovSystemInit
     {
       public Vector2Int fov_pos;
       public GameObject fov_cursor_prefab;

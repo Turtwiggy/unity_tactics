@@ -31,10 +31,8 @@ namespace Wiggy
 
         var dead = ecs.GetComponent<IsDeadComponent>(e);
 
-        // Remove unity record
-        InstantiatedComponent backup = default;
-        var instance = ecs.TryGetComponent(e, ref backup);
-        bool has_instance = !instance.Equals(backup);
+        InstantiatedComponent instance_default = default;
+        ref var instance = ref ecs.TryGetComponent(e, ref instance_default, out var has_instance);
         if (has_instance)
           Object.Destroy(instance.instance);
 

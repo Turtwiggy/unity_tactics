@@ -127,7 +127,7 @@ namespace Wiggy
       return sample;
     }
 
-    /// Helper struct to calculate the x and y indices of a sample in the grid
+    /// Helper to calculate the x and y indices of a sample in the grid
     private struct GridPos
     {
       public int x;

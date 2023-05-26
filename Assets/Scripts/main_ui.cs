@@ -116,11 +116,20 @@ namespace Wiggy
         {
           hovered_text.SetText(unity.instance.name);
 
-          var hp = main.ecs.GetComponent<HealthComponent>(entity.Data);
-          hovered_player_hp_text.SetText(hp.cur.ToString());
+          // may or may not have weapon equipped
+          HealthComponent health_default = default;
+          ref var hp = ref main.ecs.TryGetComponent(entity.Data, ref health_default, out var has_hp);
+          if (has_hp)
+            hovered_player_hp_text.SetText(hp.cur.ToString());
+          else
+            hovered_player_hp_text.SetText("No health");
 
-          var weapon = main.ecs.GetComponent<WeaponComponent>(entity.Data);
-          hovered_player_weapon_text.SetText(weapon.display_name);
+          WeaponComponent weapon_default = default;
+          ref var weapon = ref main.ecs.TryGetComponent(entity.Data, ref weapon_default, out var has_weapon);
+          if (has_weapon)
+            hovered_player_weapon_text.SetText(weapon.display_name);
+          else
+            hovered_player_weapon_text.SetText("No weapon");
         }
       }
       else

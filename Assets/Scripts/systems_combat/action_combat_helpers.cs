@@ -125,14 +125,10 @@ namespace Wiggy
     {
       // Weapon may or may not be equipped
 
-      WeaponComponent backup = default;
-      ref WeaponComponent weapon = ref ecs.TryGetComponent(attacker, ref backup);
-      bool has_weapon = !weapon.Equals(backup);
+      WeaponComponent weapon_default = default;
+      ref var weapon = ref ecs.TryGetComponent(attacker, ref weapon_default, out var has_weapon);
       if (!has_weapon)
-      {
-        Debug.Log("attacker doesnt have weapon equipped");
         return 0;
-      }
 
       int damage = weapon.damage;
 
