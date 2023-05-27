@@ -99,22 +99,22 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Entity e, Vector2Int spot, Entity player, astar_cell[] path)
+    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
     {
       int quality = 0;
 
-      bool spot_in_cover = SpotInCover(map, spot);
+      bool spot_in_cover = SpotInCover(map, new_pos);
       if (spot_in_cover)
         quality += 2;
 
       // Does this spot move closer to player?
-      var different_pos = spot != ecs.GetComponent<GridPositionComponent>(e).position;
-      if (Array.Exists(path, e => e.pos == spot) && different_pos)
+      var new_pos_dst_from_player = Vector2Int.Distance(new_pos, player_pos);
+      var cur_pos_dst_from_player = Vector2Int.Distance(cur_pos, player_pos);
+      if (new_pos_dst_from_player < cur_pos_dst_from_player) // moved closer
         quality += 5;
 
       // Is a player flanking the potential spot?
-      var player_pos = ecs.GetComponent<GridPositionComponent>(player).position;
-      bool spot_is_flanked = SpotIsFlanked(map, player_pos, spot);
+      bool spot_is_flanked = SpotIsFlanked(map, player_pos, new_pos);
       if (spot_is_flanked)
         quality -= 1;
 

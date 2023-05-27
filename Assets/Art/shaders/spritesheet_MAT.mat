@@ -32,7 +32,7 @@ Material:
     - _Metallic: 0
     - _SpriteX: 13.47
     - _SpriteY: 21
-    - _WallSpriteX: 4
+    - _WallSpriteX: 0
     - _WallSpriteY: 0
     m_Colors:
     - _Color: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}

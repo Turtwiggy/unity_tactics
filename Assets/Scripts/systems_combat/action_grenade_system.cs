@@ -42,9 +42,6 @@ namespace Wiggy
         var grenade_pos = Grid.IndexToPos(grenade_idx, map.width, map.height);
         var grenade = Entities.create_grenade(ecs, grenade_pos, "Grenade", new Optional<GameObject>());
 
-        // TODO: when is grenade cleaned up??
-        Debug.LogWarning("Grenade created; currently never cleaned up");
-
         // Grenade Effects
         Entities.create_effect(ecs, grenade_pos, vfx_grenade, "Grenade Effect");
 

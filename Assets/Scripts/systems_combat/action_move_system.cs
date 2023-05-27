@@ -7,7 +7,7 @@ namespace Wiggy
 {
   public struct MoveInformation
   {
-    public astar_cell[] path;
+    public Vector2Int[] path;
     public Entity e;
   }
 
@@ -59,7 +59,6 @@ namespace Wiggy
 
         // Process request
         int from = Grid.GetIndex(position.position, map.width);
-        int to = request.to;
 
         // Check this unit does not have the overwatch status
         // (otherwise, you'd be immobalized)
@@ -74,7 +73,7 @@ namespace Wiggy
         }
 
         Debug.Log("Moving..");
-        MoveActionLogic(ecs, from, to);
+        MoveActionLogic(ecs, from, request.path.ToArray());
         Debug.Log("Move action done.");
 
         // Request is processed
@@ -82,17 +81,15 @@ namespace Wiggy
       }
     }
 
-    private void MoveActionLogic(Wiggy.registry ecs, int from, int to)
+    private void MoveActionLogic(Wiggy.registry ecs, int from, Vector2Int[] path)
     {
-      // Generate path
-      var cells = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
-      var path = a_star.generate_direct(cells, from, to, map.width);
-
-      if (path == null)
+      if (path == null || path.Length <= 1)
       {
         Debug.Log("no path...");
         return;
       }
+      var final = path[^1];
+      var to = Grid.GetIndex(final, map.width);
 
       if (unit_spawn_system.units[to].IsSet)
       {
@@ -131,16 +128,11 @@ namespace Wiggy
         animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
       }
 
-      // convert astar_cells to Vector2Int[]
-      var path_vec2s = new Vector2Int[path.Length];
-      for (int i = 0; i < path.Length; i++)
-        path_vec2s[i] = path[i].pos;
-
       Debug.Log("Starting coroutine");
       var instance = ecs.GetComponent<InstantiatedComponent>(go);
       animation_go = instance.instance;
-      animation_final = path[^1].pos;
-      animation_coroutine = Animate.AlongPath(animation_go, path_vec2s, map.size);
+      animation_final = path[^1];
+      animation_coroutine = Animate.AlongPath(animation_go, path, map.size);
       main.StartCoroutine(animation_coroutine);
     }
   }

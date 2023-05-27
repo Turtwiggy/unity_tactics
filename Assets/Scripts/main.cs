@@ -12,6 +12,7 @@ namespace Wiggy
     public GameObject barrel_prefab;
     public GameObject trap_prefab;
     public GameObject selected_cursor_prefab;
+    public GameObject move_prefab;
     public Texture2D map_texture;
 
     // unity-based systems
@@ -57,6 +58,8 @@ namespace Wiggy
       ecs.RegisterComponent<ActionsComponent>();
       // movement
       ecs.RegisterComponent<GridPositionComponent>();
+      // stats
+      ecs.RegisterComponent<DexterityComponent>();
       // ai
       ecs.RegisterComponent<AIMoveConsiderationComponent>();
       // events
@@ -164,7 +167,7 @@ namespace Wiggy
       vfx_reload = Resources.Load("Prefabs/Reload") as GameObject;
       vfx_take_damage = Resources.Load("Prefabs/TakeDamage") as GameObject;
 
-      action_system.Start(ecs, this);
+      action_system.Start(ecs, this, move_prefab);
       ai_system.Start(ecs, unit_spawn_system, action_system);
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);

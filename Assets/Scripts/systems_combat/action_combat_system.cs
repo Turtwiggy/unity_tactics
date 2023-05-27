@@ -25,6 +25,7 @@ namespace Wiggy
       {
         var action = new Attack();
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
+        var request = ecs.GetComponent<WantsToAttack>(e);
 
         if (!ActionHelpers.Valid<WantsToAttack>(ecs, e, action))
         {
@@ -33,21 +34,13 @@ namespace Wiggy
           continue;
         }
 
-        var targets = ecs.GetComponent<TargetsComponent>(e);
-        if (targets.targets.Count == 0)
-        {
-          Debug.Log("No targets to attack!");
-          ecs.RemoveComponent<WantsToAttack>(e);
-          continue;
-        }
-
         // Create event
         AttackEvent evt = new();
         evt.from = e;
-        evt.to = targets.targets[0];
+        evt.to = request.target;
         Debug.Log("creating attack event...");
 
-        // Create entity
+        // Create event entity
         var event_entity = ecs.Create();
         ecs.AddComponent(event_entity, evt);
 

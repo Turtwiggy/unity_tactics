@@ -210,6 +210,14 @@ namespace Wiggy
       return visible_cell.ToArray();
     }
 
+    public static List<Vector2Int> convert_to_points(astar_cell[] results)
+    {
+      List<Vector2Int> spots = new();
+      for (int i = 0; i < results.Length; i++)
+        spots.Add(results[i].pos);
+      return spots;
+    }
+
     // default heuristic
     private static int heuristic(Vector2Int point, Vector2Int end)
     {

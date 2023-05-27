@@ -80,13 +80,16 @@ namespace Wiggy
 
   public interface Request { };
 
-  public struct WantsToAttack : Request { }
+  public struct WantsToAttack : Request
+  {
+    public Entity target;
+  }
 
   public struct WantsToHeal : Request { }
 
   public struct WantsToMove : Request
   {
-    public int to;
+    public Vector2Int[] path;
   }
 
   public struct WantsToOverwatch : Request { }
@@ -115,6 +118,13 @@ namespace Wiggy
   {
     public Entity from;
     public Entity to;
+  };
+
+  // Stats
+
+  public struct DexterityComponent
+  {
+    public int amount;
   };
 
 };

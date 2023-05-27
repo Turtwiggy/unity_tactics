@@ -45,6 +45,10 @@ namespace Wiggy
       team.team = Team.PLAYER;
       ecs.AddComponent(e, team);
 
+      DexterityComponent dex = new();
+      dex.amount = 4;
+      ecs.AddComponent(e, dex);
+
       PlayerComponent player = new();
       ecs.AddComponent(e, player);
 
@@ -91,6 +95,10 @@ namespace Wiggy
       TeamComponent team = new();
       team.team = Team.ENEMY;
       ecs.AddComponent(e, team);
+
+      DexterityComponent dex = new();
+      dex.amount = 4;
+      ecs.AddComponent(e, dex);
 
       AIMoveConsiderationComponent move = new();
       move.positions = new();

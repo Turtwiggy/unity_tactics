@@ -56,7 +56,7 @@ namespace Wiggy
           var path = move_events[i].path;
           for (int p = 0; p < path.Length; p++)
           {
-            var path_pos = path[p].pos;
+            var path_pos = path[p];
             var dst = Mathf.Abs(Vector2Int.Distance(path_pos, pos.position));
             var in_weapon_range = dst >= min && dst <= max;
             if (in_weapon_range)

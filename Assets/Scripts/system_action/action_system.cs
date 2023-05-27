@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 namespace Wiggy
@@ -12,6 +13,10 @@ namespace Wiggy
     public bool action_selected_from_ui;
     public Action action_selected;
 
+    // Move Action specific visuals
+    private GameObject[] instantiated_path_visuals;
+    private Vector2Int[] path_from_ui;
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -19,21 +24,30 @@ namespace Wiggy
       ecs.SetSystemSignature<ActionSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, main main)
+    public void Start(Wiggy.registry ecs, main main, GameObject move_prefab)
     {
-      map = Object.FindObjectOfType<map_manager>();
+      map = GameObject.FindObjectOfType<map_manager>();
       this.select_system = main.select_system;
       this.unit_spawn_system = main.unit_spawn_system;
       this.camera = main.camera;
+
+      GameObject cursor_parent = new GameObject("Cursor Parent");
+      instantiated_path_visuals = new GameObject[100];
+      for (int i = 0; i < 100; i++)
+      {
+        var go = GameObject.Instantiate(move_prefab, Vector3.zero, move_prefab.transform.rotation, cursor_parent.transform);
+        instantiated_path_visuals[i] = go;
+        instantiated_path_visuals[i].SetActive(false);
+      }
     }
 
     public void RequestMapInteraction(Wiggy.registry ecs, Entity from_entity)
     {
       var pos = ecs.GetComponent<GridPositionComponent>(from_entity).position;
       var from = Grid.GetIndex(pos, map.width);
-      var to = Grid.GetIndex(camera.grid_index, map.width);
+      var full_to = Grid.GetIndex(camera.grid_index, map.width);
 
-      if (from == to)
+      if (from == full_to)
       {
         Debug.Log("from == to; no action to take");
         return;
@@ -49,18 +63,8 @@ namespace Wiggy
       //
       // Actions that can resolve by clicking the map
       //
-      var units = unit_spawn_system.units;
-      Optional<Entity> to_entity = units[to];
-      bool to_contains_unit = to_entity.IsSet;
-      bool to_contains_obstacle = map.obstacle_map[to].entities.Contains(EntityType.tile_type_wall);
-
-      if (to_contains_unit)
-      {
-        Debug.Log("TO contained unit");
-        ref var targets = ref ecs.GetComponent<TargetsComponent>(from_entity);
-        targets.targets.Clear();
-        targets.targets.Add(to_entity.Data);
-      }
+      bool to_contains_unit = unit_spawn_system.units[full_to].IsSet;
+      bool to_contains_obstacle = map.obstacle_map[full_to].entities.Contains(EntityType.tile_type_wall);
 
       if (action_selected.GetType() == typeof(Move) && to_contains_unit)
       {
@@ -79,13 +83,61 @@ namespace Wiggy
 
       // Not-immediate (map input)
       if (a.GetType() == typeof(Move))
-        RequestMoveAction(ecs, e, to);
+      {
+        if (path_from_ui == null)
+          return;
+
+        // Move is validated by the MoveActionVisuals
+        ecs.AddComponent<WantsToMove>(e, new() { path = path_from_ui });
+
+        path_from_ui = null;
+      }
       else if (a.GetType() == typeof(Attack))
-        RequestAttackAction(ecs, e);
+      {
+        // Target is validated by the monitor_combat_system
+        var target = unit_spawn_system.units[full_to].Data;
+        ecs.AddComponent<WantsToAttack>(e, new() { target = target });
+      }
       else if (a.GetType() == typeof(Grenade))
-        RequestGrenadeAction(ecs, e, to);
+      {
+        // Validate grenade throw position
+        DexterityComponent dex_backup = default;
+        ref var dex = ref ecs.TryGetComponent(e, ref dex_backup, out var has_dex);
+        if (!has_dex)
+          return;
+        var grenade_request_pos = Grid.IndexToPos(full_to, map.width, map.height);
+        var grenade_dst_from_player = Vector2Int.Distance(pos, grenade_request_pos);
+        if (grenade_dst_from_player > dex.amount)
+        {
+          Debug.Log("grenade throw out of range");
+          return;
+        }
+
+        Debug.Log("haha you can grenade anywhere on the map this is a bug");
+        ecs.AddComponent<WantsToGrenade>(e, new() { index = full_to });
+      }
 
       ClearInteraction();
+    }
+
+    public void AIRequestAttackAction(Wiggy.registry ecs, Entity e, Entity target)
+    {
+      ecs.AddComponent<WantsToAttack>(e, new() { target = target });
+    }
+
+    public void AIRequestMoveAction(Wiggy.registry ecs, Entity e, int to)
+    {
+      var pos = ecs.GetComponent<GridPositionComponent>(e).position;
+      var from = Grid.GetIndex(pos, map.width);
+
+      // work out a path
+      var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
+      var path = a_star.generate_direct(astar, from, to, map.width);
+      if (path == null)
+        return; // no path
+      var converted_path = a_star.convert_to_points(path).ToArray();
+
+      ecs.AddComponent<WantsToMove>(e, new() { path = converted_path });
     }
 
     public void RequestActionFromUI<T>(Wiggy.registry ecs) where T : Action, new()
@@ -126,22 +178,6 @@ namespace Wiggy
       action_selected_from_ui = false;
     }
 
-    public void RequestMoveAction(Wiggy.registry ecs, Entity e, int to)
-    {
-      Debug.Log($"EID: {e.id} wants to move to: {to}");
-      ecs.AddComponent<WantsToMove>(e, new() { to = to });
-    }
-
-    public void RequestAttackAction(Wiggy.registry ecs, Entity e)
-    {
-      ecs.AddComponent<WantsToAttack>(e, new() { });
-    }
-
-    public void RequestGrenadeAction(Wiggy.registry ecs, Entity e, int to)
-    {
-      ecs.AddComponent<WantsToGrenade>(e, new() { index = to });
-    }
-
     public bool RequestActionIfImmediate(Wiggy.registry ecs, Action a, Entity e)
     {
       if (a.GetType() == typeof(Reload))
@@ -164,7 +200,50 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-
+      if (action_selected != null && action_selected.GetType() == typeof(Move) && select_system.HasAnySelected())
+        MoveActionVisuals(ecs);
     }
+
+    private void MoveActionVisuals(Wiggy.registry ecs)
+    {
+      // Turn them all off
+      for (int i = 0; i < instantiated_path_visuals.Length; i++)
+        instantiated_path_visuals[i].SetActive(false);
+
+      var e = select_system.GetSelected();
+      var from_pos = ecs.GetComponent<GridPositionComponent>(e).position;
+      var to_pos = camera.grid_index;
+
+      DexterityComponent dex_backup = default;
+      ref var dex = ref ecs.TryGetComponent(e, ref dex_backup, out var has_dex);
+      if (!has_dex)
+        return;
+
+      var from_idx = Grid.GetIndex(from_pos, map.width);
+      var to_idx = Grid.GetIndex(to_pos, map.width);
+
+      // work out a path
+      {
+        var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
+        var path = a_star.generate_direct(astar, from_idx, to_idx, map.width);
+        if (path == null)
+          return; // no path
+                  // Limit movement by dexterity
+        path = path.Take(dex.amount).ToArray();
+        path_from_ui = a_star.convert_to_points(path).ToArray();
+      }
+
+      // Display a cursor at each of the points
+      for (int i = 0; i < path_from_ui.Length; i++)
+      {
+        if (i > dex.amount)
+          break; // cant move anymore!
+        instantiated_path_visuals[i].SetActive(true);
+        var p = path_from_ui[i];
+        var pos = Grid.GridSpaceToWorldSpace(p, 1); // 1 seems wrong to hard code here
+        instantiated_path_visuals[i].transform.position = pos;
+      }
+    }
+
   }
 }

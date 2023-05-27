@@ -137,6 +137,22 @@ namespace Wiggy
         obstacle_map[idx].entities.Add(ent);
       }
 
+      // start spots
+      var map_defined_start_spots = GetFilteredMapEntities(loaded_map_entities, EntityType.actor_player);
+      foreach (var spot in map_defined_start_spots)
+      {
+        var pos = Grid.IndexToPos(spot.Item1, width, height);
+        srt_spots.Add(pos);
+      }
+
+      // exit spots
+      var map_defined_exit_spots = GetFilteredMapEntities(loaded_map_entities, EntityType.tile_type_exit);
+      foreach (var spot in map_defined_exit_spots)
+      {
+        var pos = Grid.IndexToPos(spot.Item1, width, height);
+        ext_spots.Add(pos);
+      }
+
       // Make borders of map obstacles
       // GenerateWallBorders();
 
