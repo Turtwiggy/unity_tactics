@@ -68,8 +68,7 @@ namespace Wiggy
         return 0;
       }
       if (targets.targets.Count > 1)
-        Debug.LogError("InsideWeaponDistanceConsideration is not built for >1 target");
-
+        Debug.LogWarning("InsideWeaponDistanceConsideration >1 target.. choosing [0]");
       var to = targets.targets[0];
       var to_pos = ecs.GetComponent<GridPositionComponent>(to);
       var dst = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));

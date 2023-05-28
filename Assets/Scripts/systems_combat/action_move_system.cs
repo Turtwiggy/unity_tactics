@@ -19,9 +19,6 @@ namespace Wiggy
 
     // animations
     private MonoBehaviour main;
-    private GameObject animation_go;
-    private IEnumerator animation_coroutine;
-    private Vector2Int animation_final;
 
     public override void SetSignature(Wiggy.registry ecs)
     {
@@ -119,20 +116,20 @@ namespace Wiggy
       something_moved.Invoke(move_info);
 
       // Start animation
-      if (animation_coroutine != null)
-      {
-        Debug.Log("Stopping existing coroutine");
-        main.StopCoroutine(animation_coroutine);
-
-        // Finish moving animation
-        animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
-      }
+      // if (animation_coroutine != null)
+      // {
+      //   Debug.Log("Stopping existing coroutine");
+      //   main.StopCoroutine(animation_coroutine);
+      //   // Finish moving animation
+      //   if (animation_go != null)
+      //     animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
+      // }
 
       Debug.Log("Starting coroutine");
       var instance = ecs.GetComponent<InstantiatedComponent>(go);
-      animation_go = instance.instance;
-      animation_final = path[^1];
-      animation_coroutine = Animate.AlongPath(animation_go, path, map.size);
+      // animation_go = instance.instance;
+      // animation_final = path[^1];
+      var animation_coroutine = Animate.AlongPath(instance.instance, path, map.size);
       main.StartCoroutine(animation_coroutine);
     }
   }

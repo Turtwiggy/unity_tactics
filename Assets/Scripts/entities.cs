@@ -26,7 +26,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 100;
+      health.max = 20;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -46,7 +46,7 @@ namespace Wiggy
       ecs.AddComponent(e, team);
 
       DexterityComponent dex = new();
-      dex.amount = 4;
+      dex.amount = 5;
       ecs.AddComponent(e, dex);
 
       PlayerComponent player = new();
@@ -77,7 +77,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 100;
+      health.max = 20;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -90,7 +90,7 @@ namespace Wiggy
       ammo.cur = ammo.max;
       ecs.AddComponent(e, ammo);
 
-      add_weapon_component(ecs, e, EntityType.shotgun);
+      add_weapon_component(ecs, e, EntityType.pistol);
 
       TeamComponent team = new();
       team.team = Team.ENEMY;

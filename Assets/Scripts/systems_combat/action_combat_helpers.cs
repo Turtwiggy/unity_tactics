@@ -99,7 +99,7 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
+    public static int SpotQuality(Wiggy.registry ecs, map_manager map, UnitSpawnSystem uss, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
     {
       int quality = 0;
 
@@ -117,6 +117,11 @@ namespace Wiggy
       bool spot_is_flanked = SpotIsFlanked(map, player_pos, new_pos);
       if (spot_is_flanked)
         quality -= 1;
+
+      // Is the spot full?
+      var new_spot_idx = Grid.GetIndex(new_pos, map.width);
+      if (uss.units[new_spot_idx].IsSet)
+        quality = 0;
 
       return quality;
     }
@@ -154,6 +159,7 @@ namespace Wiggy
       // Random crit amount?
       // TODO
 
+      Debug.Log($"damage: {damage}");
       return damage;
     }
   }

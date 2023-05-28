@@ -66,18 +66,6 @@ namespace Wiggy
       bool to_contains_unit = unit_spawn_system.units[full_to].IsSet;
       bool to_contains_obstacle = map.obstacle_map[full_to].entities.Contains(EntityType.tile_type_wall);
 
-      if (action_selected.GetType() == typeof(Move) && to_contains_unit)
-      {
-        Debug.Log("cant move to another unit position");
-        return; // cant move to another unit position
-      }
-
-      if (action_selected.GetType() == typeof(Attack) && to_contains_obstacle)
-      {
-        Debug.Log("cant attack walls?");
-        return; // cant attack walls??
-      }
-
       var a = action_selected;
       var e = from_entity;
 
@@ -85,6 +73,8 @@ namespace Wiggy
       if (a.GetType() == typeof(Move))
       {
         if (path_from_ui == null)
+          return;
+        if (to_contains_unit)
           return;
 
         // Move is validated by the MoveActionVisuals
@@ -94,6 +84,11 @@ namespace Wiggy
       }
       else if (a.GetType() == typeof(Attack))
       {
+        if (!to_contains_unit)
+          return;
+        if (to_contains_obstacle)
+          return;
+
         // Target is validated by the monitor_combat_system
         var target = unit_spawn_system.units[full_to].Data;
         ecs.AddComponent<WantsToAttack>(e, new() { target = target });
@@ -108,10 +103,7 @@ namespace Wiggy
         var grenade_request_pos = Grid.IndexToPos(full_to, map.width, map.height);
         var grenade_dst_from_player = Vector2Int.Distance(pos, grenade_request_pos);
         if (grenade_dst_from_player > dex.amount)
-        {
-          Debug.Log("grenade throw out of range");
           return;
-        }
 
         Debug.Log("haha you can grenade anywhere on the map this is a bug");
         ecs.AddComponent<WantsToGrenade>(e, new() { index = full_to });
@@ -244,6 +236,5 @@ namespace Wiggy
         instantiated_path_visuals[i].transform.position = pos;
       }
     }
-
   }
 }
