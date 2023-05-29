@@ -64,6 +64,7 @@ namespace Wiggy
       ecs.RegisterComponent<AIMoveConsiderationComponent>();
       // events
       ecs.RegisterComponent<AttackEvent>();
+      ecs.RegisterComponent<ExplodesOnDeath>();
       // combat
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();
@@ -227,7 +228,6 @@ namespace Wiggy
       grenade_system.Update(ecs);
       heal_system.Update(ecs);
       instantiate_system.Update(ecs);
-      is_dead_system.Update(ecs);
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
       monitor_combat_events_system.Update(ecs);
@@ -235,6 +235,9 @@ namespace Wiggy
       monitor_particle_effect_system.Update(ecs);
       reload_system.Update(ecs);
       select_system.Update(ecs);
+
+      // kill entities last
+      is_dead_system.Update(ecs);
 
       // UI
       ui.DoUpdate();

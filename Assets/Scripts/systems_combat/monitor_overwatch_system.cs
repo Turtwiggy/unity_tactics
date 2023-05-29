@@ -74,7 +74,8 @@ namespace Wiggy
 
           // Send a damage event
           var evt = new AttackEvent();
-          evt.from = e;
+          evt.amount = new Optional<int>();
+          evt.from = new Optional<Entity>(e);
           evt.to = entity_that_activated;
           var ent = ecs.Create();
           ecs.AddComponent(ent, evt);

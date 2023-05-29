@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -30,6 +31,35 @@ namespace Wiggy
         Debug.Log("something died!");
 
         var dead = ecs.GetComponent<IsDeadComponent>(e);
+        var pos = ecs.GetComponent<GridPositionComponent>(e);
+
+        // Does this unit explode?
+        ExplodesOnDeath explode_default = default;
+        ref var explodes = ref ecs.TryGetComponent(e, ref explode_default, out var unit_explodes);
+        if (unit_explodes)
+        {
+          // Create an attack event around this unit
+          var neighbours = a_star.square_neighbour_indicies_with_diagonals(pos.position.x, pos.position.y, map.width, map.height);
+          for (int i = 0; i < neighbours.Length; i++)
+          {
+            var damage_idx = neighbours[i].Item2;
+            if (units.units[damage_idx].IsSet)
+            {
+              var defender_entity = units.units[damage_idx].Data;
+              AttackEvent evt = new()
+              {
+                // HMM - this entity is now dead
+                amount = new Optional<int>(10), // shuld not be hard coded
+                from = new Optional<Entity>(),
+                to = defender_entity
+              };
+              var ent = ecs.Create();
+              ecs.AddComponent(ent, evt);
+            }
+          }
+        }
+
+        // TODO: Does this unit drop loot? 
 
         InstantiatedComponent instance_default = default;
         ref var instance = ref ecs.TryGetComponent(e, ref instance_default, out var has_instance);
@@ -37,7 +67,6 @@ namespace Wiggy
           Object.Destroy(instance.instance);
 
         // Remove units record
-        var pos = ecs.GetComponent<GridPositionComponent>(e);
         var idx = Grid.GetIndex(pos.position.x, pos.position.y, map.width);
         units.units[idx].Reset();
 

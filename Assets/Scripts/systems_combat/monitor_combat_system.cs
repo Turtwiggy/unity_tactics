@@ -29,18 +29,22 @@ namespace Wiggy
         var e = array[i];
         var evt = ecs.GetComponent<AttackEvent>(e);
 
-        var attacker = evt.from;
+        var attacker = evt.from.Data;
         var defender = evt.to;
+        int damage = evt.amount.IsSet ? evt.amount.Data : 0;
 
         // Get the attacker to play an animation
         // Note: this shouldn't be here, probably
-        ref var instance = ref ecs.GetComponent<InstantiatedComponent>(attacker);
-        var gameObject = instance.instance;
-        var animator = gameObject.GetComponentInChildren<Animator>();
-        animation_handler.PlayAnimation(animator, "breakdance_ending_1", false);
+        if (evt.from.IsSet)
+        {
+          ref var instance = ref ecs.GetComponent<InstantiatedComponent>(attacker);
+          var gameObject = instance.instance;
+          var animator = gameObject.GetComponentInChildren<Animator>();
+          animation_handler.PlayAnimation(animator, "breakdance_ending_1", false);
 
-        // Calculate damage
-        int damage = CombatHelpers.CalculateDamage(ecs, map, attacker, defender);
+          // Calculate damage from the attacker
+          damage = CombatHelpers.CalculateDamage(ecs, map, attacker, defender);
+        }
 
         // deal damage
         ref var defender_health = ref ecs.GetComponent<HealthComponent>(defender);

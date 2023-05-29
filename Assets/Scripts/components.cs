@@ -111,12 +111,17 @@ namespace Wiggy
   {
   };
 
+  public struct ExplodesOnDeath
+  {
+  };
+
   // Events
 
   // attack event does the attack
   public struct AttackEvent
   {
-    public Entity from;
+    public Optional<Entity> from;
+    public Optional<int> amount;
     public Entity to;
   };
 

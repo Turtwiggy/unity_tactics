@@ -133,7 +133,10 @@ namespace Wiggy
       WeaponComponent weapon_default = default;
       ref var weapon = ref ecs.TryGetComponent(attacker, ref weapon_default, out var has_weapon);
       if (!has_weapon)
+      {
+        Debug.Log("entity does not have weapon; damage is 0");
         return 0;
+      }
 
       int damage = weapon.damage;
 
@@ -159,7 +162,7 @@ namespace Wiggy
       // Random crit amount?
       // TODO
 
-      Debug.Log($"damage: {damage}");
+      Debug.Log($"damage: {damage} in_range: {in_weapon_range}, flanked: {flanked}");
       return damage;
     }
   }

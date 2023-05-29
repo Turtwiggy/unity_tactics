@@ -36,7 +36,8 @@ namespace Wiggy
 
         // Create event
         AttackEvent evt = new();
-        evt.from = e;
+        evt.amount = new Optional<int>();
+        evt.from = new Optional<Entity>(e);
         evt.to = request.target;
         Debug.Log("creating attack event...");
 

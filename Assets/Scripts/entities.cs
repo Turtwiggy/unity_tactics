@@ -26,7 +26,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 20;
+      health.max = 50;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -77,7 +77,7 @@ namespace Wiggy
       ecs.AddComponent(e, actions);
 
       HealthComponent health = new();
-      health.max = 20;
+      health.max = 50;
       health.cur = health.max;
       ecs.AddComponent(e, health);
 
@@ -268,6 +268,14 @@ namespace Wiggy
       TeamComponent team = new();
       team.team = Team.NEUTRAL;
       ecs.AddComponent(e, team);
+
+      HealthComponent hp = new();
+      hp.cur = 1;
+      hp.max = 1;
+      ecs.AddComponent(e, hp);
+
+      ExplodesOnDeath expl = new();
+      ecs.AddComponent(e, expl);
 
       return e;
     }

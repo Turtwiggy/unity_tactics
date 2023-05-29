@@ -71,7 +71,8 @@ namespace Wiggy
             {
               AttackEvent evt = new()
               {
-                from = grenade,
+                amount = new Optional<int>(),
+                from = new Optional<Entity>(grenade),
                 to = defender_entity
               };
               var ent = ecs.Create();
