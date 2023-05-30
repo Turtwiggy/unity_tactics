@@ -309,23 +309,23 @@ namespace Wiggy
         // It's a for loop because there could be multiple instantiated items?
         //
 
-        for (int iidx = 0; iidx < map_manager.obstacle_map[i].instantiated.Count; iidx++)
-        {
-          var instance = map_manager.obstacle_map[i].instantiated[iidx];
+        // for (int iidx = 0; iidx < map_manager.obstacle_map[i].instantiated.Count; iidx++)
+        // {
+        //   var instance = map_manager.obstacle_map[i].instantiated[iidx];
 
-          instance.SetActive(false);
-          // settings.object_when_was_seen.SetActive(false);
-          // settings.object_when_hidden.SetActive(false);
+        //   instance.SetActive(false);
+        //   // settings.object_when_was_seen.SetActive(false);
+        //   // settings.object_when_hidden.SetActive(false);
 
-          if (fov_map_mask[i] == TileState.VISIBLE)
-            instance.SetActive(true);
+        //   if (fov_map_mask[i] == TileState.VISIBLE)
+        //     instance.SetActive(true);
 
-          // if (fov_map_mask[i] == TileState.HIDDEN)
-          //   settings.object_when_hidden.SetActive(false);
+        //   // if (fov_map_mask[i] == TileState.HIDDEN)
+        //   //   settings.object_when_hidden.SetActive(false);
 
-          // if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
-          //   settings.object_when_was_seen.SetActive(true);
-        }
+        //   // if (fov_map_mask[i] == TileState.PREVIOUSLY_SEEN)
+        //   //   settings.object_when_was_seen.SetActive(true);
+        // }
       }
 
       // Update Cursor

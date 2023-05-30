@@ -38,9 +38,9 @@ namespace Wiggy
     }
 
     // The voronoi map is a representation where the lines are "walls"
-    public static MapEntry[] GetVoronoiRepresentation(VoronoiBase graph, int width, int height, int size)
+    public static MapRepresentation[] GetVoronoiRepresentation(VoronoiBase graph, int width, int height, int size)
     {
-      MapEntry[] voronoi_map = map_manager.CreateBlankMap(width * height);
+      MapRepresentation[] voronoi_map = map_manager.CreateBlankMap(width * height);
 
       // Debug zone edges
       foreach (var e in graph.Edges)
@@ -84,7 +84,7 @@ namespace Wiggy
       return zones;
     }
 
-    public static List<IndexList> GetZones(List<Vector2Int> zone_center, MapEntry[] voronoi_map, int width, int height)
+    public static List<IndexList> GetZones(List<Vector2Int> zone_center, MapRepresentation[] voronoi_map, int width, int height)
     {
       var astar_map = map_manager.GameToAStar(voronoi_map, width, height);
 

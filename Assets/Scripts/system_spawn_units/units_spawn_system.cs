@@ -11,49 +11,57 @@ namespace Wiggy
       public GameObject enemy_prefab;
       public GameObject barrel_prefab;
       public GameObject trap_prefab;
+      public GameObject keycard_prefab;
+      public GameObject wall_prefab;
       public List<(int, EntityType)> entities;
     }
 
-    // x * y representation
-    public Optional<Entity>[] units { get; set; }
-
-    public map_manager map;
     private UnitSpawnSystemInit data;
 
-    public Entity CreatePlayer(Wiggy.registry ecs, Vector2Int gpos, string name)
+    public static Entity Create(Wiggy.registry ecs, map_manager map, EntityType type, Vector2Int gpos, string name, Optional<GameObject> go, Optional<GameObject> parent)
     {
       var idx = Grid.GetIndex(gpos, map.width);
       var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_player(ecs, pos, name, new Optional<GameObject>(data.player_prefab));
-      units[idx].Set(unit);
-      return units[idx].Data;
+
+      Entity u = default;
+      switch (type)
+      {
+        case EntityType.actor_player:
+          u = Entities.create_player(ecs, pos, name, go, parent);
+          break;
+        case EntityType.actor_enemy:
+          u = Entities.create_enemy(ecs, pos, name, go, parent);
+          break;
+        case EntityType.actor_barrel:
+          u = Entities.create_barrel(ecs, pos, name, go, parent);
+          break;
+        case EntityType.tile_type_wall:
+          u = Entities.create_wall(ecs, pos, name, go, parent);
+          break;
+        case EntityType.tile_type_trap:
+          u = Entities.create_trap(ecs, pos, name, go, parent);
+          break;
+        case EntityType.keycard:
+          u = Entities.create_keycard(ecs, pos, name, go, parent);
+          break;
+        default:
+          Debug.LogError("Failed to create entity");
+          break;
+      }
+
+      map.entity_map[idx].entities.Add(u);
+      return u;
     }
 
-    public Entity CreateEnemy(Wiggy.registry ecs, Vector2Int gpos, string name)
+    public void Spawn(Wiggy.registry ecs, map_manager map, EntityType type, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
-      var idx = Grid.GetIndex(gpos, map.width);
-      var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_enemy(ecs, pos, name, new Optional<GameObject>(data.enemy_prefab));
-      units[idx].Set(unit);
-      return units[idx].Data;
-    }
-
-    public Entity CreateBarrel(Wiggy.registry ecs, Vector2Int gpos, string name)
-    {
-      var idx = Grid.GetIndex(gpos, map.width);
-      var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_barrel(ecs, pos, name, new Optional<GameObject>(data.barrel_prefab));
-      units[idx].Set(unit);
-      return units[idx].Data;
-    }
-
-    public Entity CreateTrap(Wiggy.registry ecs, Vector2Int gpos, string name)
-    {
-      var idx = Grid.GetIndex(gpos, map.width);
-      var pos = Grid.IndexToPos(idx, map.width, map.height);
-      var unit = Entities.create_trap(ecs, pos, name, new Optional<GameObject>(data.trap_prefab));
-      units[idx].Set(unit);
-      return units[idx].Data;
+      var spawn = map_manager.GetFilteredMapEntities(data.entities, type);
+      for (int i = 0; i < spawn.Count; i++)
+      {
+        (int, EntityType) s = spawn[i];
+        var spot = Grid.IndexToPos(s.Item1, map.width, map.height);
+        Create(ecs, map, type, spot, name, prefab, parent);
+      }
     }
 
     public override void SetSignature(Wiggy.registry ecs)
@@ -67,43 +75,15 @@ namespace Wiggy
     public void Start(Wiggy.registry ecs, UnitSpawnSystemInit data)
     {
       this.data = data;
-      map = Object.FindObjectOfType<map_manager>();
+      var map = Object.FindObjectOfType<map_manager>();
 
-      units = new Optional<Entity>[map.width * map.height];
-      for (int i = 0; i < map.width * map.height; i++)
-        units[i] = new Optional<Entity>();
-
-      // Spawn players
-      var players_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_player);
-      foreach (var player in players_to_spawn)
-      {
-        var spot = Grid.IndexToPos(player.Item1, map.width, map.height);
-        CreatePlayer(ecs, spot, "Player");
-      }
-
-      // Spawn enemies
-      var enemies_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_enemy);
-      foreach (var enemy in enemies_to_spawn)
-      {
-        var spot = Grid.IndexToPos(enemy.Item1, map.width, map.height);
-        CreateEnemy(ecs, spot, "Enemy");
-      }
-
-      // Spawn explosive barrels
-      var barrels_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.actor_barrel);
-      foreach (var barrel in barrels_to_spawn)
-      {
-        var spot = Grid.IndexToPos(barrel.Item1, map.width, map.height);
-        CreateBarrel(ecs, spot, "Explosive Barrel");
-      }
-
-      // Spawn traps
-      var trap_to_spawn = map_manager.GetFilteredMapEntities(data.entities, EntityType.tile_type_trap);
-      foreach (var trap in trap_to_spawn)
-      {
-        var spot = Grid.IndexToPos(trap.Item1, map.width, map.height);
-        CreateTrap(ecs, spot, "Trap");
-      }
+      GameObject parent = new("Map Parent");
+      Spawn(ecs, map, EntityType.tile_type_wall, "Walls", new Optional<GameObject>(data.wall_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.actor_player, "Player", new Optional<GameObject>(data.player_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.actor_enemy, "Enemy", new Optional<GameObject>(data.enemy_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.actor_barrel, "Explosive Barrel", new Optional<GameObject>(data.barrel_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.tile_type_trap, "Trap", new Optional<GameObject>(data.trap_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.keycard, "Keycard", new Optional<GameObject>(data.keycard_prefab), new Optional<GameObject>(parent));
 
       // set players at start spots
       // CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));
@@ -130,17 +110,10 @@ namespace Wiggy
           // validation checks
 
           // unit in zone?
-          if (units[idx].IsSet)
+          if (map.entity_map.Length != 0)
           {
-            Debug.Log("Skipping tile; unit already existed");
+            Debug.Log("Skipping tile; something already existed");
             break;
-          }
-
-          // In obstacle?
-          if (map.obstacle_map[idx].entities.Contains(EntityType.tile_type_wall))
-          {
-            Debug.Log("Would spawn in obstacle... skipping");
-            continue;
           }
 
           var pos = Grid.IndexToPos(idx, map.width, map.height);

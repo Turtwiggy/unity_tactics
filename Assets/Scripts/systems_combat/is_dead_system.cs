@@ -6,7 +6,6 @@ namespace Wiggy
 {
   public class IsDeadSystem : ECSSystem
   {
-    private UnitSpawnSystem units;
     private map_manager map;
     private GameObject vfx_death;
 
@@ -17,9 +16,8 @@ namespace Wiggy
       ecs.SetSystemSignature<IsDeadSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss, GameObject vfx_death)
+    public void Start(Wiggy.registry ecs, GameObject vfx_death)
     {
-      units = uss;
       map = GameObject.FindObjectOfType<map_manager>();
       this.vfx_death = vfx_death;
     }
@@ -43,9 +41,10 @@ namespace Wiggy
           for (int i = 0; i < neighbours.Length; i++)
           {
             var damage_idx = neighbours[i].Item2;
-            if (units.units[damage_idx].IsSet)
+
+            var ents = map.entity_map[damage_idx].entities;
+            foreach (var defender_entity in ents)
             {
-              var defender_entity = units.units[damage_idx].Data;
               AttackEvent evt = new()
               {
                 // HMM - this entity is now dead
@@ -68,7 +67,7 @@ namespace Wiggy
 
         // Remove units record
         var idx = Grid.GetIndex(pos.position.x, pos.position.y, map.width);
-        units.units[idx].Reset();
+        map.entity_map[idx].entities.Remove(e);
 
         // Death Effects
         Entities.create_effect(ecs, pos.position, vfx_death, "Death Effect");

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Wiggy
@@ -5,6 +6,7 @@ namespace Wiggy
   public class map_visual_manager : MonoBehaviour
   {
     private map_manager map;
+
     [SerializeField]
     private MaterialPropertyBlock[] property;
 
@@ -26,8 +28,9 @@ namespace Wiggy
       {
         var pos = Grid.IndexToPos(i, map.width, map.height);
         var neighbour_idxs = a_star.square_neighbour_indicies_with_diagonals(pos.x, pos.y, map.width, map.height);
-        var obstacles = map.obstacle_map[i].instantiated;
 
+        // broken
+        List<GameObject> obstacles = new(); // map.obstacle_map[i].instantiated;
         if (obstacles.Count == 0)
           continue;
         var obstacle = obstacles[0];

@@ -26,7 +26,7 @@ namespace Wiggy
       main.RegisterSystemSignatures(main.ecs);
 
       // Setup obstacle map...
-      map.obstacle_map = new MapEntry[MAP_SIZE]; // a 3x3 map
+      map.obstacle_map = new MapRepresentation[MAP_SIZE]; // a 3x3 map
       for (int i = 0; i < MAP_SIZE; i++)
       {
         map.obstacle_map[i] = new() { entities = new() };
@@ -37,13 +37,13 @@ namespace Wiggy
       }
 
       // Setup unit map...
-      var units = main.unit_spawn_system;
-      units.map = map;
-      units.units = new Optional<Entity>[MAP_SIZE];
-      for (int i = 0; i < units.units.Length; i++)
-        units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player");
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
+      map.entity_map = new MapEntry[MAP_SIZE];
+      for (int i = 0; i < map.entity_map.Length; i++)
+      {
+        map.entity_map[i] = new() { entities = new() };
+      }
+      var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(1, 0), "Player", new Optional<GameObject>(), new Optional<GameObject>());
+      var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -76,7 +76,7 @@ namespace Wiggy
       main.RegisterSystemSignatures(main.ecs);
 
       // Setup obstacle map...
-      map.obstacle_map = new MapEntry[MAP_SIZE]; // a 3x3 map
+      map.obstacle_map = new MapRepresentation[MAP_SIZE]; // a 3x3 map
       for (int i = 0; i < MAP_SIZE; i++)
       {
         map.obstacle_map[i] = new() { entities = new() };
@@ -84,13 +84,13 @@ namespace Wiggy
       }
 
       // Setup unit map...
-      var units = main.unit_spawn_system;
-      units.map = map;
-      units.units = new Optional<Entity>[MAP_SIZE];
-      for (int i = 0; i < units.units.Length; i++)
-        units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(1, 0), "Player");
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
+      map.entity_map = new MapEntry[MAP_SIZE];
+      for (int i = 0; i < map.entity_map.Length; i++)
+      {
+        map.entity_map[i] = new() { entities = new() };
+      }
+      var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(1, 0), "Player", new Optional<GameObject>(), new Optional<GameObject>());
+      var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -122,7 +122,7 @@ namespace Wiggy
       main.RegisterSystemSignatures(main.ecs);
 
       // Setup obstacle map...
-      map.obstacle_map = new MapEntry[MAP_SIZE]; // a 3x3 map
+      map.obstacle_map = new MapRepresentation[MAP_SIZE]; // a 3x3 map
       for (int i = 0; i < MAP_SIZE; i++)
       {
         map.obstacle_map[i] = new() { entities = new() };
@@ -130,13 +130,13 @@ namespace Wiggy
       }
 
       // Setup unit map...
-      var units = main.unit_spawn_system;
-      units.map = map;
-      units.units = new Optional<Entity>[MAP_SIZE];
-      for (int i = 0; i < units.units.Length; i++)
-        units.units[i] = new();
-      var atk = units.CreatePlayer(main.ecs, new Vector2Int(0, 2), "Player");
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 2), "Enemy");
+      map.entity_map = new MapEntry[MAP_SIZE];
+      for (int i = 0; i < map.entity_map.Length; i++)
+      {
+        map.entity_map[i] = new() { entities = new() };
+      }
+      var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(0, 2), "Player", new Optional<GameObject>(), new Optional<GameObject>());
+      var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
@@ -168,19 +168,22 @@ namespace Wiggy
       main.RegisterSystemSignatures(main.ecs);
 
       // Setup unit map...
-      var units = main.unit_spawn_system;
-      units.map = map;
-      units.units = new Optional<Entity>[MAP_SIZE];
-      for (int i = 0; i < units.units.Length; i++)
-        units.units[i] = new();
+      map.entity_map = new MapEntry[MAP_SIZE];
+      for (int i = 0; i < map.entity_map.Length; i++)
+      {
+        map.entity_map[i] = new() { entities = new() };
+      }
 
       // Setup obstacle map...
-      map.obstacle_map = new MapEntry[MAP_SIZE]; // a 3x3 map
+      map.obstacle_map = new MapRepresentation[MAP_SIZE]; // a 3x3 map
       for (int i = 0; i < MAP_SIZE; i++)
+      {
         map.obstacle_map[i] = new() { entities = new() };
+        map.obstacle_map[i].entities.Add(EntityType.tile_type_floor);
+      }
 
       // Generate all neighbours around a unit
-      var def = units.CreateEnemy(main.ecs, new Vector2Int(1, 1), "Enemy");
+      var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 1), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
       var def_pos = main.ecs.GetComponent<GridPositionComponent>(def).position;
       var idxs = a_star.square_neighbour_indicies_with_diagonals(1, 1, map.width, map.height);
 

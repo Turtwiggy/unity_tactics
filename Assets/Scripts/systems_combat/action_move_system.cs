@@ -15,7 +15,6 @@ namespace Wiggy
   {
     public UnityEvent<MoveInformation> something_moved;
     private map_manager map;
-    private UnitSpawnSystem unit_spawn_system;
 
     // animations
     private MonoBehaviour main;
@@ -33,7 +32,6 @@ namespace Wiggy
     {
       this.main = main;
       this.map = Object.FindObjectOfType<map_manager>();
-      this.unit_spawn_system = main.unit_spawn_system;
       this.something_moved = new();
     }
 
@@ -70,7 +68,7 @@ namespace Wiggy
         }
 
         Debug.Log("Moving..");
-        MoveActionLogic(ecs, from, request.path.ToArray());
+        MoveActionLogic(ecs, e, from, request.path.ToArray());
         Debug.Log("Move action done.");
 
         // Request is processed
@@ -78,7 +76,7 @@ namespace Wiggy
       }
     }
 
-    private void MoveActionLogic(Wiggy.registry ecs, int from, Vector2Int[] path)
+    private void MoveActionLogic(Wiggy.registry ecs, Entity e, int from, Vector2Int[] path)
     {
       if (path == null || path.Length <= 1)
       {
@@ -87,32 +85,50 @@ namespace Wiggy
       }
       var final = path[^1];
       var to = Grid.GetIndex(final, map.width);
+      var to_ents = map.entity_map[to].entities;
+      var from_ents = map.entity_map[from].entities;
 
-      if (unit_spawn_system.units[to].IsSet)
+      // Does the "to" spot contain a humanoid?
+      bool to_contains_humanoid = false;
+      foreach (var to_ent in to_ents)
       {
-        Debug.Log($"EID: {unit_spawn_system.units[from].Data.id} tried to move to already full spot");
+        HumanoidComponent humanoid_default = default;
+        ecs.TryGetComponent(to_ent, ref humanoid_default, out var is_humanoid);
+        if (is_humanoid)
+          to_contains_humanoid = true;
+      }
+      if (to_contains_humanoid)
+      {
+        Debug.Log($"EID: {e.id} tried to move to spot containing a humanoid");
         return;
       }
 
-      if (!unit_spawn_system.units[from].IsSet)
+      // Does the "from" spot contain the correct entity?
+      int index = -1;
+      for (int i = 0; i < from_ents.Count; i++)
       {
-        Debug.Log("Entity tried to move 'from' a spot that doesnt contain an entity");
+        Entity from_ent = from_ents[i];
+        if (from_ent.id == e.id)
+          index = i;
+      }
+      if (index == -1)
+      {
+        Debug.Log("Entity tried to move 'from' a spot that doesnt contain the correct entity");
         return;
       }
 
       // Update representation
-      var go = unit_spawn_system.units[from].Data;
-      unit_spawn_system.units[to].Set(go);
-      unit_spawn_system.units[from].Reset();
+      map.entity_map[from].entities.RemoveAt(index);
+      map.entity_map[to].entities.Add(e);
 
       // Update component data
-      ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(go);
+      ref var grid_pos = ref ecs.GetComponent<GridPositionComponent>(e);
       grid_pos.position = Grid.IndexToPos(to, map.width, map.height);
 
       // Send event
       MoveInformation move_info = new();
       move_info.path = path;
-      move_info.e = go;
+      move_info.e = e;
       something_moved.Invoke(move_info);
 
       // Start animation
@@ -126,7 +142,7 @@ namespace Wiggy
       // }
 
       Debug.Log("Starting coroutine");
-      var instance = ecs.GetComponent<InstantiatedComponent>(go);
+      var instance = ecs.GetComponent<InstantiatedComponent>(e);
       // animation_go = instance.instance;
       // animation_final = path[^1];
       var animation_coroutine = Animate.AlongPath(instance.instance, path, map.size);

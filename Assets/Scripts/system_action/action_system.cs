@@ -63,8 +63,27 @@ namespace Wiggy
       //
       // Actions that can resolve by clicking the map
       //
-      bool to_contains_unit = unit_spawn_system.units[full_to].IsSet;
+
+      // Does destination contain an obstacle?
+      // WARNING: obstacle_map is the *starting* representation
       bool to_contains_obstacle = map.obstacle_map[full_to].entities.Contains(EntityType.tile_type_wall);
+
+      // Does destination contain a unit?
+      bool to_contains_unit = false;
+      int to_contains_index = -1;
+      var ents = map.entity_map[full_to].entities;
+      for (int i = 0; i < ents.Count; i++)
+      {
+        Entity ent = ents[i];
+        HumanoidComponent humanoid_default = default;
+        ecs.TryGetComponent(ent, ref humanoid_default, out var is_humanoid);
+        if (is_humanoid)
+        {
+          to_contains_unit = true;
+          to_contains_index = i;
+          break;
+        }
+      }
 
       var a = action_selected;
       var e = from_entity;
@@ -90,7 +109,7 @@ namespace Wiggy
           return;
 
         // Target is validated by the monitor_combat_system
-        var target = unit_spawn_system.units[full_to].Data;
+        var target = map.entity_map[full_to].entities[to_contains_index];
         ecs.AddComponent<WantsToAttack>(e, new() { target = target });
       }
       else if (a.GetType() == typeof(Grenade))

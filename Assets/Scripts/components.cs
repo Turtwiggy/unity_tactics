@@ -24,6 +24,11 @@ namespace Wiggy
     //
   };
 
+  public struct KeycardComponent
+  {
+    //
+  };
+
   public struct ParticleEffectComponent
   {
     //
@@ -41,6 +46,11 @@ namespace Wiggy
     public Team team;
   };
 
+  // Is a humanoid like character
+  public struct HumanoidComponent
+  {
+  };
+
   // Other
 
   public struct GridPositionComponent
@@ -53,6 +63,7 @@ namespace Wiggy
   public struct ToBeInstantiatedComponent
   {
     public GameObject prefab;
+    public GameObject parent;
     public string name;
   };
 
@@ -115,6 +126,10 @@ namespace Wiggy
   {
   };
 
+  public struct TrapAbleToSpring
+  {
+  };
+
   // Events
 
   // attack event does the attack
@@ -132,4 +147,26 @@ namespace Wiggy
     public int amount;
   };
 
+  // Items / Inventory
+
+  struct AbleToBePickedUp
+  {
+  };
+  struct InBackpackComponent
+  {
+    public Entity parent;
+  };
+  struct WantsToPickup
+  {
+    public List<Entity> items;
+  };
+  public struct Use
+  {
+    public Entity entity;
+    public List<Entity> targets;
+  };
+  public struct WantsToUse
+  {
+    public List<Use> items;
+  }
 };

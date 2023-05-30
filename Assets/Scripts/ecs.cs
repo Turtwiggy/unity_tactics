@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -63,6 +64,9 @@ namespace Wiggy
     {
       int new_index = size;
 
+      if (new_index >= component_array.Length)
+        UnityEngine.Debug.LogError("Component array out of space!");
+
       entity_to_index_map[e] = new_index;
       index_to_entity_map[new_index] = e;
       component_array[new_index] = component;
@@ -100,7 +104,7 @@ namespace Wiggy
     {
       // var exists = entity_to_index_map.TryGetValue(e, out _);
       // if (!exists)
-      //   Debug.LogError($"{typeof(T)} does not exist");
+      //   UnityEngine.Debug.LogError($"{typeof(T)} does not exist");
       return ref component_array[entity_to_index_map[e]];
     }
 
@@ -273,8 +277,8 @@ namespace Wiggy
 
   public class registry
   {
-    private const int max_entities = 5000;
-    private const int max_components = 32;
+    private const int max_entities = 4096;
+    private const int max_components = 512;
     public EntityManager entity_manager { get; private set; }
     public ComponentManager component_manager { get; private set; }
     public SystemManager system_manager { get; private set; }

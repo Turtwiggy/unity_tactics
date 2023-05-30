@@ -29,6 +29,9 @@ namespace Wiggy
 
     // shield,
 
+    // misc
+    keycard,
+
     // consumable
     // potion,
     // scroll_damage_nearest,

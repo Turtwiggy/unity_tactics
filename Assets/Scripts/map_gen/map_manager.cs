@@ -4,14 +4,15 @@ using System.Collections.Generic;
 namespace Wiggy
 {
   [System.Serializable]
+  public class MapRepresentation
+  {
+    public List<EntityType> entities = new();
+  };
+
+  [System.Serializable]
   public class MapEntry
   {
-    // 0 is bottom, n is top
-    [SerializeField]
-    public List<EntityType> entities = new();
-
-    [SerializeField]
-    public List<GameObject> instantiated = new();
+    public List<Entity> entities = new();
   };
 
   [System.Serializable]
@@ -24,8 +25,9 @@ namespace Wiggy
   public class map_manager : MonoBehaviour
   {
     // Map representations
-    public MapEntry[] obstacle_map;
-    public MapEntry[] voronoi_map;
+    public MapRepresentation[] obstacle_map;
+    public MapRepresentation[] voronoi_map;
+    public MapEntry[] entity_map;
 
     // Interesting spots
     public List<IndexList> voronoi_zones;
@@ -58,7 +60,7 @@ namespace Wiggy
     public int zone_seed = 0;
     public int zone_size = 5;
 
-    public static astar_cell[] GameToAStar(MapEntry[] map, int x_max, int y_max)
+    public static astar_cell[] GameToAStar(MapRepresentation[] map, int x_max, int y_max)
     {
       astar_cell[] astar = new astar_cell[map.Length];
 
@@ -73,9 +75,9 @@ namespace Wiggy
     }
 
     // Create an X by Y map entirely of floor
-    public static MapEntry[] CreateBlankMap(int dim)
+    public static MapRepresentation[] CreateBlankMap(int dim)
     {
-      MapEntry[] map = new MapEntry[dim];
+      MapRepresentation[] map = new MapRepresentation[dim];
       for (int i = 0; i < map.Length; i++)
       {
         map[i] = new()
@@ -88,7 +90,7 @@ namespace Wiggy
     }
 
     // Given a spot on the map, generate X connected cells
-    private List<Vector2Int> GenerateConnectedSpots(MapEntry[] map, Vector2Int spot, int amount)
+    private List<Vector2Int> GenerateConnectedSpots(MapRepresentation[] map, Vector2Int spot, int amount)
     {
       int range = amount + 1; // arbitrarily chosen
       int index = Grid.GetIndex(spot, width);
@@ -120,11 +122,9 @@ namespace Wiggy
       generated_obstacle_holder.parent = generated_map_holder;
 
       // make entirely floor
-      obstacle_map = map_manager.CreateBlankMap(width * height);
-
+      obstacle_map = CreateBlankMap(width * height);
       if (generate_obstacles)
         obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
-
       if (remove_isolated)
         map_gen_obstacles.ObstaclePostProcessing(obstacle_map, remove_isolated_count, width, height);
 
@@ -153,6 +153,12 @@ namespace Wiggy
         ext_spots.Add(pos);
       }
 
+      // Create entity map
+      entity_map = new MapEntry[width * height];
+      for (int i = 0; i < entity_map.Length; i++)
+        entity_map[i] = new() { entities = new() };
+
+
       // Make borders of map obstacles
       // GenerateWallBorders();
 
@@ -173,11 +179,11 @@ namespace Wiggy
       // Unity side of things
       //
 
-      InstantiateMapEntry(obstacle_map, EntityType.tile_type_wall, wall_prefab, generated_obstacle_holder);
+      // InstantiateMapEntry(obstacle_map, EntityType.tile_type_wall, wall_prefab, generated_obstacle_holder);
       // InstantiateMapEntry(voronoi_map, EntityType.tile_type_wall, debug_zone_edge_prefab, map_holder.transform);
       // InstantiateSpots(poisson_points, debug_zone_core_prefab);
-      InstantiateSpots(srt_spots, debug_start_points_prefab);
-      InstantiateSpots(ext_spots, debug_end_points_prefab);
+      DebugInstantiateSpots(srt_spots, debug_start_points_prefab);
+      DebugInstantiateSpots(ext_spots, debug_end_points_prefab);
 
       // Visualize the zones
       // Random.InitState(1);
@@ -185,31 +191,11 @@ namespace Wiggy
       // {
       //   var sr = debug_zone_edge_prefab.GetComponentInChildren<SpriteRenderer>();
       //   sr.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-      //   InstantiateSpotsFromIdxs(voronoi_map, voronoi_zones[i], debug_zone_edge_prefab);
+      //   DebugInstantiateSpotsFromIdxs(voronoi_map, voronoi_zones[i], debug_zone_edge_prefab);
       // }
     }
 
-    public void InstantiateMapEntry(MapEntry[] map, EntityType type, GameObject prefab, Transform parent)
-    {
-      for (int i = 0; i < map.Length; i++)
-      {
-        var entry = map[i];
-        if (entry.entities.Contains(type))
-        {
-          var pos = Grid.IndexToPos(i, width, height);
-          var wpos = Grid.GridSpaceToWorldSpace(pos, size);
-          wpos.y += 0.5f; // hmm
-
-          var go = Instantiate(prefab, wpos, Quaternion.identity, parent);
-          go.transform.rotation = Quaternion.Euler(0, 180, 0); // 180 because the default unity cube is upsidedown
-          go.transform.name = "ObjectIndex: " + i;
-
-          // This should probably be removed for the ecs system
-          map[i].instantiated.Add(go);
-        }
-      }
-    }
-    public void InstantiateSpots(List<Vector2Int> spots, GameObject prefab)
+    public void DebugInstantiateSpots(List<Vector2Int> spots, GameObject prefab)
     {
       for (int i = 0; i < spots.Count; i++)
       {
@@ -219,7 +205,8 @@ namespace Wiggy
         obj.transform.parent = generated_map_holder;
       }
     }
-    public void InstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
+
+    public void DebugInstantiateSpotsFromIdxs<T>(T[] map, List<int> idxs, GameObject prefab)
     {
       for (int j = 0; j < idxs.Count; j++)
       {

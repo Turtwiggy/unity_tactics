@@ -99,7 +99,7 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, UnitSpawnSystem uss, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
+    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
     {
       int quality = 0;
 
@@ -118,10 +118,17 @@ namespace Wiggy
       if (spot_is_flanked)
         quality -= 1;
 
-      // Is the spot full?
+      // Does the spot contain another actor?
       var new_spot_idx = Grid.GetIndex(new_pos, map.width);
-      if (uss.units[new_spot_idx].IsSet)
-        quality = 0;
+      var entities = map.entity_map[new_spot_idx].entities;
+      foreach (var e in entities)
+      {
+        // is a humanoid standing on a tile?
+        HumanoidComponent humanoid_default = default;
+        ecs.TryGetComponent(e, ref humanoid_default, out var is_humanoid);
+        if (is_humanoid)
+          return 0;
+      }
 
       return quality;
     }

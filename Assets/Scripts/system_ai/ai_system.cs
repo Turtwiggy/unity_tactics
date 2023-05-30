@@ -79,7 +79,7 @@ namespace Wiggy
         {
           var cur_pos = position.position;
           var new_pos = spots[i];
-          int quality = CombatHelpers.SpotQuality(ecs, map, spawner, cur_pos, new_pos, player_pos);
+          int quality = CombatHelpers.SpotQuality(ecs, map, cur_pos, new_pos, player_pos);
 
           if (new_pos.x == player_pos.x && new_pos.y == player_pos.y)
             continue; // do not move to players position

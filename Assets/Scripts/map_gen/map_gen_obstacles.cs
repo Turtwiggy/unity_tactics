@@ -7,10 +7,10 @@ namespace Wiggy
 
   public static class map_gen_obstacles
   {
-    public static MapEntry[] GenerateObstacles(int width, int height, int iterations, int seed)
+    public static MapRepresentation[] GenerateObstacles(int width, int height, int iterations, int seed)
     {
       int dim = width * height;
-      MapEntry[] map = map_manager.CreateBlankMap(dim);
+      MapRepresentation[] map = map_manager.CreateBlankMap(dim);
       UnityEngine.Random.InitState(seed);
 
       // Make the map completely chaos, with 55% set to floor
@@ -26,7 +26,7 @@ namespace Wiggy
       // iteratively apply the cellular atomata rules
       for (int i = 0; i < iterations; i++)
       {
-        var newtiles = new MapEntry[map.Length];
+        var newtiles = new MapRepresentation[map.Length];
 
         for (int idx = 0; idx < dim; idx++)
         {
@@ -61,7 +61,7 @@ namespace Wiggy
 
     // Problem: <4 should not be removing some stuff
     // need to take a copy of map and not iterate over changing map
-    public static void ObstaclePostProcessing(MapEntry[] map, int count, int width, int height)
+    public static void ObstaclePostProcessing(MapRepresentation[] map, int count, int width, int height)
     {
       for (int idx = 0; idx < map.Length; idx++)
       {
@@ -81,7 +81,7 @@ namespace Wiggy
       }
     }
 
-    public static Vector2Int StartPoint(MapEntry[] map, int width, int height)
+    public static Vector2Int StartPoint(MapRepresentation[] map, int width, int height)
     {
       // Find a starting point; start at the middle and walk left until we find an open tile
       var pos = new Vector2Int(width / 2, height / 2);
@@ -98,7 +98,7 @@ namespace Wiggy
       return pos;
     }
 
-    public static Vector2Int ExitPoint(MapEntry[] map, int width, int height)
+    public static Vector2Int ExitPoint(MapRepresentation[] map, int width, int height)
     {
       // Find all tiles we can reach from the starting point
       var start = StartPoint(map, width, height);

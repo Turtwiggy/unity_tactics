@@ -35,12 +35,12 @@ namespace Wiggy
 
         // Get the attacker to play an animation
         // Note: this shouldn't be here, probably
-        if (evt.from.IsSet)
+        if (evt.from.IsSet && !evt.amount.IsSet)
         {
-          ref var instance = ref ecs.GetComponent<InstantiatedComponent>(attacker);
-          var gameObject = instance.instance;
-          var animator = gameObject.GetComponentInChildren<Animator>();
-          animation_handler.PlayAnimation(animator, "breakdance_ending_1", false);
+          // ref var instance = ref ecs.GetComponent<InstantiatedComponent>(attacker);
+          // var gameObject = instance.instance;
+          // var animator = gameObject.GetComponentInChildren<Animator>();
+          // animation_handler.PlayAnimation(animator, "breakdance_ending_1", false);
 
           // Calculate damage from the attacker
           damage = CombatHelpers.CalculateDamage(ecs, map, attacker, defender);

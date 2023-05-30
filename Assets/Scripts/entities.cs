@@ -4,21 +4,10 @@ namespace Wiggy
 {
   public static class Entities
   {
-    public static Entity create_player(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    public static Entity create_player(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
-
-      GridPositionComponent gpc = new();
-      gpc.position = spot;
-      ecs.AddComponent(e, gpc);
-
-      if (prefab.IsSet)
-      {
-        ToBeInstantiatedComponent tbic = new();
-        tbic.prefab = prefab.Data;
-        tbic.name = name;
-        ecs.AddComponent(e, tbic);
-      }
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
       ActionsComponent actions = new();
       actions.allowed_actions_per_turn = 2;
@@ -46,8 +35,11 @@ namespace Wiggy
       ecs.AddComponent(e, team);
 
       DexterityComponent dex = new();
-      dex.amount = 5;
+      dex.amount = 100;
       ecs.AddComponent(e, dex);
+
+      HumanoidComponent humanoid = new();
+      ecs.AddComponent(e, humanoid);
 
       PlayerComponent player = new();
       ecs.AddComponent(e, player);
@@ -55,21 +47,10 @@ namespace Wiggy
       return e;
     }
 
-    public static Entity create_enemy(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    public static Entity create_enemy(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
-
-      GridPositionComponent gpc = new();
-      gpc.position = spot;
-      ecs.AddComponent(e, gpc);
-
-      if (prefab.IsSet)
-      {
-        ToBeInstantiatedComponent tbic = new();
-        tbic.prefab = prefab.Data;
-        tbic.name = name;
-        ecs.AddComponent(e, tbic);
-      }
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
       ActionsComponent actions = new();
       actions.allowed_actions_per_turn = 2;
@@ -92,6 +73,9 @@ namespace Wiggy
 
       add_weapon_component(ecs, e, EntityType.pistol);
 
+      HumanoidComponent humanoid = new();
+      ecs.AddComponent(e, humanoid);
+
       TeamComponent team = new();
       team.team = Team.ENEMY;
       ecs.AddComponent(e, team);
@@ -110,64 +94,34 @@ namespace Wiggy
       return e;
     }
 
-    public static Entity create_grenade(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    public static Entity create_grenade(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
-
-      GridPositionComponent gpc = new();
-      gpc.position = spot;
-      ecs.AddComponent(e, gpc);
-
-      if (prefab.IsSet)
-      {
-        ToBeInstantiatedComponent tbic = new();
-        tbic.prefab = prefab.Data;
-        tbic.name = name;
-        ecs.AddComponent(e, tbic);
-      }
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
       add_weapon_component(ecs, e, EntityType.grenade);
 
       return e;
     }
 
-    public static Entity create_cursor(Wiggy.registry ecs, GameObject prefab)
+    public static Entity create_cursor(Wiggy.registry ecs, GameObject prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
-
-      GridPositionComponent gpc = new();
-      gpc.position = new Vector2Int(0, 0);
-      ecs.AddComponent(e, gpc);
+      MakeWorldEntity(ecs, e, new Vector2Int(0, 0), "Cursor", new Optional<GameObject>(prefab), parent);
 
       CursorComponent cc = new();
       ecs.AddComponent(e, cc);
 
-      ToBeInstantiatedComponent tbi = new();
-      tbi.prefab = prefab;
-      tbi.name = "cursor";
-      ecs.AddComponent(e, tbi);
-
       return e;
     }
+
 
     // vfx
 
     public static Entity create_effect(Wiggy.registry ecs, Vector2Int spot, GameObject prefab, string name)
     {
       var e = ecs.Create();
-
-      ToBeInstantiatedComponent effect = new()
-      {
-        name = name,
-        prefab = prefab
-      };
-      ecs.AddComponent(e, effect);
-
-      GridPositionComponent effect_position = new()
-      {
-        position = spot
-      };
-      ecs.AddComponent(e, effect_position);
+      MakeWorldEntity(ecs, e, spot, name, new Optional<GameObject>(prefab), new Optional<GameObject>());
 
       ParticleEffectComponent pfe = new();
       ecs.AddComponent(e, pfe);
@@ -246,21 +200,19 @@ namespace Wiggy
 
     // environment
 
-    public static Entity create_barrel(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+
+    public static Entity create_wall(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
-      GridPositionComponent gpc = new();
-      gpc.position = spot;
-      ecs.AddComponent(e, gpc);
+      return e;
+    }
 
-      if (prefab.IsSet)
-      {
-        ToBeInstantiatedComponent tbic = new();
-        tbic.prefab = prefab.Data;
-        tbic.name = name;
-        ecs.AddComponent(e, tbic);
-      }
+    public static Entity create_barrel(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
+    {
+      var e = ecs.Create();
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
       BarrelComponent barrel = new();
       ecs.AddComponent(e, barrel);
@@ -280,10 +232,49 @@ namespace Wiggy
       return e;
     }
 
-    public static Entity create_trap(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab)
+    public static Entity create_keycard(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
     {
       var e = ecs.Create();
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
 
+      KeycardComponent keycard = new();
+      ecs.AddComponent(e, keycard);
+
+      TeamComponent team = new();
+      team.team = Team.NEUTRAL;
+      ecs.AddComponent(e, team);
+
+      AbleToBePickedUp pickedup = new();
+      ecs.AddComponent(e, pickedup);
+
+      return e;
+    }
+
+    public static Entity create_trap(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
+    {
+      var e = ecs.Create();
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
+
+      TrapComponent trap = new();
+      ecs.AddComponent(e, trap);
+
+      TrapAbleToSpring spring = new();
+      ecs.AddComponent(e, spring);
+
+      TeamComponent team = new();
+      team.team = Team.NEUTRAL;
+      ecs.AddComponent(e, team);
+
+      HealthComponent hp = new();
+      hp.cur = 1;
+      hp.max = 1;
+      ecs.AddComponent(e, hp);
+
+      return e;
+    }
+
+    private static void MakeWorldEntity(Wiggy.registry ecs, Entity e, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
+    {
       GridPositionComponent gpc = new();
       gpc.position = spot;
       ecs.AddComponent(e, gpc);
@@ -293,18 +284,9 @@ namespace Wiggy
         ToBeInstantiatedComponent tbic = new();
         tbic.prefab = prefab.Data;
         tbic.name = name;
+        tbic.parent = parent.Data;
         ecs.AddComponent(e, tbic);
       }
-
-      TrapComponent trap = new();
-      ecs.AddComponent(e, trap);
-
-      TeamComponent team = new();
-      team.team = Team.NEUTRAL;
-      ecs.AddComponent(e, team);
-
-      return e;
     }
-
   }
 }

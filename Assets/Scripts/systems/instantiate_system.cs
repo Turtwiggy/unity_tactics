@@ -22,7 +22,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      foreach (var e in entities.ToArray()) // ReadOnly Copy
+      foreach (var e in entities.ToArray())
       {
         var p = ecs.GetComponent<GridPositionComponent>(e);
         var r = ecs.GetComponent<ToBeInstantiatedComponent>(e);

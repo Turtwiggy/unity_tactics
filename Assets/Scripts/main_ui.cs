@@ -107,36 +107,38 @@ namespace Wiggy
       // Hover UI
       //
       var index = Grid.GetIndex(main.camera.grid_index, main.map.width);
-      var entity = main.unit_spawn_system.units[index];
-      if (entity.IsSet)
+      var entities = main.map.entity_map[index].entities;
+      if (entities.Count > 0)
       {
-        TextMeshProUGUI hovered_name = hovered_enemy_text;
-        TextMeshProUGUI hovered_hp = hovered_enemy_hp_text;
-        TextMeshProUGUI hovered_weapon = hovered_enemy_weapon_text;
+        var entity = entities[0];
+        TextMeshProUGUI hovered_name = hovered_player;
+        TextMeshProUGUI hovered_hp = hovered_player_hp_text;
+        TextMeshProUGUI hovered_weapon = hovered_player_weapon_text;
 
-        var team = main.ecs.GetComponent<TeamComponent>(entity.Data);
-        if (team.team != Team.ENEMY)
+        TeamComponent default_team = default;
+        var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
+        if (has_team && team.team == Team.ENEMY)
         {
-          hovered_name = hovered_player;
-          hovered_hp = hovered_player_hp_text;
-          hovered_weapon = hovered_player_weapon_text;
+          hovered_name = hovered_enemy_text;
+          hovered_hp = hovered_enemy_hp_text;
+          hovered_weapon = hovered_enemy_weapon_text;
         }
 
-        var unity = main.ecs.GetComponent<InstantiatedComponent>(entity.Data);
-        hovered_name.SetText(unity.instance.name);
+        var unity = main.ecs.GetComponent<InstantiatedComponent>(entity);
+        hovered_name.SetText(unity.instance.name + $" ({entities.Count})");
 
         // may or may not have weapon equipped
         HealthComponent health_default = default;
-        ref var hp = ref main.ecs.TryGetComponent(entity.Data, ref health_default, out var has_hp);
+        ref var hp = ref main.ecs.TryGetComponent(entity, ref health_default, out var has_hp);
         if (has_hp)
-          hovered_hp.SetText(hp.cur.ToString());
+          hovered_hp.SetText("HP: " + hp.cur.ToString());
         else
           hovered_hp.SetText("No health");
 
         WeaponComponent weapon_default = default;
-        ref var weapon = ref main.ecs.TryGetComponent(entity.Data, ref weapon_default, out var has_weapon);
+        ref var weapon = ref main.ecs.TryGetComponent(entity, ref weapon_default, out var has_weapon);
         if (has_weapon)
-          hovered_weapon.SetText(weapon.display_name);
+          hovered_weapon.SetText("Weapon: " + weapon.display_name);
         else
           hovered_weapon.SetText("No weapon");
       }
@@ -146,8 +148,8 @@ namespace Wiggy
         hovered_enemy_hp_text.SetText("");
         hovered_enemy_weapon_text.SetText("");
         hovered_player.SetText("Nothing hovered");
-        hovered_player_hp_text.SetText("");
-        hovered_player_weapon_text.SetText("");
+        hovered_player_hp_text.SetText("No health");
+        hovered_player_weapon_text.SetText("No weapon");
       }
 
       // Debug which action is selected from UI

@@ -13,6 +13,7 @@ namespace Wiggy
     public GameObject trap_prefab;
     public GameObject selected_cursor_prefab;
     public GameObject move_prefab;
+    public GameObject keycard_prefab;
     public Texture2D map_texture;
 
     // unity-based systems
@@ -37,11 +38,14 @@ namespace Wiggy
     public MonitorCombatEventsSystem monitor_combat_events_system;
     public MonitorOverwatchSystem monitor_overwatch_system;
     public MonitorParticleEffectSystem monitor_particle_effect_system;
+    public MonitorTrapSystem monitor_trap_system;
     public MoveSystem move_system;
     public OverwatchSystem overwatch_system;
+    public PickUpItemSystem pickup_item_system;
     public ReloadSystem reload_system;
     public SelectSystem select_system;
     public UnitSpawnSystem unit_spawn_system;
+    public UseItemSystem use_item_system;
 
     private GameObject vfx_death;
     private GameObject vfx_grenade;
@@ -73,12 +77,15 @@ namespace Wiggy
       ecs.RegisterComponent<TeamComponent>();
       ecs.RegisterComponent<OverwatchStatus>();
       ecs.RegisterComponent<IsDeadComponent>();
+      ecs.RegisterComponent<TrapAbleToSpring>();
       // entity tags
       ecs.RegisterComponent<BarrelComponent>();
       ecs.RegisterComponent<CursorComponent>();
+      ecs.RegisterComponent<KeycardComponent>();
       ecs.RegisterComponent<PlayerComponent>();
       ecs.RegisterComponent<ParticleEffectComponent>();
       ecs.RegisterComponent<TrapComponent>();
+      ecs.RegisterComponent<HumanoidComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
       // Requests
@@ -88,6 +95,11 @@ namespace Wiggy
       ecs.RegisterComponent<WantsToMove>();
       ecs.RegisterComponent<WantsToOverwatch>();
       ecs.RegisterComponent<WantsToReload>();
+      ecs.RegisterComponent<WantsToPickup>();
+      ecs.RegisterComponent<WantsToUse>();
+      // Items
+      ecs.RegisterComponent<AbleToBePickedUp>();
+      ecs.RegisterComponent<InBackpackComponent>();
     }
     public void RegisterSystems(Wiggy.registry ecs)
     {
@@ -103,11 +115,14 @@ namespace Wiggy
       monitor_combat_events_system = ecs.RegisterSystem<MonitorCombatEventsSystem>();
       monitor_overwatch_system = ecs.RegisterSystem<MonitorOverwatchSystem>();
       monitor_particle_effect_system = ecs.RegisterSystem<MonitorParticleEffectSystem>();
+      monitor_trap_system = ecs.RegisterSystem<MonitorTrapSystem>();
       move_system = ecs.RegisterSystem<MoveSystem>();
       overwatch_system = ecs.RegisterSystem<OverwatchSystem>();
+      pickup_item_system = ecs.RegisterSystem<PickUpItemSystem>();
       reload_system = ecs.RegisterSystem<ReloadSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
+      use_item_system = ecs.RegisterSystem<UseItemSystem>();
     }
     public void RegisterSystemSignatures(Wiggy.registry ecs)
     {
@@ -123,11 +138,14 @@ namespace Wiggy
       monitor_combat_events_system.SetSignature(ecs);
       monitor_overwatch_system.SetSignature(ecs);
       monitor_particle_effect_system.SetSignature(ecs);
+      monitor_trap_system.SetSignature(ecs);
       move_system.SetSignature(ecs);
       overwatch_system.SetSignature(ecs);
+      pickup_item_system.SetSignature(ecs);
       reload_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
       unit_spawn_system.SetSignature(ecs);
+      use_item_system.SetSignature(ecs);
     }
 
     void Start()
@@ -157,6 +175,8 @@ namespace Wiggy
         enemy_prefab = enemy_prefab,
         barrel_prefab = barrel_prefab,
         trap_prefab = trap_prefab,
+        wall_prefab = map.wall_prefab,
+        keycard_prefab = keycard_prefab,
         entities = texture_map_entities
       };
 
@@ -173,18 +193,21 @@ namespace Wiggy
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      grenade_system.Start(ecs, unit_spawn_system, vfx_grenade);
+      grenade_system.Start(ecs, vfx_grenade);
       heal_system.Start(ecs, vfx_heal);
       instantiate_system.Start(ecs, map);
-      is_dead_system.Start(ecs, unit_spawn_system, vfx_death);
+      is_dead_system.Start(ecs, vfx_death);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs, vfx_take_damage);
       monitor_overwatch_system.Start(ecs, move_system);
       monitor_particle_effect_system.Start(ecs);
+      monitor_trap_system.Start(ecs, move_system);
       overwatch_system.Start(ecs, vfx_overwatch);
+      pickup_item_system.Start(ecs);
       reload_system.Start(ecs, vfx_reload);
-      select_system.Start(ecs, unit_spawn_system, selected_cursor_prefab);
+      select_system.Start(ecs, selected_cursor_prefab);
       unit_spawn_system.Start(ecs, uss_data);
+      use_item_system.Start(ecs);
 
       mvm.DoStart();
       mvm.RefreshVisuals();
@@ -230,11 +253,14 @@ namespace Wiggy
       instantiate_system.Update(ecs);
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
+      pickup_item_system.Update(ecs);
       monitor_combat_events_system.Update(ecs);
       monitor_overwatch_system.Update(ecs); // dep: overwatch_system
       monitor_particle_effect_system.Update(ecs);
+      monitor_trap_system.Update(ecs);
       reload_system.Update(ecs);
       select_system.Update(ecs);
+      use_item_system.Update(ecs);
 
       // kill entities last
       is_dead_system.Update(ecs);
@@ -261,6 +287,7 @@ namespace Wiggy
       ColorUtility.TryParseHtmlString("#d77bba", out var exit_colour);
       ColorUtility.TryParseHtmlString("#fbf236", out var door_colour);
       ColorUtility.TryParseHtmlString("#639bff", out var trap_colour);
+      ColorUtility.TryParseHtmlString("#37946e", out var keycard_colour);
 
       List<(Color, EntityType)> colour_to_entity_type_association = new()
       {
@@ -271,7 +298,8 @@ namespace Wiggy
         new(enemy_colour, EntityType.actor_enemy),
         new(exit_colour, EntityType.tile_type_exit),
         new(door_colour, EntityType.tile_type_door),
-        new(trap_colour, EntityType.tile_type_trap)
+        new(trap_colour, EntityType.tile_type_trap),
+        new(keycard_colour, EntityType.keycard),
       };
 
       List<(int, EntityType)> entities = new();

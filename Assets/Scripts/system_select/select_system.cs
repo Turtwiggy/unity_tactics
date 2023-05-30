@@ -7,7 +7,6 @@ namespace Wiggy
   {
     private camera_handler camera;
     private map_manager map;
-    private UnitSpawnSystem unit_spawn_system;
     private Entity cursor;
     public UnityEvent<Entity> new_entity_selected;
 
@@ -23,12 +22,11 @@ namespace Wiggy
       ecs.SetSystemSignature<SelectSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, UnitSpawnSystem uss, GameObject selected_cursor_prefab)
+    public void Start(Wiggy.registry ecs, GameObject selected_cursor_prefab)
     {
       camera = Object.FindObjectOfType<camera_handler>();
       map = Object.FindObjectOfType<map_manager>();
-      unit_spawn_system = uss;
-      cursor = Entities.create_cursor(ecs, selected_cursor_prefab);
+      cursor = Entities.create_cursor(ecs, selected_cursor_prefab, new Optional<GameObject>());
       new_entity_selected = new();
     }
 
@@ -58,7 +56,7 @@ namespace Wiggy
       if (HasAnySelected())
         return;
 
-      var camera_entity = unit_spawn_system.units[index].Data;
+      var map_entities = map.entity_map[index].entities;
 
       //
       // Limits entities to only players via Components
@@ -66,10 +64,14 @@ namespace Wiggy
 
       foreach (var e in entities)
       {
-        if (e.Equals(camera_entity))
+        foreach (var map_entity in map_entities)
         {
-          selected.Set(e);
-          new_entity_selected.Invoke(e);
+          if (e.Equals(map_entity))
+          {
+            selected.Set(e);
+            new_entity_selected.Invoke(e);
+            break;
+          }
         }
       }
     }
