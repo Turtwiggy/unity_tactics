@@ -16,7 +16,6 @@ namespace Wiggy
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
-      s.Set(ecs.GetComponentType<PlayerComponent>());
       s.Set(ecs.GetComponentType<InstantiatedComponent>());
       s.Set(ecs.GetComponentType<GridPositionComponent>());
       ecs.SetSystemSignature<SelectSystem>(s);
@@ -57,10 +56,6 @@ namespace Wiggy
         return;
 
       var map_entities = map.entity_map[index].entities;
-
-      //
-      // Limits entities to only players via Components
-      //
 
       foreach (var e in entities)
       {

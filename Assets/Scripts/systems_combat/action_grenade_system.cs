@@ -61,21 +61,15 @@ namespace Wiggy
           var damage_pos = positions_to_take_damage[i];
           var damage_idx = Grid.GetIndex(damage_pos, map.width);
 
-          var ents = map.entity_map[damage_idx].entities;
-          foreach (var defender_entity in ents)
+          Debug.Log("spot taking damage");
+          AttackEvent evt = new()
           {
-            Debug.Log("grenading entity!");
-            {
-              AttackEvent evt = new()
-              {
-                amount = new Optional<int>(),
-                from = new Optional<Entity>(grenade),
-                to = defender_entity
-              };
-              var ent = ecs.Create();
-              ecs.AddComponent(ent, evt);
-            }
-          }
+            amount = new Optional<int>(),
+            from = new Optional<Entity>(grenade),
+            to = map.entity_map[damage_idx].entities
+          };
+          var ent = ecs.Create();
+          ecs.AddComponent(ent, evt);
         }
 
         // Request is processed

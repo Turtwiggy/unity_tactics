@@ -4,27 +4,27 @@ namespace Wiggy
 {
   public class effects : MonoBehaviour
   {
-    public bool update_effect_time = false;
     public float effect_time = 2;
     public float pause = 1;
-
-    [SerializeField]
     private ParticleSystem _ps;
-
-    // public AnimationCurve fadeIn;
+    private bool Initialized = false;
 
     public bool IsDone
     {
       get
       {
-        if (_ps == null)
-          _ps = GetComponentInChildren<ParticleSystem>();
+        if (!Initialized)
+          Start();
         return !_ps.IsAlive();
       }
     }
 
     public void Start()
     {
+      if (Initialized)
+        return;
+      Initialized = true;
+
       // shaderProperty = Shader.PropertyToID("_cutoff");
       _ps = GetComponentInChildren<ParticleSystem>();
       _ps.Stop();

@@ -3,6 +3,24 @@ using UnityEngine;
 
 namespace Wiggy
 {
+  // Helpers
+
+  public struct TagComponent
+  {
+    public string name;
+  };
+
+  public struct ToBeInstantiatedComponent
+  {
+    public GameObject prefab;
+    public GameObject parent;
+  };
+
+  public struct InstantiatedComponent
+  {
+    public GameObject instance;
+  };
+
   // Tag Components
 
   public struct PlayerComponent
@@ -20,6 +38,11 @@ namespace Wiggy
   };
 
   public struct BarrelComponent
+  {
+    //
+  };
+
+  public struct DoorComponent
   {
     //
   };
@@ -58,20 +81,6 @@ namespace Wiggy
     public Vector2Int position;
   };
 
-  // Helpers
-
-  public struct ToBeInstantiatedComponent
-  {
-    public GameObject prefab;
-    public GameObject parent;
-    public string name;
-  };
-
-  public struct InstantiatedComponent
-  {
-    public GameObject instance;
-  };
-
   public struct IsDeadComponent
   {
   };
@@ -93,7 +102,7 @@ namespace Wiggy
 
   public struct WantsToAttack : Request
   {
-    public Entity target;
+    public int map_idx;
   }
 
   public struct WantsToHeal : Request { }
@@ -137,7 +146,7 @@ namespace Wiggy
   {
     public Optional<Entity> from;
     public Optional<int> amount;
-    public Entity to;
+    public List<Entity> to;
   };
 
   // Stats
@@ -152,21 +161,24 @@ namespace Wiggy
   struct AbleToBePickedUp
   {
   };
+
   struct InBackpackComponent
   {
     public Entity parent;
   };
+
   struct WantsToPickup
   {
     public List<Entity> items;
   };
-  public struct Use
-  {
-    public Entity entity;
-    public List<Entity> targets;
-  };
+
   public struct WantsToUse
   {
-    public List<Use> items;
-  }
+    public List<Entity> targets;
+  };
+
+  // struct ConsumableComponent
+  // {
+  // };
+
 };

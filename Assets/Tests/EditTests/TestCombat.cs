@@ -44,11 +44,12 @@ namespace Wiggy
       }
       var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(1, 0), "Player", new Optional<GameObject>(), new Optional<GameObject>());
       var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
+      var astar = map_manager.GameToAStar(main.ecs, map);
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
       var def_pos = main.ecs.GetComponent<GridPositionComponent>(def).position;
-      var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+      var flanked = CombatHelpers.SpotIsFlanked(map, astar, atk_pos, def_pos);
 
       // Assert
       Assert.AreEqual(true, map.obstacle_map[4].entities.Contains(EntityType.tile_type_wall));
@@ -91,11 +92,12 @@ namespace Wiggy
       }
       var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(1, 0), "Player", new Optional<GameObject>(), new Optional<GameObject>());
       var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
+      var astar = map_manager.GameToAStar(main.ecs, map);
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
       var def_pos = main.ecs.GetComponent<GridPositionComponent>(def).position;
-      var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+      var flanked = CombatHelpers.SpotIsFlanked(map, astar, atk_pos, def_pos);
 
       // Assert
       Assert.AreEqual(true, flanked);
@@ -137,11 +139,12 @@ namespace Wiggy
       }
       var atk = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_player, new Vector2Int(0, 2), "Player", new Optional<GameObject>(), new Optional<GameObject>());
       var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 2), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
+      var astar = map_manager.GameToAStar(main.ecs, map);
 
       // Act
       var atk_pos = main.ecs.GetComponent<GridPositionComponent>(atk).position;
       var def_pos = main.ecs.GetComponent<GridPositionComponent>(def).position;
-      var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+      var flanked = CombatHelpers.SpotIsFlanked(map, astar, atk_pos, def_pos);
 
       // Assert
       Assert.AreEqual(true, flanked);
@@ -181,6 +184,7 @@ namespace Wiggy
         map.obstacle_map[i] = new() { entities = new() };
         map.obstacle_map[i].entities.Add(EntityType.tile_type_floor);
       }
+      var astar = map_manager.GameToAStar(main.ecs, map);
 
       // Generate all neighbours around a unit
       var def = UnitSpawnSystem.Create(main.ecs, map, EntityType.actor_enemy, new Vector2Int(1, 1), "Enemy", new Optional<GameObject>(), new Optional<GameObject>());
@@ -192,7 +196,7 @@ namespace Wiggy
         for (int i = 0; i < idxs.Length; i++)
         {
           var atk_pos = Grid.IndexToPos(idxs[i].Item2, map.width, map.height);
-          var flanked = CombatHelpers.SpotIsFlanked(map, atk_pos, def_pos);
+          var flanked = CombatHelpers.SpotIsFlanked(map, astar, atk_pos, def_pos);
           Assert.AreEqual(true, flanked);
         }
       }

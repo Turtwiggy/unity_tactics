@@ -1,6 +1,7 @@
-using System.Diagnostics;
+using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections;
 
 // This is heavily based off of:
 // https://austinmorlan.com/posts/entity_component_system/
@@ -9,6 +10,13 @@ using System.Collections.Generic;
 namespace Wiggy
 {
   using ComponentType = System.Int32;
+
+  public static class ECS_CONFIG
+  {
+    public static int max_entities = 4096;
+    public static int max_registered_components = 64;
+  };
+
   public struct Entity
   {
     public int id;
@@ -21,21 +29,34 @@ namespace Wiggy
 
   public class Signature
   {
-    public int data { get; private set; }
+    public bool[] data;
+    private static bool[] comparer;
+
+    public Signature()
+    {
+      data = new bool[ECS_CONFIG.max_registered_components];
+      comparer = new bool[ECS_CONFIG.max_registered_components];
+    }
 
     public void Set(int bit_position, bool bit = true)
     {
-      if (bit)
-        data |= 1 << bit_position;
-      else
-        data &= ~(1 << bit_position);
+      data[bit_position] = bit;
     }
 
     public void Reset()
     {
-      data = 0;
+      Array.Fill(data, false);
+    }
+
+    public bool[] And(bool[] other)
+    {
+      Array.Fill(comparer, false);
+      for (int i = 0; i < data.Length; i++)
+        comparer[i] = other[i] & data[i];
+      return comparer;
     }
   }
+
 
   interface IComponentArray
   {
@@ -170,7 +191,7 @@ namespace Wiggy
   {
     private Dictionary<string, ComponentType> component_types = new();
     private Dictionary<string, IComponentArray> component_arrays = new();
-    private ComponentType next_component_type;
+    private ComponentType next_component_type_index;
     private readonly int max_entities;
 
     public ComponentManager(int max_entities)
@@ -181,9 +202,9 @@ namespace Wiggy
     public void RegisterComponent<T>()
     {
       var name = typeof(T).ToString();
-      component_types[name] = next_component_type;
+      component_types[name] = next_component_type_index;
       component_arrays[name] = new ComponentArray<T>(max_entities);
-      ++next_component_type;
+      ++next_component_type_index;
     }
 
     public ComponentType GetComponentType<T>()
@@ -259,7 +280,7 @@ namespace Wiggy
         var sys_sig = signatures[name];
 
         // Entity signature matches system signature - insert into set
-        if ((entity_sig.data & sys_sig.data) == sys_sig.data)
+        if (Enumerable.SequenceEqual(entity_sig.And(sys_sig.data), sys_sig.data))
           sys.entities.Add(e);
         else
           sys.entities.Remove(e);
@@ -277,16 +298,14 @@ namespace Wiggy
 
   public class registry
   {
-    private const int max_entities = 4096;
-    private const int max_components = 512;
     public EntityManager entity_manager { get; private set; }
     public ComponentManager component_manager { get; private set; }
     public SystemManager system_manager { get; private set; }
 
     public registry()
     {
-      entity_manager = new(max_entities);
-      component_manager = new(max_components);
+      entity_manager = new(ECS_CONFIG.max_entities);
+      component_manager = new(ECS_CONFIG.max_entities);
       system_manager = new();
     }
 

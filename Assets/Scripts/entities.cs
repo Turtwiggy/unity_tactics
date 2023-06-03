@@ -115,7 +115,6 @@ namespace Wiggy
       return e;
     }
 
-
     // vfx
 
     public static Entity create_effect(Wiggy.registry ecs, Vector2Int spot, GameObject prefab, string name)
@@ -205,6 +204,17 @@ namespace Wiggy
     {
       var e = ecs.Create();
       MakeWorldEntity(ecs, e, spot, name, prefab, parent);
+      return e;
+    }
+
+    public static Entity create_door(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
+    {
+      var e = ecs.Create();
+
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
+
+      DoorComponent door = new();
+      ecs.AddComponent(e, door);
 
       return e;
     }
@@ -279,13 +289,41 @@ namespace Wiggy
       gpc.position = spot;
       ecs.AddComponent(e, gpc);
 
+      TagComponent tag = new();
+      tag.name = name;
+      ecs.AddComponent(e, tag);
+
       if (prefab.IsSet)
       {
         ToBeInstantiatedComponent tbic = new();
         tbic.prefab = prefab.Data;
-        tbic.name = name;
         tbic.parent = parent.Data;
         ecs.AddComponent(e, tbic);
+      }
+    }
+
+    public static void RemoveWorldEntity(Wiggy.registry ecs, Entity e, map_manager map)
+    {
+      // Remove instance
+      ref var instance = ref ecs.GetComponent<InstantiatedComponent>(e);
+      Object.Destroy(instance.instance);
+      ecs.RemoveComponent<InstantiatedComponent>(e);
+
+      // Remove grid pos
+      var pos = ecs.GetComponent<GridPositionComponent>(e);
+      var idx = Grid.GetIndex(pos.position, map.width);
+      ecs.RemoveComponent<GridPositionComponent>(e);
+
+      // Remove from entity map
+      var ents = map.entity_map[idx].entities;
+      for (int i = 0; i < ents.Count; i++)
+      {
+        Entity map_ent = ents[i];
+        if (map_ent.id == e.id)
+        {
+          ents.RemoveAt(i);
+          break;
+        }
       }
     }
   }

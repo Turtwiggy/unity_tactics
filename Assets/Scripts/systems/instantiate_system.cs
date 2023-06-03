@@ -30,7 +30,9 @@ namespace Wiggy
         var wpos = Grid.GridSpaceToWorldSpace(p.position, map.size);
         var obj = Object.Instantiate(r.prefab);
         obj.transform.SetPositionAndRotation(wpos, r.prefab.transform.rotation);
-        obj.name = r.name;
+        if (r.parent)
+          obj.transform.parent = r.parent.transform;
+        obj.name = ecs.GetComponent<TagComponent>(e).name;
 
         // Done with request
         Debug.Log("Processed instantiate request...");

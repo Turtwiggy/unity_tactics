@@ -60,6 +60,35 @@ namespace Wiggy
     public int zone_seed = 0;
     public int zone_size = 5;
 
+    public static astar_cell[] GameToAStar(Wiggy.registry ecs, map_manager map)
+    {
+      int size = map.width * map.height;
+      astar_cell[] astar = new astar_cell[size];
+
+      for (int i = 0; i < size; i++)
+      {
+        astar_cell c = new();
+        c.pos = Grid.IndexToPos(i, map.width, map.height);
+
+        int cost = 1;
+
+        // Obstacle Mask
+        var obstacles = map.obstacle_map[i].entities;
+        if (obstacles.Contains(EntityType.tile_type_wall))
+          cost = -1; // impassable
+
+        // Game Mask
+        var entities = map.entity_map[i].entities;
+        var door = GetFirst<DoorComponent>(ecs, entities);
+        if (door.IsSet)
+          cost = -1; // assume impassable (until doors can be open state?)
+
+        c.path_cost = cost;
+        astar[i] = c;
+      }
+      return astar;
+    }
+
     public static astar_cell[] GameToAStar(MapRepresentation[] map, int x_max, int y_max)
     {
       astar_cell[] astar = new astar_cell[map.Length];
@@ -87,24 +116,6 @@ namespace Wiggy
         map[i].entities.Add(EntityType.tile_type_floor);
       }
       return map;
-    }
-
-    // Given a spot on the map, generate X connected cells
-    private List<Vector2Int> GenerateConnectedSpots(MapRepresentation[] map, Vector2Int spot, int amount)
-    {
-      int range = amount + 1; // arbitrarily chosen
-      int index = Grid.GetIndex(spot, width);
-      var astar = GameToAStar(map, width, height);
-      var cells = a_star.generate_accessible_areas(astar, index, range, width, height);
-
-      if (cells.Length < amount)
-        Debug.LogError("Not enough spots for amount");
-
-      List<Vector2Int> spots = new();
-      for (int i = 0; i < amount; i++)
-        spots.Add(cells[i].pos);
-
-      return spots;
     }
 
     public void GenerateMap(List<(int, EntityType)> loaded_map_entities = null)
@@ -219,40 +230,6 @@ namespace Wiggy
       }
     }
 
-    private void GenerateWallBorders()
-    {
-      for (int y = 0; y < height; y++)
-      {
-        for (int x = 0; x < width; x++)
-        {
-          int idx = Grid.GetIndex(x, y, width);
-
-          if (y == 0) // bottom
-          {
-            obstacle_map[idx].entities.Clear();
-            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
-          }
-          if (x == width - 1) // right
-          {
-            obstacle_map[idx].entities.Clear();
-            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
-          }
-
-          if (x == 0) // left
-          {
-            obstacle_map[idx].entities.Clear();
-            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
-          }
-
-          if (y == height - 1) // top
-          {
-            obstacle_map[idx].entities.Clear();
-            obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
-          }
-        }
-      }
-    }
-
     public static List<(int, EntityType)> GetFilteredMapEntities(List<(int, EntityType)> loaded_map_entities, EntityType type)
     {
       var entities = new List<(int, EntityType)>();
@@ -264,5 +241,19 @@ namespace Wiggy
       }
       return entities;
     }
+
+    public static Optional<int> GetFirst<T>(Wiggy.registry ecs, List<Entity> entities)
+    {
+      for (int i = 0; i < entities.Count; i++)
+      {
+        var def = default(T);
+        ecs.TryGetComponent(entities[i], ref def, out var has_comp);
+        if (has_comp)
+          return new Optional<int>(i);
+      }
+      return new Optional<int>();
+    }
   }
+
+
 } // namespace Wiggy

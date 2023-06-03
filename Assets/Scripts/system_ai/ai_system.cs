@@ -24,7 +24,7 @@ namespace Wiggy
       this.action_system = action_system;
     }
 
-    public void Update(Wiggy.registry ecs)
+    public void Update(Wiggy.registry ecs, astar_cell[] astar)
     {
       // Debug.Log("decising best action for entity...");
 
@@ -61,7 +61,6 @@ namespace Wiggy
           Debug.Log($"EID: {e.id} has {targets.targets.Count} targets in range");
 
         // Possible move spots.
-        var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
         var movement_range = ecs.GetComponent<DexterityComponent>(e).amount;
         var move_index = Grid.GetIndex(position.position, map.width);
         var move_s = a_star.generate_accessible_areas(astar, move_index, movement_range, map.width, map.height);
@@ -79,7 +78,7 @@ namespace Wiggy
         {
           var cur_pos = position.position;
           var new_pos = spots[i];
-          int quality = CombatHelpers.SpotQuality(ecs, map, cur_pos, new_pos, player_pos);
+          int quality = CombatHelpers.SpotQuality(ecs, map, astar, cur_pos, new_pos, player_pos);
 
           if (new_pos.x == player_pos.x && new_pos.y == player_pos.y)
             continue; // do not move to players position
@@ -105,10 +104,16 @@ namespace Wiggy
         if (a.GetType() == typeof(Move))
         {
           var to_idx = Grid.GetIndex(move.positions[^1].Item1, map.width);
-          action_system.AIRequestMoveAction(ecs, e, to_idx);
+          action_system.AIRequestMoveAction(ecs, astar, e, to_idx);
         }
         else if (a.GetType() == typeof(Attack))
-          action_system.AIRequestAttackAction(ecs, e, player);
+        {
+          var player_idx = Grid.GetIndex(player_pos, map.width);
+          // warning: this could introduce a bug where the ai now attacks 
+          // everything at a specific index, instead of just the intended entity
+          // as/if multiple units on the same tile, reevaluate this
+          action_system.AIRequestAttackAction(ecs, e, player_idx);
+        }
         // else if (a.GetType() == typeof(Grenade))
         // action_system.RequestGrenadeAction(ecs, e, -1); // -1 because currently unknown how ai handles grenade spot choosing
         else

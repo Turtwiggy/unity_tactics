@@ -56,7 +56,8 @@ namespace Wiggy
       return false;
     }
 
-    public static bool SpotIsFlanked(map_manager map, Vector2Int atk_pos, Vector2Int def_pos)
+    // Bug: doors not considered as cover
+    public static bool SpotIsFlanked(map_manager map, astar_cell[] astar, Vector2Int atk_pos, Vector2Int def_pos)
     {
       // Which quadrant is the attacker in?
       var attacker_quadrant = WhichQuadrantIsAttacker(def_pos, atk_pos);
@@ -73,7 +74,6 @@ namespace Wiggy
       // or objects that shouldnt be shot through
       bool line_of_sight_blocked = false;
 
-      var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
       int from = Grid.GetIndex(atk_pos, map.width);
       int to = Grid.GetIndex(def_pos, map.width);
       var path = a_star.generate_direct_with_diagonals(astar, from, to, map.width, false);
@@ -99,7 +99,7 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
+    public static int SpotQuality(Wiggy.registry ecs, map_manager map, astar_cell[] astar, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
     {
       int quality = 0;
 
@@ -114,7 +114,7 @@ namespace Wiggy
         quality += 5;
 
       // Is a player flanking the potential spot?
-      bool spot_is_flanked = SpotIsFlanked(map, player_pos, new_pos);
+      bool spot_is_flanked = SpotIsFlanked(map, astar, player_pos, new_pos);
       if (spot_is_flanked)
         quality -= 1;
 
@@ -133,7 +133,7 @@ namespace Wiggy
       return quality;
     }
 
-    public static int CalculateDamage(Wiggy.registry ecs, map_manager map, Entity attacker, Entity defender)
+    public static int CalculateDamage(Wiggy.registry ecs, map_manager map, astar_cell[] astar, Entity attacker, Entity defender)
     {
       // Weapon may or may not be equipped
 
@@ -159,7 +159,7 @@ namespace Wiggy
       }
 
       // Check flanked
-      var flanked = SpotIsFlanked(map, atk_pos, def_pos);
+      var flanked = SpotIsFlanked(map, astar, atk_pos, def_pos);
       if (flanked)
         damage *= 2;
 

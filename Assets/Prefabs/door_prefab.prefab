@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6385970463473546320}
   m_Layer: 0
-  m_Name: obstacle_prefab_flat_colour
+  m_Name: door_prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +85,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 659f07a91019cb04ab067c396f0b23ad, type: 2}
+  - {fileID: 2100000, guid: 11b0d4a9c139ea84b98301ca9a1559ef, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

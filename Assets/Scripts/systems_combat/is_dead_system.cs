@@ -42,19 +42,15 @@ namespace Wiggy
           {
             var damage_idx = neighbours[i].Item2;
 
-            var ents = map.entity_map[damage_idx].entities;
-            foreach (var defender_entity in ents)
+            AttackEvent evt = new()
             {
-              AttackEvent evt = new()
-              {
-                // HMM - this entity is now dead
-                amount = new Optional<int>(10), // shuld not be hard coded
-                from = new Optional<Entity>(),
-                to = defender_entity
-              };
-              var ent = ecs.Create();
-              ecs.AddComponent(ent, evt);
-            }
+              // HMM - this entity is now dead
+              amount = new Optional<int>(10), // TODO: shuld not be hard coded
+              from = new Optional<Entity>(),
+              to = map.entity_map[damage_idx].entities
+            };
+            var ent = ecs.Create();
+            ecs.AddComponent(ent, evt);
           }
         }
 

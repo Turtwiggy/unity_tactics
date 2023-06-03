@@ -5,6 +5,9 @@ namespace Wiggy
 {
   public class TextEcs
   {
+
+    // Entities / Components
+
     [Test]
     public void TestEcs__CreateEntity()
     {
@@ -155,6 +158,46 @@ namespace Wiggy
         Assert.AreEqual(true, success);
         Assert.AreEqual(Team.PLAYER, team.team);
       }
+    }
+
+    // Systems
+
+    class FakeSystem : ECSSystem
+    {
+      public override void SetSignature(registry ecs)
+      {
+        Signature s = new();
+        s.Set(ecs.GetComponentType<GridPositionComponent>());
+        ecs.SetSystemSignature<FakeSystem>(s);
+      }
+    }
+
+    [Test]
+    public void TestECS__BasicSystem()
+    {
+      // Arrange
+      Wiggy.registry ecs = new();
+      ecs.RegisterComponent<GridPositionComponent>();
+      var sys = ecs.RegisterSystem<FakeSystem>();
+      sys.SetSignature(ecs);
+
+      // Act
+      Entity create_entity(int i)
+      {
+        var e = ecs.Create();
+        var a = new GridPositionComponent();
+        a.position = new();
+        a.position.x = i;
+        a.position.y = i;
+        ecs.AddComponent(e, a);
+        return e;
+      }
+      int ENTITY_COUNT = 4;
+      for (int i = 0; i < ENTITY_COUNT; i++)
+        create_entity(i);
+
+      // Assert
+      Assert.AreEqual(ENTITY_COUNT, sys.entities.Count);
     }
   }
 }

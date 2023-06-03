@@ -14,6 +14,7 @@ namespace Wiggy
     public GameObject selected_cursor_prefab;
     public GameObject move_prefab;
     public GameObject keycard_prefab;
+    public GameObject door_prefab;
     public Texture2D map_texture;
 
     // unity-based systems
@@ -24,7 +25,10 @@ namespace Wiggy
     [HideInInspector] public main_ui ui;
     [HideInInspector] public scene_manager scene_manager;
 
-    // ecs-based systems
+    // pathfinding
+    public astar_cell[] astar;
+
+    // ecs-based game systems
     public Wiggy.registry ecs;
     public ActionSystem action_system;
     public AiSystem ai_system;
@@ -44,8 +48,12 @@ namespace Wiggy
     public PickUpItemSystem pickup_item_system;
     public ReloadSystem reload_system;
     public SelectSystem select_system;
+    public StandingOnItemSystem standing_on_item_system;
+    public StandingNextToDoorSystem standing_next_to_door_system;
     public UnitSpawnSystem unit_spawn_system;
     public UseItemSystem use_item_system;
+    // ui systems
+    public DisplayInventorySystem display_inventory_system;
 
     private GameObject vfx_death;
     private GameObject vfx_grenade;
@@ -56,36 +64,37 @@ namespace Wiggy
 
     public void RegisterComponents(Wiggy.registry ecs)
     {
+      // helpers
+      ecs.RegisterComponent<TagComponent>();
       ecs.RegisterComponent<InstantiatedComponent>();
       ecs.RegisterComponent<ToBeInstantiatedComponent>();
-      // actions
-      ecs.RegisterComponent<ActionsComponent>();
+      // tags
+      ecs.RegisterComponent<PlayerComponent>();
+      ecs.RegisterComponent<CursorComponent>();
+      ecs.RegisterComponent<TrapComponent>();
+      ecs.RegisterComponent<BarrelComponent>();
+      ecs.RegisterComponent<KeycardComponent>();
+      ecs.RegisterComponent<ParticleEffectComponent>();
+      ecs.RegisterComponent<HumanoidComponent>();
+      ecs.RegisterComponent<TeamComponent>();
       // movement
       ecs.RegisterComponent<GridPositionComponent>();
       // stats
       ecs.RegisterComponent<DexterityComponent>();
       // ai
       ecs.RegisterComponent<AIMoveConsiderationComponent>();
-      // events
-      ecs.RegisterComponent<AttackEvent>();
-      ecs.RegisterComponent<ExplodesOnDeath>();
       // combat
+      ecs.RegisterComponent<ActionsComponent>();
       ecs.RegisterComponent<AmmoComponent>();
       ecs.RegisterComponent<HealthComponent>();
       ecs.RegisterComponent<TargetsComponent>();
       ecs.RegisterComponent<WeaponComponent>();
-      ecs.RegisterComponent<TeamComponent>();
       ecs.RegisterComponent<OverwatchStatus>();
       ecs.RegisterComponent<IsDeadComponent>();
       ecs.RegisterComponent<TrapAbleToSpring>();
-      // entity tags
-      ecs.RegisterComponent<BarrelComponent>();
-      ecs.RegisterComponent<CursorComponent>();
-      ecs.RegisterComponent<KeycardComponent>();
-      ecs.RegisterComponent<PlayerComponent>();
-      ecs.RegisterComponent<ParticleEffectComponent>();
-      ecs.RegisterComponent<TrapComponent>();
-      ecs.RegisterComponent<HumanoidComponent>();
+      ecs.RegisterComponent<AttackEvent>();
+      ecs.RegisterComponent<ExplodesOnDeath>();
+      ecs.RegisterComponent<DoorComponent>();
       // AI
       ecs.RegisterComponent<DefaultBrainComponent>();
       // Requests
@@ -95,17 +104,18 @@ namespace Wiggy
       ecs.RegisterComponent<WantsToMove>();
       ecs.RegisterComponent<WantsToOverwatch>();
       ecs.RegisterComponent<WantsToReload>();
-      ecs.RegisterComponent<WantsToPickup>();
-      ecs.RegisterComponent<WantsToUse>();
       // Items
       ecs.RegisterComponent<AbleToBePickedUp>();
       ecs.RegisterComponent<InBackpackComponent>();
+      ecs.RegisterComponent<WantsToPickup>();
+      ecs.RegisterComponent<WantsToUse>();
     }
     public void RegisterSystems(Wiggy.registry ecs)
     {
       action_system = ecs.RegisterSystem<ActionSystem>();
       ai_system = ecs.RegisterSystem<AiSystem>();
       combat_system = ecs.RegisterSystem<CombatSystem>();
+      display_inventory_system = ecs.RegisterSystem<DisplayInventorySystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
       grenade_system = ecs.RegisterSystem<GrenadeSystem>();
@@ -121,6 +131,8 @@ namespace Wiggy
       pickup_item_system = ecs.RegisterSystem<PickUpItemSystem>();
       reload_system = ecs.RegisterSystem<ReloadSystem>();
       select_system = ecs.RegisterSystem<SelectSystem>();
+      standing_on_item_system = ecs.RegisterSystem<StandingOnItemSystem>();
+      standing_next_to_door_system = ecs.RegisterSystem<StandingNextToDoorSystem>();
       unit_spawn_system = ecs.RegisterSystem<UnitSpawnSystem>();
       use_item_system = ecs.RegisterSystem<UseItemSystem>();
     }
@@ -129,6 +141,7 @@ namespace Wiggy
       action_system.SetSignature(ecs);
       ai_system.SetSignature(ecs);
       combat_system.SetSignature(ecs);
+      display_inventory_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
       grenade_system.SetSignature(ecs);
@@ -144,6 +157,8 @@ namespace Wiggy
       pickup_item_system.SetSignature(ecs);
       reload_system.SetSignature(ecs);
       select_system.SetSignature(ecs);
+      standing_on_item_system.SetSignature(ecs);
+      standing_next_to_door_system.SetSignature(ecs);
       unit_spawn_system.SetSignature(ecs);
       use_item_system.SetSignature(ecs);
     }
@@ -177,6 +192,7 @@ namespace Wiggy
         trap_prefab = trap_prefab,
         wall_prefab = map.wall_prefab,
         keycard_prefab = keycard_prefab,
+        door_prefab = door_prefab,
         entities = texture_map_entities
       };
 
@@ -206,8 +222,10 @@ namespace Wiggy
       pickup_item_system.Start(ecs);
       reload_system.Start(ecs, vfx_reload);
       select_system.Start(ecs, selected_cursor_prefab);
+      standing_on_item_system.Start(ecs);
+      standing_next_to_door_system.Start(ecs);
       unit_spawn_system.Start(ecs, uss_data);
-      use_item_system.Start(ecs);
+      use_item_system.Start(ecs, select_system);
 
       mvm.DoStart();
       mvm.RefreshVisuals();
@@ -244,8 +262,15 @@ namespace Wiggy
         action_system.ClearInteraction();
       }
 
+      // TODO: cache this and only update it when map changes
+      // What could change the map? 
+      // obstacles being destroyed
+      // doors being open/closed
+      // players moving positions (if players were taken in to consideration for a*star, which they arnt)
+      astar = map_manager.GameToAStar(ecs, map);
+
       // Systems that update every frame
-      action_system.Update(ecs);
+      action_system.Update(ecs, astar);
       combat_system.Update(ecs);
       extraction_system.Update(ecs, map.ext_spots);
       grenade_system.Update(ecs);
@@ -254,19 +279,21 @@ namespace Wiggy
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
       pickup_item_system.Update(ecs);
-      monitor_combat_events_system.Update(ecs);
+      monitor_combat_events_system.Update(ecs, astar);
       monitor_overwatch_system.Update(ecs); // dep: overwatch_system
       monitor_particle_effect_system.Update(ecs);
       monitor_trap_system.Update(ecs);
       reload_system.Update(ecs);
       select_system.Update(ecs);
+      standing_on_item_system.Update(ecs);
+      standing_next_to_door_system.Update(ecs);
       use_item_system.Update(ecs);
 
       // kill entities last
       is_dead_system.Update(ecs);
 
       // UI
-      ui.DoUpdate();
+      ui.DoUpdate(ecs);
     }
 
     void LateUpdate()

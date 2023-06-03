@@ -32,8 +32,8 @@ namespace Wiggy
       this.camera = main.camera;
 
       GameObject cursor_parent = new GameObject("Cursor Parent");
-      instantiated_path_visuals = new GameObject[100];
-      for (int i = 0; i < 100; i++)
+      instantiated_path_visuals = new GameObject[map.width + map.height];
+      for (int i = 0; i < map.width + map.height; i++)
       {
         var go = GameObject.Instantiate(move_prefab, Vector3.zero, move_prefab.transform.rotation, cursor_parent.transform);
         instantiated_path_visuals[i] = go;
@@ -60,6 +60,12 @@ namespace Wiggy
         return;
       }
 
+      // Check we're only moving players around
+      var ents = map.entity_map[from].entities;
+      var player = map_manager.GetFirst<PlayerComponent>(ecs, ents);
+      if (!player.IsSet)
+        return;
+
       //
       // Actions that can resolve by clicking the map
       //
@@ -68,22 +74,8 @@ namespace Wiggy
       // WARNING: obstacle_map is the *starting* representation
       bool to_contains_obstacle = map.obstacle_map[full_to].entities.Contains(EntityType.tile_type_wall);
 
-      // Does destination contain a unit?
-      bool to_contains_unit = false;
-      int to_contains_index = -1;
-      var ents = map.entity_map[full_to].entities;
-      for (int i = 0; i < ents.Count; i++)
-      {
-        Entity ent = ents[i];
-        HumanoidComponent humanoid_default = default;
-        ecs.TryGetComponent(ent, ref humanoid_default, out var is_humanoid);
-        if (is_humanoid)
-        {
-          to_contains_unit = true;
-          to_contains_index = i;
-          break;
-        }
-      }
+      // Does destination contain something?
+      // bool to_contains_something = map.entity_map[full_to].entities.Count > 0;
 
       var a = action_selected;
       var e = from_entity;
@@ -93,8 +85,6 @@ namespace Wiggy
       {
         if (path_from_ui == null)
           return;
-        if (to_contains_unit)
-          return;
 
         // Move is validated by the MoveActionVisuals
         ecs.AddComponent<WantsToMove>(e, new() { path = path_from_ui });
@@ -103,14 +93,11 @@ namespace Wiggy
       }
       else if (a.GetType() == typeof(Attack))
       {
-        if (!to_contains_unit)
-          return;
         if (to_contains_obstacle)
           return;
 
         // Target is validated by the monitor_combat_system
-        var target = map.entity_map[full_to].entities[to_contains_index];
-        ecs.AddComponent<WantsToAttack>(e, new() { target = target });
+        ecs.AddComponent<WantsToAttack>(e, new() { map_idx = full_to });
       }
       else if (a.GetType() == typeof(Grenade))
       {
@@ -119,6 +106,7 @@ namespace Wiggy
         ref var dex = ref ecs.TryGetComponent(e, ref dex_backup, out var has_dex);
         if (!has_dex)
           return;
+
         var grenade_request_pos = Grid.IndexToPos(full_to, map.width, map.height);
         var grenade_dst_from_player = Vector2Int.Distance(pos, grenade_request_pos);
         if (grenade_dst_from_player > dex.amount)
@@ -131,18 +119,17 @@ namespace Wiggy
       ClearInteraction();
     }
 
-    public void AIRequestAttackAction(Wiggy.registry ecs, Entity e, Entity target)
+    public void AIRequestAttackAction(Wiggy.registry ecs, Entity e, int map_idx)
     {
-      ecs.AddComponent<WantsToAttack>(e, new() { target = target });
+      ecs.AddComponent<WantsToAttack>(e, new() { map_idx = map_idx });
     }
 
-    public void AIRequestMoveAction(Wiggy.registry ecs, Entity e, int to)
+    public void AIRequestMoveAction(Wiggy.registry ecs, astar_cell[] astar, Entity e, int to)
     {
       var pos = ecs.GetComponent<GridPositionComponent>(e).position;
       var from = Grid.GetIndex(pos, map.width);
 
       // work out a path
-      var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
       var path = a_star.generate_direct(astar, from, to, map.width);
       if (path == null)
         return; // no path
@@ -209,13 +196,13 @@ namespace Wiggy
       return false;
     }
 
-    public void Update(Wiggy.registry ecs)
+    public void Update(Wiggy.registry ecs, astar_cell[] astar)
     {
       if (action_selected != null && action_selected.GetType() == typeof(Move) && select_system.HasAnySelected())
-        MoveActionVisuals(ecs);
+        MoveActionVisuals(ecs, astar);
     }
 
-    private void MoveActionVisuals(Wiggy.registry ecs)
+    private void MoveActionVisuals(Wiggy.registry ecs, astar_cell[] astar)
     {
       // Turn them all off
       for (int i = 0; i < instantiated_path_visuals.Length; i++)
@@ -235,12 +222,10 @@ namespace Wiggy
 
       // work out a path
       {
-        var astar = map_manager.GameToAStar(map.obstacle_map, map.width, map.height);
         var path = a_star.generate_direct(astar, from_idx, to_idx, map.width);
         if (path == null)
           return; // no path
-                  // Limit movement by dexterity
-        path = path.Take(dex.amount).ToArray();
+        path = path.Take(dex.amount).ToArray(); // limit by dex
         path_from_ui = a_star.convert_to_points(path).ToArray();
       }
 

@@ -13,6 +13,7 @@ namespace Wiggy
       public GameObject trap_prefab;
       public GameObject keycard_prefab;
       public GameObject wall_prefab;
+      public GameObject door_prefab;
       public List<(int, EntityType)> entities;
     }
 
@@ -28,6 +29,9 @@ namespace Wiggy
       {
         case EntityType.actor_player:
           u = Entities.create_player(ecs, pos, name, go, parent);
+          break;
+        case EntityType.tile_type_door:
+          u = Entities.create_door(ecs, pos, name, go, parent);
           break;
         case EntityType.actor_enemy:
           u = Entities.create_enemy(ecs, pos, name, go, parent);
@@ -84,6 +88,7 @@ namespace Wiggy
       Spawn(ecs, map, EntityType.actor_barrel, "Explosive Barrel", new Optional<GameObject>(data.barrel_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.tile_type_trap, "Trap", new Optional<GameObject>(data.trap_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.keycard, "Keycard", new Optional<GameObject>(data.keycard_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.tile_type_door, "Door", new Optional<GameObject>(data.door_prefab), new Optional<GameObject>(parent));
 
       // set players at start spots
       // CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));

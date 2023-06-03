@@ -37,10 +37,20 @@ namespace Wiggy
     [Header("Next Turn")]
     public Button next_turn_button;
 
+    [Header("Inventory")]
+    public GameObject inventory_holder;
+    public GameObject inventory_row_prefab;
+
+    [Header("Use Items")]
+    public TextMeshProUGUI door_info_text;
+
     public void DoStart(main main)
     {
       // all the game/data
       this.main = main;
+
+      // UI Systems
+      main.display_inventory_system.Start(main.ecs, main.select_system, inventory_holder, inventory_row_prefab);
 
       // ui events
       extraction_button.onClick.AddListener(() => main.scene_manager.LoadMenu());
@@ -66,8 +76,8 @@ namespace Wiggy
         CreateActionButton<Move>("Move");
         CreateActionButton<Attack>("Attack");
         // CreateActionButton<Heal>("Heal");
-        // CreateActionButton<Reload>("Reload");
         // CreateActionButton<Overwatch>("Overwatch");
+        // CreateActionButton<Reload>("Reload");
         // CreateActionButton<Grenade>("Grenade");
       }
 
@@ -78,14 +88,14 @@ namespace Wiggy
         main.end_turn_system.Update(main.ecs);
 
         // Update AI system
-        main.ai_system.Update(main.ecs);
+        main.ai_system.Update(main.ecs, main.astar);
 
         // End AI turn
         main.end_turn_system.EndAiTurn(main.ecs);
       });
     }
 
-    public void DoUpdate()
+    public void DoUpdate(Wiggy.registry ecs)
     {
       //
       // Extraction UI
@@ -106,6 +116,14 @@ namespace Wiggy
       //
       // Hover UI
       //
+
+      hovered_enemy_text.SetText("");
+      hovered_enemy_hp_text.SetText("");
+      hovered_enemy_weapon_text.SetText("");
+      hovered_player.SetText("Nothing hovered");
+      hovered_player_hp_text.SetText("No health");
+      hovered_player_weapon_text.SetText("No weapon");
+
       var index = Grid.GetIndex(main.camera.grid_index, main.map.width);
       var entities = main.map.entity_map[index].entities;
       if (entities.Count > 0)
@@ -124,32 +142,18 @@ namespace Wiggy
           hovered_weapon = hovered_enemy_weapon_text;
         }
 
-        var unity = main.ecs.GetComponent<InstantiatedComponent>(entity);
-        hovered_name.SetText(unity.instance.name + $" ({entities.Count})");
+        var tag = main.ecs.GetComponent<TagComponent>(entity);
+        hovered_name.SetText(tag.name + $" ({entities.Count})");
 
-        // may or may not have weapon equipped
         HealthComponent health_default = default;
         ref var hp = ref main.ecs.TryGetComponent(entity, ref health_default, out var has_hp);
         if (has_hp)
           hovered_hp.SetText("HP: " + hp.cur.ToString());
-        else
-          hovered_hp.SetText("No health");
 
         WeaponComponent weapon_default = default;
         ref var weapon = ref main.ecs.TryGetComponent(entity, ref weapon_default, out var has_weapon);
         if (has_weapon)
           hovered_weapon.SetText("Weapon: " + weapon.display_name);
-        else
-          hovered_weapon.SetText("No weapon");
-      }
-      else
-      {
-        hovered_enemy_text.SetText("");
-        hovered_enemy_hp_text.SetText("");
-        hovered_enemy_weapon_text.SetText("");
-        hovered_player.SetText("Nothing hovered");
-        hovered_player_hp_text.SetText("No health");
-        hovered_player_weapon_text.SetText("No weapon");
       }
 
       // Debug which action is selected from UI
@@ -157,6 +161,11 @@ namespace Wiggy
         action_text.SetText(main.action_system.action_selected.GetType().ToString());
       else
         action_text.SetText("No Action");
+      //
+      // Inventory
+      //
+      main.display_inventory_system.Update(ecs);
+      door_info_text.SetText("Doors: " + main.standing_next_to_door_system.eligable_doors.Count.ToString());
     }
 
     void RefreshActionUI(Entity selected)
@@ -165,7 +174,11 @@ namespace Wiggy
       var unity = main.ecs.GetComponent<InstantiatedComponent>(selected);
       selected_text.SetText(unity.instance.name);
 
-      // Refresh Actions UI
+      // Refresh Actions UI (only humanoid has actions)
+      var humanoid_default = default(HumanoidComponent);
+      main.ecs.TryGetComponent(selected, ref humanoid_default, out var is_humanoid);
+      if (!is_humanoid)
+        return;
       var actions = main.ecs.GetComponent<ActionsComponent>(selected);
 
       static void DisableButtonIfActionIsDone(Button b, ActionsComponent actions, Action a)

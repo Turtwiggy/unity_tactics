@@ -5,6 +5,8 @@ namespace Wiggy
 {
   public class CombatSystem : ECSSystem
   {
+    private map_manager map;
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -17,6 +19,7 @@ namespace Wiggy
 
     public void Start(Wiggy.registry ecs)
     {
+      map = Object.FindObjectOfType<map_manager>();
     }
 
     public void Update(Wiggy.registry ecs)
@@ -38,7 +41,7 @@ namespace Wiggy
         AttackEvent evt = new();
         evt.amount = new Optional<int>();
         evt.from = new Optional<Entity>(e);
-        evt.to = request.target;
+        evt.to = map.entity_map[request.map_idx].entities;
         Debug.Log("creating attack event...");
 
         // Create event entity

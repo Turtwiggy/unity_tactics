@@ -76,7 +76,7 @@ namespace Wiggy
           var evt = new AttackEvent();
           evt.amount = new Optional<int>();
           evt.from = new Optional<Entity>(e);
-          evt.to = entity_that_activated;
+          evt.to = new List<Entity>() { entity_that_activated };
           var ent = ecs.Create();
           ecs.AddComponent(ent, evt);
 
