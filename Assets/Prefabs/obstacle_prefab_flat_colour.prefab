@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6385970463473546320}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: obstacle_prefab_flat_colour
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 7398427924451053097}
   - component: {fileID: 1396862326555479184}
   - component: {fileID: 907111662805478293}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}

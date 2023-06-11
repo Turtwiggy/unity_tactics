@@ -18,9 +18,6 @@ namespace Wiggy
     [Header("Selected Unit Info")]
     public TextMeshProUGUI selected_text;
     public TextMeshProUGUI action_text;
-    public TextMeshProUGUI hovered_enemy_text;
-    public TextMeshProUGUI hovered_enemy_hp_text;
-    public TextMeshProUGUI hovered_enemy_weapon_text;
     public TextMeshProUGUI hovered_player;
     public TextMeshProUGUI hovered_player_hp_text;
     public TextMeshProUGUI hovered_player_weapon_text;
@@ -53,7 +50,11 @@ namespace Wiggy
       main.display_inventory_system.Start(main.ecs, main.select_system, inventory_holder, inventory_row_prefab);
 
       // ui events
-      extraction_button.onClick.AddListener(() => main.scene_manager.LoadMenu());
+      extraction_button.onClick.AddListener(() =>
+      {
+        // What to do when extract?
+        main.scene_manager.LoadMenu();
+      });
 
       // Actions UI
       {
@@ -62,8 +63,9 @@ namespace Wiggy
         void CreateActionButton<T>(string name) where T : Action, new()
         {
           var go = Instantiate(action_prefab, Vector3.zero, Quaternion.identity, action_holder.transform);
-          go.transform.name = name;
-          go.GetComponentInChildren<TextMeshProUGUI>().SetText(name);
+
+          // go.transform.name = name;
+          // go.GetComponentInChildren<TextMeshProUGUI>().SetText(name);
 
           var button = go.GetComponent<Button>();
           button.onClick.AddListener(() =>
@@ -75,8 +77,8 @@ namespace Wiggy
         }
         CreateActionButton<Move>("Move");
         CreateActionButton<Attack>("Attack");
-        // CreateActionButton<Heal>("Heal");
-        // CreateActionButton<Overwatch>("Overwatch");
+        CreateActionButton<Heal>("Heal");
+        CreateActionButton<Overwatch>("Overwatch");
         // CreateActionButton<Reload>("Reload");
         // CreateActionButton<Grenade>("Grenade");
       }
@@ -117,43 +119,37 @@ namespace Wiggy
       // Hover UI
       //
 
-      hovered_enemy_text.SetText("");
-      hovered_enemy_hp_text.SetText("");
-      hovered_enemy_weapon_text.SetText("");
       hovered_player.SetText("Nothing hovered");
       hovered_player_hp_text.SetText("No health");
       hovered_player_weapon_text.SetText("No weapon");
 
-      var index = Grid.GetIndex(main.camera.grid_index, main.map.width);
+      var index = Grid.GetIndex(main.camerah.grid_index, main.map.width);
       var entities = main.map.entity_map[index].entities;
       if (entities.Count > 0)
       {
         var entity = entities[0];
-        TextMeshProUGUI hovered_name = hovered_player;
-        TextMeshProUGUI hovered_hp = hovered_player_hp_text;
-        TextMeshProUGUI hovered_weapon = hovered_player_weapon_text;
 
         TeamComponent default_team = default;
         var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
-        if (has_team && team.team == Team.ENEMY)
+        if (has_team && team.team == Team.PLAYER)
         {
-          hovered_name = hovered_enemy_text;
-          hovered_hp = hovered_enemy_hp_text;
-          hovered_weapon = hovered_enemy_weapon_text;
+          var hovered_name = hovered_player;
+          var hovered_hp = hovered_player_hp_text;
+          var hovered_weapon = hovered_player_weapon_text;
+
+          var tag = main.ecs.GetComponent<TagComponent>(entity);
+          hovered_name.SetText(tag.name + $" ({entities.Count})");
+
+          HealthComponent health_default = default;
+          ref var hp = ref main.ecs.TryGetComponent(entity, ref health_default, out var has_hp);
+          if (has_hp)
+            hovered_hp.SetText("HP: " + hp.cur.ToString());
+
+          WeaponComponent weapon_default = default;
+          ref var weapon = ref main.ecs.TryGetComponent(entity, ref weapon_default, out var has_weapon);
+          if (has_weapon)
+            hovered_weapon.SetText("Weapon: " + weapon.display_name);
         }
-
-        var tag = main.ecs.GetComponent<TagComponent>(entity);
-        hovered_name.SetText(tag.name + $" ({entities.Count})");
-
-        HealthComponent health_default = default;
-        ref var hp = ref main.ecs.TryGetComponent(entity, ref health_default, out var has_hp);
-        if (has_hp)
-          hovered_hp.SetText("HP: " + hp.cur.ToString());
-
-        WeaponComponent weapon_default = default;
-        ref var weapon = ref main.ecs.TryGetComponent(entity, ref weapon_default, out var has_weapon);
-        if (has_weapon)
-          hovered_weapon.SetText("Weapon: " + weapon.display_name);
       }
 
       // Debug which action is selected from UI

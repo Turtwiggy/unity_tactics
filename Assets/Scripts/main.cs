@@ -15,11 +15,12 @@ namespace Wiggy
     public GameObject move_prefab;
     public GameObject keycard_prefab;
     public GameObject door_prefab;
+    public GameObject exit_prefab;
     public Texture2D map_texture;
 
     // unity-based systems
     [HideInInspector] public input_handler input;
-    [HideInInspector] public camera_handler camera;
+    [HideInInspector] public camera_handler camerah;
     [HideInInspector] public map_manager map;
     [HideInInspector] public map_visual_manager mvm;
     [HideInInspector] public main_ui ui;
@@ -35,6 +36,7 @@ namespace Wiggy
     public CombatSystem combat_system;
     public EndTurnSystem end_turn_system;
     public ExtractionSystem extraction_system;
+    public GameoverSystem gameover_system;
     public GrenadeSystem grenade_system;
     public HealSystem heal_system;
     public InstantiateSystem instantiate_system;
@@ -69,6 +71,7 @@ namespace Wiggy
       ecs.RegisterComponent<InstantiatedComponent>();
       ecs.RegisterComponent<ToBeInstantiatedComponent>();
       // tags
+      ecs.RegisterComponent<ExitComponent>();
       ecs.RegisterComponent<PlayerComponent>();
       ecs.RegisterComponent<CursorComponent>();
       ecs.RegisterComponent<TrapComponent>();
@@ -118,6 +121,7 @@ namespace Wiggy
       display_inventory_system = ecs.RegisterSystem<DisplayInventorySystem>();
       end_turn_system = ecs.RegisterSystem<EndTurnSystem>();
       extraction_system = ecs.RegisterSystem<ExtractionSystem>();
+      gameover_system = ecs.RegisterSystem<GameoverSystem>();
       grenade_system = ecs.RegisterSystem<GrenadeSystem>();
       heal_system = ecs.RegisterSystem<HealSystem>();
       instantiate_system = ecs.RegisterSystem<InstantiateSystem>();
@@ -144,6 +148,7 @@ namespace Wiggy
       display_inventory_system.SetSignature(ecs);
       end_turn_system.SetSignature(ecs);
       extraction_system.SetSignature(ecs);
+      gameover_system.SetSignature(ecs);
       grenade_system.SetSignature(ecs);
       heal_system.SetSignature(ecs);
       instantiate_system.SetSignature(ecs);
@@ -170,7 +175,7 @@ namespace Wiggy
       RegisterSystems(ecs);
       RegisterSystemSignatures(ecs);
 
-      camera = FindObjectOfType<camera_handler>();
+      camerah = FindObjectOfType<camera_handler>();
       map = FindObjectOfType<map_manager>();
       ui = FindObjectOfType<main_ui>();
       mvm = FindObjectOfType<map_visual_manager>();
@@ -193,6 +198,7 @@ namespace Wiggy
         wall_prefab = map.wall_prefab,
         keycard_prefab = keycard_prefab,
         door_prefab = door_prefab,
+        exit_prefab = exit_prefab,
         entities = texture_map_entities
       };
 
@@ -209,10 +215,11 @@ namespace Wiggy
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
+      gameover_system.Start(ecs);
       grenade_system.Start(ecs, vfx_grenade);
       heal_system.Start(ecs, vfx_heal);
       instantiate_system.Start(ecs, map);
-      is_dead_system.Start(ecs, vfx_death);
+      is_dead_system.Start(ecs, select_system, vfx_death);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs, vfx_take_damage);
       monitor_overwatch_system.Start(ecs, move_system);
@@ -235,8 +242,8 @@ namespace Wiggy
     void Update()
     {
       // Camera
-      camera.HandleCursorOnGrid();
-      camera.HandleCameraZoom();
+      camerah.HandleCursorOnGrid();
+      camerah.HandleCameraZoom();
 
       // Input
       var cursor_over_ui = EventSystem.current.IsPointerOverGameObject();
@@ -269,13 +276,16 @@ namespace Wiggy
       // players moving positions (if players were taken in to consideration for a*star, which they arnt)
       astar = map_manager.GameToAStar(ecs, map);
 
+      // Create entities
+      instantiate_system.Update(ecs);
+
       // Systems that update every frame
       action_system.Update(ecs, astar);
       combat_system.Update(ecs);
-      extraction_system.Update(ecs, map.ext_spots);
+      extraction_system.Update(ecs);
+      gameover_system.Update(ecs);
       grenade_system.Update(ecs);
       heal_system.Update(ecs);
-      instantiate_system.Update(ecs);
       move_system.Update(ecs);
       overwatch_system.Update(ecs);
       pickup_item_system.Update(ecs);
@@ -289,7 +299,7 @@ namespace Wiggy
       standing_next_to_door_system.Update(ecs);
       use_item_system.Update(ecs);
 
-      // kill entities last
+      // destroy entities
       is_dead_system.Update(ecs);
 
       // UI
@@ -300,8 +310,8 @@ namespace Wiggy
     {
       float delta = Time.deltaTime;
       input.DoLateUpdate();
-      camera.HandleCameraMovement(delta, input.l_analogue);
-      camera.HandleCameraLookAt();
+      camerah.HandleCameraMovement(delta, input.l_analogue);
+      camerah.HandleCameraLookAt();
     }
 
     List<(int, EntityType)> LoadMapFromTexture()

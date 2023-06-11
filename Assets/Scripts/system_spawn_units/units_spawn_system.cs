@@ -14,6 +14,7 @@ namespace Wiggy
       public GameObject keycard_prefab;
       public GameObject wall_prefab;
       public GameObject door_prefab;
+      public GameObject exit_prefab;
       public List<(int, EntityType)> entities;
     }
 
@@ -47,6 +48,9 @@ namespace Wiggy
           break;
         case EntityType.keycard:
           u = Entities.create_keycard(ecs, pos, name, go, parent);
+          break;
+        case EntityType.tile_type_exit:
+          u = Entities.create_exit(ecs, pos, name, go, parent);
           break;
         default:
           Debug.LogError("Failed to create entity");
@@ -89,6 +93,7 @@ namespace Wiggy
       Spawn(ecs, map, EntityType.tile_type_trap, "Trap", new Optional<GameObject>(data.trap_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.keycard, "Keycard", new Optional<GameObject>(data.keycard_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.tile_type_door, "Door", new Optional<GameObject>(data.door_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.tile_type_exit, "Exit", new Optional<GameObject>(data.exit_prefab), new Optional<GameObject>(parent));
 
       // set players at start spots
       // CreatePlayer(ecs, map.srt_spots[0], "Wiggy", new Optional<GameObject>(data.player_prefab));

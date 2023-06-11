@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6385970463473546320}
   - component: {fileID: 1019257038486147516}
   - component: {fileID: 961754625825955206}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: obstacle_prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

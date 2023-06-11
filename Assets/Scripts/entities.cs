@@ -35,7 +35,7 @@ namespace Wiggy
       ecs.AddComponent(e, team);
 
       DexterityComponent dex = new();
-      dex.amount = 100;
+      dex.amount = 5;
       ecs.AddComponent(e, dex);
 
       HumanoidComponent humanoid = new();
@@ -256,6 +256,17 @@ namespace Wiggy
 
       AbleToBePickedUp pickedup = new();
       ecs.AddComponent(e, pickedup);
+
+      return e;
+    }
+
+    public static Entity create_exit(Wiggy.registry ecs, Vector2Int spot, string name, Optional<GameObject> prefab, Optional<GameObject> parent)
+    {
+      var e = ecs.Create();
+      MakeWorldEntity(ecs, e, spot, name, prefab, parent);
+
+      ExitComponent exit = new();
+      ecs.AddComponent(e, exit);
 
       return e;
     }

@@ -27,6 +27,10 @@ namespace Wiggy
   {
   };
 
+  public struct ExitComponent
+  {
+  };
+
   public struct CursorComponent
   {
     //

@@ -29,7 +29,7 @@ namespace Wiggy
       map = GameObject.FindObjectOfType<map_manager>();
       this.select_system = main.select_system;
       this.unit_spawn_system = main.unit_spawn_system;
-      this.camera = main.camera;
+      this.camera = main.camerah;
 
       GameObject cursor_parent = new GameObject("Cursor Parent");
       instantiated_path_visuals = new GameObject[map.width + map.height];

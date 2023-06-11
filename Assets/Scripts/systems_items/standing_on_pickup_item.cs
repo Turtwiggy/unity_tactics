@@ -21,7 +21,7 @@ namespace Wiggy
 
     public void Update(Wiggy.registry ecs)
     {
-      foreach (var e in entities.ToArray()) // readonly because this is modified
+      foreach (var e in entities)
       {
         var pos = ecs.GetComponent<GridPositionComponent>(e);
         var idx = Grid.GetIndex(pos.position, map.width);
