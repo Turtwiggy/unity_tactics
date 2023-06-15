@@ -18,9 +18,6 @@ namespace Wiggy
     [Header("Selected Unit Info")]
     public TextMeshProUGUI selected_text;
     public TextMeshProUGUI action_text;
-    public TextMeshProUGUI hovered_player;
-    public TextMeshProUGUI hovered_player_hp_text;
-    public TextMeshProUGUI hovered_player_weapon_text;
 
     [Header("Selected Unit Actions")]
     public GameObject action_holder;
@@ -41,6 +38,25 @@ namespace Wiggy
     [Header("Use Items")]
     public TextMeshProUGUI door_info_text;
 
+    [Header("Action Button Sprites")]
+    public Sprite move_sprite;
+    public Sprite attack_sprite;
+    public Sprite heal_sprite;
+    public Sprite overwatch_sprite;
+
+    [Header("Hover UI")]
+    public float ui_distance_above_floor = 3f;
+    public GameObject HoverUI;
+    public TextMeshProUGUI HoverUI_name;
+    public TextMeshProUGUI HoverUI_hp;
+    public TextMeshProUGUI HoverUI_weapon;
+
+    [Header("Selected UI")]
+    public GameObject SelectedUI;
+    public TextMeshProUGUI SelectedUI_name;
+    public TextMeshProUGUI SelectedUI_hp;
+    public TextMeshProUGUI SelectedUI_weapon;
+
     public void DoStart(main main)
     {
       // all the game/data
@@ -60,12 +76,13 @@ namespace Wiggy
       {
         foreach (Transform t in action_holder.transform)
           Destroy(t.gameObject);
-        void CreateActionButton<T>(string name) where T : Action, new()
+        void CreateActionButton<T>(string name, Sprite sprite) where T : Action, new()
         {
           var go = Instantiate(action_prefab, Vector3.zero, Quaternion.identity, action_holder.transform);
+          go.transform.name = name;
 
-          // go.transform.name = name;
-          // go.GetComponentInChildren<TextMeshProUGUI>().SetText(name);
+          var img = go.transform.GetChild(0).GetComponent<Image>();
+          img.sprite = sprite;
 
           var button = go.GetComponent<Button>();
           button.onClick.AddListener(() =>
@@ -75,10 +92,10 @@ namespace Wiggy
 
           action_buttons.Add((button, new T()));
         }
-        CreateActionButton<Move>("Move");
-        CreateActionButton<Attack>("Attack");
-        CreateActionButton<Heal>("Heal");
-        CreateActionButton<Overwatch>("Overwatch");
+        CreateActionButton<Move>("Move", move_sprite);
+        CreateActionButton<Attack>("Attack", attack_sprite);
+        CreateActionButton<Heal>("Heal", heal_sprite);
+        CreateActionButton<Overwatch>("Overwatch", overwatch_sprite);
         // CreateActionButton<Reload>("Reload");
         // CreateActionButton<Grenade>("Grenade");
       }
@@ -109,19 +126,29 @@ namespace Wiggy
       //
       if (!main.select_system.HasAnySelected())
       {
+        SelectedUI.SetActive(false);
         selected_text.SetText("Nothing selected");
         move_actions_left_text.gameObject.SetActive(false);
       }
       else
+      {
         RefreshActionUI(main.select_system.GetSelected());
+
+        var entity = main.select_system.GetSelected();
+
+        // Display Hover UI
+        var position = main.ecs.GetComponent<GridPositionComponent>(entity);
+        var worldspace = Grid.GridSpaceToWorldSpace(position.position, main.map.size);
+        worldspace.y = ui_distance_above_floor;
+        SelectedUI.transform.position = worldspace;
+        SelectedUI.SetActive(true);
+
+        DisplayEntityInformation(main.ecs, entity, SelectedUI_name, SelectedUI_hp, SelectedUI_weapon);
+      }
 
       //
       // Hover UI
       //
-
-      hovered_player.SetText("Nothing hovered");
-      hovered_player_hp_text.SetText("No health");
-      hovered_player_weapon_text.SetText("No weapon");
 
       var index = Grid.GetIndex(main.camerah.grid_index, main.map.width);
       var entities = main.map.entity_map[index].entities;
@@ -129,28 +156,22 @@ namespace Wiggy
       {
         var entity = entities[0];
 
-        TeamComponent default_team = default;
-        var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
-        if (has_team && team.team == Team.PLAYER)
+        if (!main.select_system.HasSpecificSelected(entity))
         {
-          var hovered_name = hovered_player;
-          var hovered_hp = hovered_player_hp_text;
-          var hovered_weapon = hovered_player_weapon_text;
+          // Display Hover UI
+          var position = main.ecs.GetComponent<GridPositionComponent>(entity);
+          var worldspace = Grid.GridSpaceToWorldSpace(position.position, main.map.size);
+          worldspace.y = ui_distance_above_floor;
+          HoverUI.transform.position = worldspace;
+          HoverUI.SetActive(true);
 
-          var tag = main.ecs.GetComponent<TagComponent>(entity);
-          hovered_name.SetText(tag.name + $" ({entities.Count})");
-
-          HealthComponent health_default = default;
-          ref var hp = ref main.ecs.TryGetComponent(entity, ref health_default, out var has_hp);
-          if (has_hp)
-            hovered_hp.SetText("HP: " + hp.cur.ToString());
-
-          WeaponComponent weapon_default = default;
-          ref var weapon = ref main.ecs.TryGetComponent(entity, ref weapon_default, out var has_weapon);
-          if (has_weapon)
-            hovered_weapon.SetText("Weapon: " + weapon.display_name);
+          DisplayEntityInformation(main.ecs, entity, HoverUI_name, HoverUI_hp, HoverUI_weapon);
         }
+        else
+          HoverUI.SetActive(false);
       }
+      else
+        HoverUI.SetActive(false);
 
       // Debug which action is selected from UI
       if (main.action_system.action_selected_from_ui)
@@ -197,6 +218,34 @@ namespace Wiggy
       move_actions_left_text.gameObject.SetActive(true);
       var actions_left = actions.allowed_actions_per_turn - actions.done.Count;
       move_actions_left_text.SetText($"Actions Left: {actions_left}");
+    }
+
+    private void DisplayEntityInformation(Wiggy.registry ecs, Entity e, TextMeshProUGUI ui_name, TextMeshProUGUI ui_hp, TextMeshProUGUI ui_weapon)
+    {
+      ui_hp.transform.parent.gameObject.SetActive(false);
+      ui_weapon.transform.parent.gameObject.SetActive(false);
+
+      // TeamComponent default_team = default;
+      // var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
+
+      var tag = main.ecs.GetComponent<TagComponent>(e);
+      ui_name.SetText($"Name: {tag.name}");
+
+      HealthComponent health_default = default;
+      ref var hp = ref main.ecs.TryGetComponent(e, ref health_default, out var has_hp);
+      if (has_hp)
+      {
+        ui_hp.SetText("HP: " + hp.cur.ToString());
+        ui_hp.transform.parent.gameObject.SetActive(true);
+      }
+
+      WeaponComponent weapon_default = default;
+      ref var weapon = ref main.ecs.TryGetComponent(e, ref weapon_default, out var has_weapon);
+      if (has_weapon)
+      {
+        ui_weapon.SetText("Weapon: " + weapon.display_name);
+        ui_weapon.transform.parent.gameObject.SetActive(true);
+      }
     }
   }
 }

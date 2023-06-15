@@ -179,7 +179,9 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -2464,7 +2466,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5440276489844719457}
   - component: {fileID: 5440276489844719456}
-  - component: {fileID: 8883237082239028142}
   m_Layer: 10
   m_Name: model_LowPolyMan
   m_TagString: Untagged
@@ -2521,33 +2522,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
---- !u!114 &8883237082239028142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5440276489844719458}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 736f5e62e0533dc46a9b7b786318bdb8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlinePixelWidth: 4
-  renderers:
-  - {fileID: 5440276490435983857}
-  - {fileID: 5440276489428734048}
-  - {fileID: 5440276489187983170}
-  - {fileID: 5440276489458379993}
-  - {fileID: 5440276489146328127}
-  - {fileID: 5440276490367181027}
-  - {fileID: 5440276488903801251}
-  - {fileID: 5440276488691264635}
-  - {fileID: 5440276489052035457}
-  - {fileID: 5440276490308895867}
-  - {fileID: 5440276490474243249}
-  outlineShader: {fileID: 4800000, guid: bbd11c4af6b43a14d95c3002f80117d3, type: 3}
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5440276489917685593
 GameObject:
   m_ObjectHideFlags: 0

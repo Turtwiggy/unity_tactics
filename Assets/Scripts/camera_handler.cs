@@ -10,7 +10,10 @@ namespace Wiggy
     private Plane ground_plane;
     private Camera view_camera;
 
-    private float minimum_y = 5;
+    private Vector2 y_clamp = new(5, 15);
+    private Vector2 x_clamp = new(0, 30);
+    private Vector2 z_clamp = new(-10, 30);
+
     private float camera_move_speed = 20.0f;
     private Vector3 fixed_lookat_point;
 
@@ -83,6 +86,13 @@ namespace Wiggy
       move_dir.y = 0;
 
       camera_follow.transform.position += camera_move_speed * delta * move_dir;
+
+      // Clamp camera in boundaries 
+      var pos = camera_follow.transform.position;
+      pos.x = Mathf.Clamp(pos.x, x_clamp.x, x_clamp.y);
+      pos.y = Mathf.Clamp(pos.y, y_clamp.x, y_clamp.y);
+      pos.z = Mathf.Clamp(pos.z, z_clamp.x, z_clamp.y);
+      camera_follow.transform.position = pos;
     }
 
     public void HandleCameraLookAt()
@@ -126,15 +136,6 @@ namespace Wiggy
 
       if (mouse_y < -0.05f)
         camera_follow.transform.position -= Vector3.up;
-
-      // Keep camera above a certain y level
-      var y = camera_follow.transform.position.y;
-      var pos = camera_follow.transform.position;
-      if (y < minimum_y)
-      {
-        pos.y = minimum_y;
-        camera_follow.transform.position = pos;
-      }
     }
   }
 } // namespace Wiggy

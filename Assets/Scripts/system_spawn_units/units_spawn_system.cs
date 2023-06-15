@@ -89,7 +89,7 @@ namespace Wiggy
       Spawn(ecs, map, EntityType.tile_type_wall, "Walls", new Optional<GameObject>(data.wall_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.actor_player, "Player", new Optional<GameObject>(data.player_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.actor_enemy, "Enemy", new Optional<GameObject>(data.enemy_prefab), new Optional<GameObject>(parent));
-      Spawn(ecs, map, EntityType.actor_barrel, "Explosive Barrel", new Optional<GameObject>(data.barrel_prefab), new Optional<GameObject>(parent));
+      Spawn(ecs, map, EntityType.actor_barrel, "Bomb", new Optional<GameObject>(data.barrel_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.tile_type_trap, "Trap", new Optional<GameObject>(data.trap_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.keycard, "Keycard", new Optional<GameObject>(data.keycard_prefab), new Optional<GameObject>(parent));
       Spawn(ecs, map, EntityType.tile_type_door, "Door", new Optional<GameObject>(data.door_prefab), new Optional<GameObject>(parent));

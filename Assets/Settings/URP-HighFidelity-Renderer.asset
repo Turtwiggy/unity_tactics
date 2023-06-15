@@ -48,29 +48,29 @@ MonoBehaviour:
   m_Name: ScreenSpaceOutlines
   m_EditorClassIdentifier: 
   m_Active: 1
-  render_pass_event: 300
-  outlines_layer_mask:
+  renderPassEvent: 300
+  outlinesLayerMask:
     serializedVersion: 2
-    m_Bits: 768
-  outlines_occluder_layer_mask:
+    m_Bits: 5888
+  outlinesOccluderLayerMask:
     serializedVersion: 2
-    m_Bits: 5120
-  outline_settings:
-    outline_color: {r: 0.38679248, g: 0.38679248, b: 0.38679248, a: 1}
-    outline_scale: 1
-    depth_threshold: 1.5
-    roberts_crossMultiplier: 100
-    normal_threshold: 0.4
-    steep_angle_threshold: 0.2
-    steep_angle_multiplier: 25
-  view_space_normals_texture_settings:
-    color_format: 0
-    depth_buffer_bits: 32
-    filter_mode: 0
-    background_color: {r: 0, g: 0, b: 0, a: 1}
-    per_object_data: 0
-    enable_dynamic_batching: 0
-    enable_instancing: 0
+    m_Bits: 0
+  outlineSettings:
+    outlineColor: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
+    outlineScale: 0.5
+    depthThreshold: 1
+    robertsCrossMultiplier: 110
+    normalThreshold: 0.5
+    steepAngleThreshold: 0.2
+    steepAngleMultiplier: 15
+  viewSpaceNormalsTextureSettings:
+    colorFormat: 0
+    depthBufferBits: 16
+    filterMode: 0
+    backgroundColor: {r: 1, g: 1, b: 1, a: 1}
+    perObjectData: -1
+    enableDynamicBatching: 1
+    enableInstancing: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,7 +113,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 7735
   m_DefaultStencilState:
     overrideStencilState: 0
     stencilReference: 0
@@ -125,5 +125,5 @@ MonoBehaviour:
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
   m_CopyDepthMode: 1
-  m_AccurateGbufferNormals: 0
+  m_AccurateGbufferNormals: 1
   m_IntermediateTextureMode: 1
