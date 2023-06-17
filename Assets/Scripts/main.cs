@@ -16,6 +16,7 @@ namespace Wiggy
     public GameObject keycard_prefab;
     public GameObject door_prefab;
     public GameObject exit_prefab;
+    public GameObject wall_prefab;
     public Texture2D map_texture;
 
     // unity-based systems
@@ -168,19 +169,12 @@ namespace Wiggy
       use_item_system.SetSignature(ecs);
     }
 
-    void Start()
+    public void StartEditor()
     {
       ecs = new();
       RegisterComponents(ecs);
       RegisterSystems(ecs);
       RegisterSystemSignatures(ecs);
-
-      camerah = FindObjectOfType<camera_handler>();
-      map = FindObjectOfType<map_manager>();
-      ui = FindObjectOfType<main_ui>();
-      mvm = FindObjectOfType<map_visual_manager>();
-      input = new GameObject("input_handler").AddComponent<input_handler>();
-      scene_manager = new GameObject("scene_manager").AddComponent<scene_manager>();
 
       var texture_map_entities = LoadMapFromTexture();
       map.seed = 0;
@@ -195,7 +189,7 @@ namespace Wiggy
         enemy_prefab = enemy_prefab,
         barrel_prefab = barrel_prefab,
         trap_prefab = trap_prefab,
-        wall_prefab = map.wall_prefab,
+        wall_prefab = wall_prefab,
         keycard_prefab = keycard_prefab,
         door_prefab = door_prefab,
         exit_prefab = exit_prefab,
@@ -210,6 +204,22 @@ namespace Wiggy
       vfx_reload = Resources.Load("Prefabs/Reload") as GameObject;
       vfx_take_damage = Resources.Load("Prefabs/TakeDamage") as GameObject;
 
+      unit_spawn_system.Start(ecs, uss_data);
+      instantiate_system.Start(ecs, map);
+      instantiate_system.Update(ecs); // call once to spawn everything
+    }
+
+    void Start()
+    {
+      camerah = FindObjectOfType<camera_handler>();
+      map = FindObjectOfType<map_manager>();
+      ui = FindObjectOfType<main_ui>();
+      mvm = FindObjectOfType<map_visual_manager>();
+      input = new GameObject("input_handler").AddComponent<input_handler>();
+      scene_manager = new GameObject("scene_manager").AddComponent<scene_manager>();
+
+      StartEditor();
+
       action_system.Start(ecs, this, move_prefab);
       ai_system.Start(ecs, unit_spawn_system, action_system);
       combat_system.Start(ecs);
@@ -218,7 +228,6 @@ namespace Wiggy
       gameover_system.Start(ecs, scene_manager);
       grenade_system.Start(ecs, vfx_grenade);
       heal_system.Start(ecs, vfx_heal);
-      instantiate_system.Start(ecs, map);
       is_dead_system.Start(ecs, select_system, vfx_death);
       move_system.Start(ecs, this);
       monitor_combat_events_system.Start(ecs, vfx_take_damage);
@@ -231,7 +240,6 @@ namespace Wiggy
       select_system.Start(ecs, selected_cursor_prefab);
       standing_on_item_system.Start(ecs);
       standing_next_to_door_system.Start(ecs);
-      unit_spawn_system.Start(ecs, uss_data);
       use_item_system.Start(ecs, select_system);
 
       mvm.DoStart();

@@ -50,14 +50,12 @@ namespace Wiggy
 
       if (input.window_r)
       {
-        Debug.Log("(select_system) incrementing floor idx");
         selected_entity_on_floor += 1;
         if (selected_entity_on_floor >= map_entities.Count)
           selected_entity_on_floor = 0;
       }
       if (input.window_l)
       {
-        Debug.Log("(select_system) decremeting floor idx");
         selected_entity_on_floor -= 1;
         if (selected_entity_on_floor < 0)
           selected_entity_on_floor = map_entities.Count - 1;

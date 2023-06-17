@@ -32,11 +32,6 @@ namespace Wiggy
     // Interesting spots
     public List<IndexList> voronoi_zones;
 
-    public GameObject map_holder_public;
-    public Transform generated_obstacle_holder;
-    public Transform generated_map_holder;
-    public GameObject wall_prefab;
-
     [Header("Map Info")]
     public int width = 30;
     public int height = 30;
@@ -113,41 +108,27 @@ namespace Wiggy
 
     public void GenerateMap(List<(int, EntityType)> loaded_map_entities = null)
     {
-      // Generate Map Holder
-      string holder_name = "Generated Map";
-      {
-        var holder = map_holder_public.transform.Find(holder_name);
-        if (holder)
-          DestroyImmediate(holder.gameObject);
-      }
-      generated_map_holder = new GameObject(holder_name).transform;
-      generated_map_holder.parent = map_holder_public.transform;
-      generated_obstacle_holder = new GameObject("Obstacle Holder").transform;
-      generated_obstacle_holder.parent = generated_map_holder;
+      obstacle_map = CreateBlankMap(width * height); // make entirely floor
 
-      // make entirely floor
-      obstacle_map = CreateBlankMap(width * height);
       if (generate_obstacles)
         obstacle_map = map_gen_obstacles.GenerateObstacles(width, height, iterations, seed);
+
       if (remove_isolated)
         map_gen_obstacles.ObstaclePostProcessing(obstacle_map, remove_isolated_count, width, height);
 
+      // Update the obstacle_map prepresentation
       var walls = GetFilteredMapEntities(loaded_map_entities, EntityType.tile_type_wall);
       foreach (var wall in walls)
       {
         var idx = wall.Item1;
-        var ent = wall.Item2;
         obstacle_map[idx].entities.Clear();
-        obstacle_map[idx].entities.Add(ent);
+        obstacle_map[idx].entities.Add(EntityType.tile_type_wall);
       }
 
       // Create entity map
       entity_map = new MapEntry[width * height];
       for (int i = 0; i < entity_map.Length; i++)
         entity_map[i] = new() { entities = new() };
-
-      // Make borders of map obstacles
-      // GenerateWallBorders();
 
       // Generate Start/End Points
       // int players = 4;

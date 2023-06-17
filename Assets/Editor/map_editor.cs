@@ -5,13 +5,12 @@ using UnityEditor;
 
 namespace Wiggy
 {
-  [CustomEditor(typeof(map_manager))]
+  [CustomEditor(typeof(main))]
   public class map_editor : Editor
   {
-
     public override void OnInspectorGUI()
     {
-      map_manager map = target as map_manager;
+      main m = target as main;
 
       if (DrawDefaultInspector())
       {
@@ -20,7 +19,7 @@ namespace Wiggy
 
       if (GUILayout.Button("Generate Map"))
       {
-        map.GenerateMap();
+        m.StartEditor();
       }
     }
   }
