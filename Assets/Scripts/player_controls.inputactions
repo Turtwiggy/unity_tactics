@@ -529,6 +529,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "UI Actions",
+            "id": "0158d5b6-9ec2-4b54-a5bd-5e39f001b855",
+            "actions": [
+                {
+                    "name": "WindowLeft",
+                    "type": "Button",
+                    "id": "ff9d2ff9-aa2f-44fa-a37e-7afb099ca420",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "WindowRight",
+                    "type": "Button",
+                    "id": "8930feb7-e262-431a-bcc2-4c5e3f88425b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "7052ce29-018a-484d-9ead-0b0838848aea",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
+                    "action": "WindowLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0d4898ff-e6f9-4cb5-ac76-3fcc1d490be8",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse & Keyboard",
+                    "action": "WindowRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

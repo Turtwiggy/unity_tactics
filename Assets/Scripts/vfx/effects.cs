@@ -5,9 +5,10 @@ namespace Wiggy
   public class effects : MonoBehaviour
   {
     public float effect_time = 2;
-    public float pause = 1;
-    private ParticleSystem _ps;
     private bool Initialized = false;
+
+    [SerializeField] private ParticleSystem _ps;
+    [SerializeField] private bool is_done;
 
     public bool IsDone
     {
@@ -33,5 +34,11 @@ namespace Wiggy
       main.duration = effect_time;
       _ps.Play();
     }
+
+    private void Update()
+    {
+      is_done = IsDone;
+    }
+
   }
 }

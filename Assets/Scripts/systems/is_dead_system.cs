@@ -73,7 +73,7 @@ namespace Wiggy
 
         // Was this selected in the UI?
         // If so, forceably deselect it
-        if (select_system.HasSpecificSelected(e))
+        if (select_system.HasSelectedOnTile(e))
           select_system.ClearSelect();
 
         // Remove ecs record

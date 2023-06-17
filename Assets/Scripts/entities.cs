@@ -35,7 +35,7 @@ namespace Wiggy
       ecs.AddComponent(e, team);
 
       DexterityComponent dex = new();
-      dex.amount = 5;
+      dex.amount = 50;
       ecs.AddComponent(e, dex);
 
       HumanoidComponent humanoid = new();

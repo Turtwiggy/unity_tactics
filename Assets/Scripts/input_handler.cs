@@ -19,6 +19,8 @@ namespace Wiggy
     public bool d_pad_d;
     public bool d_pad_l;
     public bool d_pad_r;
+    public bool window_l;
+    public bool window_r;
 
     public void OnEnable()
     {
@@ -37,6 +39,8 @@ namespace Wiggy
         input_actions.PlayerActions.DPadDown.performed += i => d_pad_d = true;
         input_actions.PlayerActions.DPadLeft.performed += i => d_pad_l = true;
         input_actions.PlayerActions.DPadRight.performed += i => d_pad_r = true;
+        input_actions.UIActions.WindowLeft.performed += i => window_l = true;
+        input_actions.UIActions.WindowRight.performed += i => window_r = true;
       }
 
       input_actions.Enable();
@@ -59,6 +63,8 @@ namespace Wiggy
       d_pad_d = false;
       d_pad_l = false;
       d_pad_r = false;
+      window_l = false;
+      window_r = false;
     }
 
   }

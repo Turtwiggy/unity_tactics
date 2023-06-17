@@ -35,7 +35,7 @@ namespace Wiggy
         obj.name = ecs.GetComponent<TagComponent>(e).name;
 
         // Done with request
-        Debug.Log("Processed instantiate request...");
+        // Debug.Log("Processed instantiate request...");
         ecs.RemoveComponent<ToBeInstantiatedComponent>(e);
 
         var instance = new InstantiatedComponent();

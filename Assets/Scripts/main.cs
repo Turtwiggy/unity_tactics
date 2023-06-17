@@ -215,7 +215,7 @@ namespace Wiggy
       combat_system.Start(ecs);
       end_turn_system.Start(ecs);
       extraction_system.Start(ecs);
-      gameover_system.Start(ecs);
+      gameover_system.Start(ecs, scene_manager);
       grenade_system.Start(ecs, vfx_grenade);
       heal_system.Start(ecs, vfx_heal);
       instantiate_system.Start(ecs, map);
@@ -246,6 +246,8 @@ namespace Wiggy
       camerah.HandleCameraZoom();
 
       // Input
+      select_system.Update(ecs); // do before Select()
+
       var cursor_over_ui = EventSystem.current.IsPointerOverGameObject();
       if (!cursor_over_ui && input.a_input)
       {
@@ -294,7 +296,6 @@ namespace Wiggy
       monitor_particle_effect_system.Update(ecs);
       monitor_trap_system.Update(ecs);
       reload_system.Update(ecs);
-      select_system.Update(ecs);
       standing_on_item_system.Update(ecs);
       standing_next_to_door_system.Update(ecs);
       use_item_system.Update(ecs);

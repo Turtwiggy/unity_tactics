@@ -551,6 +551,54 @@ public partial class @Player_controls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""UI Actions"",
+            ""id"": ""0158d5b6-9ec2-4b54-a5bd-5e39f001b855"",
+            ""actions"": [
+                {
+                    ""name"": ""WindowLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""ff9d2ff9-aa2f-44fa-a37e-7afb099ca420"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""WindowRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""8930feb7-e262-431a-bcc2-4c5e3f88425b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""7052ce29-018a-484d-9ead-0b0838848aea"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Mouse & Keyboard"",
+                    ""action"": ""WindowLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d4898ff-e6f9-4cb5-ac76-3fcc1d490be8"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Mouse & Keyboard"",
+                    ""action"": ""WindowRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -583,6 +631,10 @@ public partial class @Player_controls: IInputActionCollection2, IDisposable
         m_PlayerActions_DPadDown = m_PlayerActions.FindAction("D-Pad Down", throwIfNotFound: true);
         m_PlayerActions_DPadLeft = m_PlayerActions.FindAction("D-Pad Left", throwIfNotFound: true);
         m_PlayerActions_DPadRight = m_PlayerActions.FindAction("D-Pad Right", throwIfNotFound: true);
+        // UI Actions
+        m_UIActions = asset.FindActionMap("UI Actions", throwIfNotFound: true);
+        m_UIActions_WindowLeft = m_UIActions.FindAction("WindowLeft", throwIfNotFound: true);
+        m_UIActions_WindowRight = m_UIActions.FindAction("WindowRight", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -820,6 +872,60 @@ public partial class @Player_controls: IInputActionCollection2, IDisposable
         }
     }
     public PlayerActionsActions @PlayerActions => new PlayerActionsActions(this);
+
+    // UI Actions
+    private readonly InputActionMap m_UIActions;
+    private List<IUIActionsActions> m_UIActionsActionsCallbackInterfaces = new List<IUIActionsActions>();
+    private readonly InputAction m_UIActions_WindowLeft;
+    private readonly InputAction m_UIActions_WindowRight;
+    public struct UIActionsActions
+    {
+        private @Player_controls m_Wrapper;
+        public UIActionsActions(@Player_controls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @WindowLeft => m_Wrapper.m_UIActions_WindowLeft;
+        public InputAction @WindowRight => m_Wrapper.m_UIActions_WindowRight;
+        public InputActionMap Get() { return m_Wrapper.m_UIActions; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(UIActionsActions set) { return set.Get(); }
+        public void AddCallbacks(IUIActionsActions instance)
+        {
+            if (instance == null || m_Wrapper.m_UIActionsActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_UIActionsActionsCallbackInterfaces.Add(instance);
+            @WindowLeft.started += instance.OnWindowLeft;
+            @WindowLeft.performed += instance.OnWindowLeft;
+            @WindowLeft.canceled += instance.OnWindowLeft;
+            @WindowRight.started += instance.OnWindowRight;
+            @WindowRight.performed += instance.OnWindowRight;
+            @WindowRight.canceled += instance.OnWindowRight;
+        }
+
+        private void UnregisterCallbacks(IUIActionsActions instance)
+        {
+            @WindowLeft.started -= instance.OnWindowLeft;
+            @WindowLeft.performed -= instance.OnWindowLeft;
+            @WindowLeft.canceled -= instance.OnWindowLeft;
+            @WindowRight.started -= instance.OnWindowRight;
+            @WindowRight.performed -= instance.OnWindowRight;
+            @WindowRight.canceled -= instance.OnWindowRight;
+        }
+
+        public void RemoveCallbacks(IUIActionsActions instance)
+        {
+            if (m_Wrapper.m_UIActionsActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IUIActionsActions instance)
+        {
+            foreach (var item in m_Wrapper.m_UIActionsActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_UIActionsActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public UIActionsActions @UIActions => new UIActionsActions(this);
     private int m_ControllerSchemeIndex = -1;
     public InputControlScheme ControllerScheme
     {
@@ -856,5 +962,10 @@ public partial class @Player_controls: IInputActionCollection2, IDisposable
         void OnDPadDown(InputAction.CallbackContext context);
         void OnDPadLeft(InputAction.CallbackContext context);
         void OnDPadRight(InputAction.CallbackContext context);
+    }
+    public interface IUIActionsActions
+    {
+        void OnWindowLeft(InputAction.CallbackContext context);
+        void OnWindowRight(InputAction.CallbackContext context);
     }
 }

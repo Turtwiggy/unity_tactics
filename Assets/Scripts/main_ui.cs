@@ -45,17 +45,13 @@ namespace Wiggy
     public Sprite overwatch_sprite;
 
     [Header("Hover UI")]
-    public float ui_distance_above_floor = 3f;
+    private float ui_distance_above_floor = 2.5f;
     public GameObject HoverUI;
     public TextMeshProUGUI HoverUI_name;
     public TextMeshProUGUI HoverUI_hp;
     public TextMeshProUGUI HoverUI_weapon;
-
-    [Header("Selected UI")]
-    public GameObject SelectedUI;
-    public TextMeshProUGUI SelectedUI_name;
-    public TextMeshProUGUI SelectedUI_hp;
-    public TextMeshProUGUI SelectedUI_weapon;
+    public TextMeshProUGUI HoverUI_multiple_entity_info;
+    private GameObject instantiated_hover_ui_as_selected;
 
     public void DoStart(main main)
     {
@@ -68,6 +64,9 @@ namespace Wiggy
       // ui events
       extraction_button.onClick.AddListener(() =>
       {
+        // Record a win
+        PlayerPrefs.SetInt("wins", PlayerPrefs.GetInt("wins", 0) + 1);
+
         // What to do when extract?
         main.scene_manager.LoadMenu();
       });
@@ -122,39 +121,20 @@ namespace Wiggy
       extraction_holder.SetActive(main.extraction_system.ready_for_extraction);
 
       //
-      // Selected UI
-      //
-      if (!main.select_system.HasAnySelected())
-      {
-        SelectedUI.SetActive(false);
-        selected_text.SetText("Nothing selected");
-        move_actions_left_text.gameObject.SetActive(false);
-      }
-      else
-      {
-        RefreshActionUI(main.select_system.GetSelected());
-
-        var entity = main.select_system.GetSelected();
-
-        // Display Hover UI
-        var position = main.ecs.GetComponent<GridPositionComponent>(entity);
-        var worldspace = Grid.GridSpaceToWorldSpace(position.position, main.map.size);
-        worldspace.y = ui_distance_above_floor;
-        SelectedUI.transform.position = worldspace;
-        SelectedUI.SetActive(true);
-
-        DisplayEntityInformation(main.ecs, entity, SelectedUI_name, SelectedUI_hp, SelectedUI_weapon);
-      }
-
-      //
       // Hover UI
+      // Must come before Selected UI
       //
 
       var index = Grid.GetIndex(main.camerah.grid_index, main.map.width);
       var entities = main.map.entity_map[index].entities;
+
       if (entities.Count > 0)
       {
-        var entity = entities[0];
+        var floor_idx = main.select_system.GetSelectedFloorIndex();
+        var entity = entities[floor_idx];
+
+        HoverUI_multiple_entity_info.SetText($"{floor_idx + 1} / {entities.Count}");
+        HoverUI_multiple_entity_info.transform.parent.gameObject.SetActive(true);
 
         if (!main.select_system.HasSpecificSelected(entity))
         {
@@ -171,7 +151,32 @@ namespace Wiggy
           HoverUI.SetActive(false);
       }
       else
+      {
+        HoverUI_multiple_entity_info.transform.parent.gameObject.SetActive(false);
         HoverUI.SetActive(false);
+      }
+
+      //
+      // Selected UI
+      //
+      if (!main.select_system.HasAnySelected())
+      {
+        if (instantiated_hover_ui_as_selected != null)
+          Destroy(instantiated_hover_ui_as_selected);
+        selected_text.SetText("Nothing selected");
+        move_actions_left_text.gameObject.SetActive(false);
+      }
+      else
+      {
+        RefreshActionUI(main.select_system.GetSelected());
+        if (instantiated_hover_ui_as_selected == null)
+        {
+          instantiated_hover_ui_as_selected = Instantiate(HoverUI);
+          instantiated_hover_ui_as_selected.SetActive(true);
+          var bar = instantiated_hover_ui_as_selected.transform.Find("top_bar");
+          Destroy(bar.gameObject);
+        }
+      }
 
       // Debug which action is selected from UI
       if (main.action_system.action_selected_from_ui)
@@ -229,13 +234,13 @@ namespace Wiggy
       // var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
 
       var tag = main.ecs.GetComponent<TagComponent>(e);
-      ui_name.SetText($"Name: {tag.name}");
+      ui_name.SetText($"{tag.name.ToUpper()}");
 
       HealthComponent health_default = default;
       ref var hp = ref main.ecs.TryGetComponent(e, ref health_default, out var has_hp);
       if (has_hp)
       {
-        ui_hp.SetText("HP: " + hp.cur.ToString());
+        ui_hp.SetText($"{hp.cur.ToString()}");
         ui_hp.transform.parent.gameObject.SetActive(true);
       }
 
@@ -243,7 +248,7 @@ namespace Wiggy
       ref var weapon = ref main.ecs.TryGetComponent(e, ref weapon_default, out var has_weapon);
       if (has_weapon)
       {
-        ui_weapon.SetText("Weapon: " + weapon.display_name);
+        ui_weapon.SetText($"{weapon.display_name}");
         ui_weapon.transform.parent.gameObject.SetActive(true);
       }
     }

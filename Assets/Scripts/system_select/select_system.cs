@@ -6,9 +6,14 @@ namespace Wiggy
   public class SelectSystem : ECSSystem
   {
     private camera_handler camera;
+    private input_handler input;
     private map_manager map;
     private Entity cursor;
     public UnityEvent<Entity> new_entity_selected;
+
+    // Handles multiple entities on one square
+    private int selected_entity_on_floor = 0;
+    private int last_hovered_index = 0;
 
     // data
     private Optional<Entity> selected = new();
@@ -25,24 +30,54 @@ namespace Wiggy
     {
       camera = Object.FindObjectOfType<camera_handler>();
       map = Object.FindObjectOfType<map_manager>();
+      input = Object.FindObjectOfType<input_handler>();
       cursor = Entities.create_cursor(ecs, selected_cursor_prefab, new Optional<GameObject>());
       new_entity_selected = new();
     }
 
     public void Update(Wiggy.registry ecs)
     {
-      foreach (var e in entities)
-      {
-        if (HasSpecificSelected(e))
-        {
-          // note: instantiated is cursor, not unit
-          ref var p = ref ecs.GetComponent<GridPositionComponent>(e);
-          ref var i = ref ecs.GetComponent<InstantiatedComponent>(cursor);
+      //
+      // Handle user input on hovered square
+      //
 
-          var world_space = Grid.GridSpaceToWorldSpace(p.position, map.size);
-          i.instance.transform.position = world_space;
-          i.instance.SetActive(true);
-        }
+      var index = Grid.GetIndex(camera.grid_index, map.width);
+      var map_entities = map.entity_map[index].entities;
+
+      if (last_hovered_index != index)
+        selected_entity_on_floor = 0;
+      last_hovered_index = index;
+
+      if (input.window_r)
+      {
+        Debug.Log("(select_system) incrementing floor idx");
+        selected_entity_on_floor += 1;
+        if (selected_entity_on_floor >= map_entities.Count)
+          selected_entity_on_floor = 0;
+      }
+      if (input.window_l)
+      {
+        Debug.Log("(select_system) decremeting floor idx");
+        selected_entity_on_floor -= 1;
+        if (selected_entity_on_floor < 0)
+          selected_entity_on_floor = map_entities.Count - 1;
+      }
+
+      //
+      // Sets the "cursor" on the selected unit 
+      //
+
+      if (HasAnySelected())
+      {
+        var e = selected.Data;
+
+        // note: instantiated is cursor, not unit
+        ref var p = ref ecs.GetComponent<GridPositionComponent>(e);
+        ref var i = ref ecs.GetComponent<InstantiatedComponent>(cursor);
+
+        var world_space = Grid.GridSpaceToWorldSpace(p.position, map.size);
+        i.instance.transform.position = world_space;
+        i.instance.SetActive(true);
       }
     }
 
@@ -50,30 +85,24 @@ namespace Wiggy
     {
       var camera_pos = camera.grid_index;
       var index = Grid.GetIndex(camera_pos, map.width);
-      // Debug.Log("trying to select index: " + index);
 
       if (HasAnySelected())
         return;
 
       var map_entities = map.entity_map[index].entities;
+      if (map_entities.Count == 0)
+        return;
 
-      foreach (var e in entities)
-      {
-        foreach (var map_entity in map_entities)
-        {
-          if (e.Equals(map_entity))
-          {
-            selected.Set(e);
-            new_entity_selected.Invoke(e);
-            break;
-          }
-        }
-      }
+      var entity = map_entities[selected_entity_on_floor];
+      selected.Set(entity);
+      new_entity_selected.Invoke(entity);
     }
 
     public void ClearSelect()
     {
       selected.Reset();
+      selected_entity_on_floor = 0;
+      Debug.Log("clear selected to 0");
     }
 
     public bool HasAnySelected()
@@ -86,9 +115,21 @@ namespace Wiggy
       return selected.IsSet && e.id == selected.Data.id;
     }
 
+    public bool HasSelectedOnTile(Entity e)
+    {
+      var entities = map.entity_map[selected_entity_on_floor].entities;
+      return entities.Contains(e);
+    }
+
     public Entity GetSelected()
     {
       return selected.Data;
     }
+
+    public int GetSelectedFloorIndex()
+    {
+      return selected_entity_on_floor;
+    }
+
   }
 } // namespace Wiggy

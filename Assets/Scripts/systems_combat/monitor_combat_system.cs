@@ -31,6 +31,7 @@ namespace Wiggy
 
         var attacker = evt.from.Data;
         var defenders = evt.to;
+        Debug.Log($"{defenders.Count} defenders taking damage");
 
         foreach (var defender in defenders)
         {
