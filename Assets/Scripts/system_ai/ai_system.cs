@@ -96,7 +96,10 @@ namespace Wiggy
 
         var action = Reasoner.Evaluate(brain, ecs, e);
         if (!action.IsSet)
+        {
           Debug.Log("Ai brain cannot take any actions");
+          continue;
+        }
 
         var a = action.Data;
         Debug.Log($"EID: {e.id} decided: {a.GetType()}");

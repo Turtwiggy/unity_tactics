@@ -75,6 +75,8 @@ namespace Wiggy
         // If so, forceably deselect it
         if (select_system.HasSelectedOnTile(e))
           select_system.ClearSelect();
+        if (select_system.HasSpecificSelected(e))
+          select_system.ClearSelect();
 
         // Remove ecs record
         ecs.Destroy(e);

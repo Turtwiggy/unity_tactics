@@ -75,7 +75,7 @@ namespace Wiggy
       bool to_contains_obstacle = map.obstacle_map[full_to].entities.Contains(EntityType.tile_type_wall);
 
       // Does destination contain something?
-      // bool to_contains_something = map.entity_map[full_to].entities.Count > 0;
+      bool to_contains_something = map.entity_map[full_to].entities.Count > 0;
 
       var a = action_selected;
       var e = from_entity;
@@ -89,12 +89,18 @@ namespace Wiggy
         // Move is validated by the MoveActionVisuals
         ecs.AddComponent<WantsToMove>(e, new() { path = path_from_ui });
 
+        // Turn them all off
+        for (int i = 0; i < instantiated_path_visuals.Length; i++)
+          instantiated_path_visuals[i].SetActive(false);
+
         path_from_ui = null;
       }
       else if (a.GetType() == typeof(Attack))
       {
         if (to_contains_obstacle)
           return;
+        if (!to_contains_something)
+          return; // probably dont want to attack nothing
 
         // Target is validated by the monitor_combat_system
         ecs.AddComponent<WantsToAttack>(e, new() { map_idx = full_to });

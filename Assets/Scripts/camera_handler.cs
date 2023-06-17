@@ -19,7 +19,7 @@ namespace Wiggy
 
     public Vector2Int grid_index { get; private set; }
     public GameObject camera_follow;
-    public GameObject camera_lookat;
+    // public GameObject camera_lookat;
     public GameObject cursor_prefab;
     private GameObject cursor_instance;
 
@@ -34,19 +34,6 @@ namespace Wiggy
       cursor_instance = Instantiate(cursor_prefab);
       cursor_instance.name = "Cursor Instance";
     }
-
-#if DEBUG
-    void Update()
-    {
-      // // try use lmb to fix lookat point
-      // if (Mouse.current.leftButton.wasPressedThisFrame)
-      //   fixed_lookat_point = cursor.transform.position;
-
-      // // try use to remove lookat point
-      // if (Mouse.current.rightButton.wasPressedThisFrame)
-      //   fixed_lookat_point = Vector3.zero;
-    }
-#endif
 
     public void HandleCursor()
     {
@@ -98,32 +85,31 @@ namespace Wiggy
     public void HandleCameraLookAt()
     {
       // warning: a bug if fixed lookat point is actually 0,0,0
-      if (fixed_lookat_point != Vector3.zero)
-        camera_lookat.transform.position = fixed_lookat_point;
-      else
-      {
-        // fixes the lookat a point but moves along the x-axis
-        if (camera_z_lock)
-        {
-          camera_lookat.transform.position = new Vector3()
-          {
-            x = camera_follow.transform.position.x,
-            y = 0f,
-            z = camera_follow_z_lock
-          };
-        }
-        else
-        {
-          // This a lookat point z+5 in front of the camera
-          camera_lookat.transform.position = new Vector3()
-          {
-            x = camera_follow.transform.position.x,
-            y = 0f,
-            z = camera_follow.transform.position.z + 5f
-          };
-        }
-
-      }
+      // if (fixed_lookat_point != Vector3.zero)
+      //   camera_lookat.transform.position = fixed_lookat_point;
+      // else
+      // {
+      //   // fixes the lookat a point but moves along the x-axis
+      //   if (camera_z_lock)
+      //   {
+      //     camera_lookat.transform.position = new Vector3()
+      //     {
+      //       x = camera_follow.transform.position.x,
+      //       y = 0f,
+      //       z = camera_follow_z_lock
+      //     };
+      //   }
+      //   else
+      //   {
+      //     // This a lookat point z+5 in front of the camera
+      //     camera_lookat.transform.position = new Vector3()
+      //     {
+      //       x = camera_follow.transform.position.x,
+      //       y = 0f,
+      //       z = camera_follow.transform.position.z + 5f
+      //     };
+      //   }
+      // }
     }
 
     public void HandleCameraZoom()
