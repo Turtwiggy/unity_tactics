@@ -211,6 +211,7 @@ namespace Wiggy
 
     void Start()
     {
+      // unity-based systems
       camerah = FindObjectOfType<camera_handler>();
       map = FindObjectOfType<map_manager>();
       ui = FindObjectOfType<main_ui>();
@@ -220,6 +221,7 @@ namespace Wiggy
 
       StartEditor();
 
+      // ecs-based systems
       action_system.Start(ecs, this, move_prefab);
       ai_system.Start(ecs, unit_spawn_system, action_system);
       combat_system.Start(ecs);
@@ -283,7 +285,8 @@ namespace Wiggy
       // What could change the map? 
       // obstacles being destroyed
       // doors being open/closed
-      // players moving positions (if players were taken in to consideration for a*star, which they arnt)
+      // players moving positions
+      // (if players were taken in to consideration for a*star, which they currently arnt)
       astar = map_manager.GameToAStar(ecs, map);
 
       // Create entities

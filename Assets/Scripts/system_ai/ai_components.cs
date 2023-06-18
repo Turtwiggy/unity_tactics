@@ -56,7 +56,7 @@ namespace Wiggy
   {
     public override float Evaluate(Wiggy.registry ecs, Entity e)
     {
-      var from = ecs.GetComponent<GridPositionComponent>(e);
+      var from_pos = ecs.GetComponent<GridPositionComponent>(e).position;
       var targets = ecs.GetComponent<TargetsComponent>(e);
       var weapon = ecs.GetComponent<WeaponComponent>(e);
 
@@ -68,18 +68,17 @@ namespace Wiggy
         return 0;
       }
       if (targets.targets.Count > 1)
-        Debug.LogWarning("InsideWeaponDistanceConsideration >1 target.. choosing [0]");
+        Debug.LogWarning("InsideWeaponDistanceConsideration >1 target.. choosing closest");
 
-      var dst = targets.targets[0].distance;
       var to = targets.targets[0].entity;
-      var to_pos = ecs.GetComponent<GridPositionComponent>(to);
-      Debug.Log($"(WeaponDistanceConsideration) dst: {dst}");
+      var to_pos = ecs.GetComponent<GridPositionComponent>(to).position;
 
       // no utility in attacking; out of range!
-      if (dst < weapon.min_range || dst > weapon.max_range)
+      var (in_range, dst) = CombatHelpers.InWeaponRange(from_pos, to_pos, weapon);
+      if (!in_range)
       {
         Debug.Log("ai weapon out of range; not attacking!");
-        return 0;
+        return 0.0f;
       }
 
       // model this as a negative quadratic parabola

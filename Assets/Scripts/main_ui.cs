@@ -6,6 +6,7 @@ using UnityEngine.UI;
 namespace Wiggy
 {
   [System.Serializable]
+  [RequireComponent(typeof(main_ui_hover))]
   public class main_ui : MonoBehaviour
   {
     [HideInInspector]
@@ -44,19 +45,17 @@ namespace Wiggy
     public Sprite heal_sprite;
     public Sprite overwatch_sprite;
 
-    [Header("Hover UI")]
-    private float ui_distance_above_floor = 2.5f;
-    public GameObject HoverUI;
-    public TextMeshProUGUI HoverUI_name;
-    public TextMeshProUGUI HoverUI_hp;
-    public TextMeshProUGUI HoverUI_weapon;
-    public TextMeshProUGUI HoverUI_multiple_entity_info;
-    private GameObject instantiated_hover_ui_as_selected;
+    private main_ui_hover hover_ui;
+
+    [SerializeField]
+    private GameObject selected_ui;
 
     public void DoStart(main main)
     {
       // all the game/data
       this.main = main;
+      hover_ui = GetComponent<main_ui_hover>();
+      hover_ui.DoStart(this.main);
 
       // UI Systems
       main.display_inventory_system.Start(main.ecs, main.select_system, inventory_holder, inventory_row_prefab);
@@ -124,57 +123,30 @@ namespace Wiggy
       // Hover UI
       // Must come before Selected UI
       //
-
-      var index = Grid.GetIndex(main.camerah.grid_index, main.map.width);
-      var entities = main.map.entity_map[index].entities;
-
-      if (entities.Count > 0)
-      {
-        var floor_idx = main.select_system.GetSelectedFloorIndex();
-        var entity = entities[floor_idx];
-
-        HoverUI_multiple_entity_info.SetText($"{floor_idx + 1} / {entities.Count}");
-        HoverUI_multiple_entity_info.transform.parent.gameObject.SetActive(true);
-
-        if (!main.select_system.HasSpecificSelected(entity))
-        {
-          // Display Hover UI
-          var position = main.ecs.GetComponent<GridPositionComponent>(entity);
-          var worldspace = Grid.GridSpaceToWorldSpace(position.position, main.map.size);
-          worldspace.y = ui_distance_above_floor;
-          HoverUI.transform.position = worldspace;
-          HoverUI.SetActive(true);
-
-          DisplayEntityInformation(main.ecs, entity, HoverUI_name, HoverUI_hp, HoverUI_weapon);
-        }
-        else
-          HoverUI.SetActive(false);
-      }
-      else
-      {
-        HoverUI_multiple_entity_info.transform.parent.gameObject.SetActive(false);
-        HoverUI.SetActive(false);
-      }
+      hover_ui.DoUpdate();
 
       //
       // Selected UI
       //
       if (!main.select_system.HasAnySelected())
       {
-        if (instantiated_hover_ui_as_selected != null)
-          Destroy(instantiated_hover_ui_as_selected);
         selected_text.SetText("Nothing selected");
         move_actions_left_text.gameObject.SetActive(false);
+
+        if (selected_ui != null)
+          Destroy(selected_ui);
       }
       else
       {
         RefreshActionUI(main.select_system.GetSelected());
-        if (instantiated_hover_ui_as_selected == null)
+
+        if (selected_ui == null)
         {
-          instantiated_hover_ui_as_selected = Instantiate(HoverUI);
-          instantiated_hover_ui_as_selected.SetActive(true);
-          var bar = instantiated_hover_ui_as_selected.transform.Find("top_bar");
-          Destroy(bar.gameObject);
+          selected_ui = Instantiate(hover_ui.hover_ui);
+          selected_ui.SetActive(true);
+          selected_ui.transform.GetChild(0).GetChild(0).GetChild(2).gameObject.SetActive(false);
+          selected_ui.transform.GetChild(0).GetChild(0).GetChild(0).gameObject.SetActive(false);
+          selected_ui.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>().SetText("SELECTED");
         }
       }
 
@@ -223,34 +195,6 @@ namespace Wiggy
       move_actions_left_text.gameObject.SetActive(true);
       var actions_left = actions.allowed_actions_per_turn - actions.done.Count;
       move_actions_left_text.SetText($"Actions Left: {actions_left}");
-    }
-
-    private void DisplayEntityInformation(Wiggy.registry ecs, Entity e, TextMeshProUGUI ui_name, TextMeshProUGUI ui_hp, TextMeshProUGUI ui_weapon)
-    {
-      ui_hp.transform.parent.gameObject.SetActive(false);
-      ui_weapon.transform.parent.gameObject.SetActive(false);
-
-      // TeamComponent default_team = default;
-      // var team = main.ecs.TryGetComponent(entity, ref default_team, out var has_team);
-
-      var tag = main.ecs.GetComponent<TagComponent>(e);
-      ui_name.SetText($"{tag.name.ToUpper()}");
-
-      HealthComponent health_default = default;
-      ref var hp = ref main.ecs.TryGetComponent(e, ref health_default, out var has_hp);
-      if (has_hp)
-      {
-        ui_hp.SetText($"{hp.cur.ToString()}");
-        ui_hp.transform.parent.gameObject.SetActive(true);
-      }
-
-      WeaponComponent weapon_default = default;
-      ref var weapon = ref main.ecs.TryGetComponent(e, ref weapon_default, out var has_weapon);
-      if (has_weapon)
-      {
-        ui_weapon.SetText($"{weapon.display_name}");
-        ui_weapon.transform.parent.gameObject.SetActive(true);
-      }
     }
   }
 }

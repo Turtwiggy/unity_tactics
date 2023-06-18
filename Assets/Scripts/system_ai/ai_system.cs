@@ -146,11 +146,11 @@ namespace Wiggy
           }
           var target = targets[0].entity;
           var target_pos = ecs.GetComponent<GridPositionComponent>(target).position;
-          var player_idx = Grid.GetIndex(target_pos, map.width);
+          var target_idx = Grid.GetIndex(target_pos, map.width);
           // warning: this could introduce a bug where the ai now attacks 
           // everything at a specific index, instead of just the intended entity
           // as/if multiple units on the same tile, reevaluate this
-          action_system.AIRequestAttackAction(ecs, e, player_idx);
+          action_system.AIRequestAttackAction(ecs, e, target_idx);
         }
         // else if (a.GetType() == typeof(Grenade))
         // action_system.RequestGrenadeAction(ecs, e, -1); // -1 because currently unknown how ai handles grenade spot choosing

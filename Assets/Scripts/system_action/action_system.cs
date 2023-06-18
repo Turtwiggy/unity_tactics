@@ -41,6 +41,12 @@ namespace Wiggy
       }
     }
 
+    public void Update(Wiggy.registry ecs, astar_cell[] astar)
+    {
+      if (action_selected != null && action_selected.GetType() == typeof(Move) && select_system.HasAnySelected())
+        MoveActionVisuals(ecs, astar);
+    }
+
     public void RequestMapInteraction(Wiggy.registry ecs, Entity from_entity)
     {
       var pos = ecs.GetComponent<GridPositionComponent>(from_entity).position;
@@ -200,12 +206,6 @@ namespace Wiggy
         return true;
       }
       return false;
-    }
-
-    public void Update(Wiggy.registry ecs, astar_cell[] astar)
-    {
-      if (action_selected != null && action_selected.GetType() == typeof(Move) && select_system.HasAnySelected())
-        MoveActionVisuals(ecs, astar);
     }
 
     private void MoveActionVisuals(Wiggy.registry ecs, astar_cell[] astar)

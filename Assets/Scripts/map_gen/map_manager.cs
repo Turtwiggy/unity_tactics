@@ -167,6 +167,13 @@ namespace Wiggy
       }
       return new Optional<int>();
     }
+
+    public static List<Entity> GetHoveredEntities(map_manager map, camera_handler camera)
+    {
+      var idx = Grid.GetIndex(camera.grid_index, map.width);
+      return map.entity_map[idx].entities;
+    }
+
   }
 
 
