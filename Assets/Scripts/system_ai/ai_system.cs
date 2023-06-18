@@ -24,6 +24,63 @@ namespace Wiggy
       this.action_system = action_system;
     }
 
+    private void UpdateTargetsInWeaponRange(Wiggy.registry ecs, Entity e)
+    {
+      ref var targets = ref ecs.GetComponent<TargetsComponent>(e);
+      targets.targets.Clear();
+
+      var atk_weapon = ecs.GetComponent<WeaponComponent>(e);
+      var atk_pos = ecs.GetComponent<GridPositionComponent>(e).position;
+
+      foreach (var player in ecs.View<PlayerComponent>())
+      {
+        var def_pos = ecs.GetComponent<GridPositionComponent>(player).position;
+
+        var (in_range, distance) = CombatHelpers.InWeaponRange(atk_pos, def_pos, atk_weapon);
+        if (in_range)
+        {
+          TargetInfo info = new()
+          {
+            entity = player,
+            distance = distance
+          };
+          targets.targets.Add(info);
+        }
+      }
+
+      if (targets.targets.Count > 0)
+      {
+        Debug.Log($"EID: {e.id} has {targets.targets.Count} targets in range");
+
+        // Sort targets by distance
+        targets.targets.Sort(delegate (TargetInfo a, TargetInfo b)
+        {
+          return a.distance.CompareTo(b.distance);
+        });
+      }
+    }
+
+    private void EvaluateSurroundingPositionQuality(Wiggy.registry ecs, Entity e, ref AIMoveConsiderationComponent move_component, astar_cell[] astar, List<Vector2Int> spots)
+    {
+      ref var move_positions = ref move_component.positions;
+      var position = ecs.GetComponent<GridPositionComponent>(e).position;
+
+      for (int i = 0; i < spots.Count; i++)
+      {
+        var cur_pos = position;
+        var new_pos = spots[i];
+
+        // do not move to players position
+        if (cur_pos.x == new_pos.x && cur_pos.y == new_pos.y)
+          continue;
+
+        int quality = CombatHelpers.SpotQuality(ecs, e, map, astar, cur_pos, new_pos);
+        move_positions.Add((new_pos, quality));
+      }
+
+      move_positions.Sort((a, b) => a.Item2.CompareTo(b.Item2));
+    }
+
     public void Update(Wiggy.registry ecs, astar_cell[] astar)
     {
       // Debug.Log("decising best action for entity...");
@@ -31,7 +88,6 @@ namespace Wiggy
       foreach (var e in entities)
       {
         // Ai Entity
-        var position = ecs.GetComponent<GridPositionComponent>(e);
 
         // if (brain.brain_fsm == BRAIN_STATE.IDLE)
         // Debug.Log("brain in idle state... choosing action");
@@ -40,53 +96,24 @@ namespace Wiggy
         // Before evaluating, 
         //
 
-        // Update valid targets
-        // Used by the WeaponDistanceConsideration
+        // Update valid targets (Used by the WeaponDistanceConsideration)
+        UpdateTargetsInWeaponRange(ecs, e);
 
-        var weapon = ecs.GetComponent<WeaponComponent>(e);
-        ref var targets = ref ecs.GetComponent<TargetsComponent>(e);
-        targets.targets.Clear();
-        {
-          var players = ecs.View<PlayerComponent>();
-          for (int i = 0; i < players.Length; i++)
-          {
-            var entity = players[i];
-            var entity_pos = ecs.GetComponent<GridPositionComponent>(entity);
-            var dst = Mathf.Abs(Vector2Int.Distance(position.position, entity_pos.position));
-            if (dst >= weapon.min_range && dst <= weapon.max_range)
-              targets.targets.Add(entity);
-          }
-        }
-        if (targets.targets.Count > 0)
-          Debug.Log($"EID: {e.id} has {targets.targets.Count} targets in range");
-
-        // Possible move spots.
+        // All possible move spots.
+        var position = ecs.GetComponent<GridPositionComponent>(e);
         var movement_range = ecs.GetComponent<DexterityComponent>(e).amount;
         var move_index = Grid.GetIndex(position.position, map.width);
         var move_s = a_star.generate_accessible_areas(astar, move_index, movement_range, map.width, map.height);
         var spots = a_star.convert_to_points(move_s);
 
         // Evaluate quality of possible move spots
-
-        // Create a path from current spot to player spot
-        var player = ecs.View<PlayerComponent>()[0]; // assume first player
-        var player_pos = ecs.GetComponent<GridPositionComponent>(player).position;
-
         ref var move = ref ecs.GetComponent<AIMoveConsiderationComponent>(e);
         move.positions.Clear();
-        for (int i = 0; i < spots.Count; i++)
-        {
-          var cur_pos = position.position;
-          var new_pos = spots[i];
-          int quality = CombatHelpers.SpotQuality(ecs, map, astar, cur_pos, new_pos, player_pos);
 
-          if (new_pos.x == player_pos.x && new_pos.y == player_pos.y)
-            continue; // do not move to players position
-                      // NOTE: SHOULD CONSIDER ALL ENTITIES
-
-          move.positions.Add((new_pos, quality));
-        }
-        move.positions.Sort((a, b) => a.Item2.CompareTo(b.Item2));
+        // If we have targets in range, no need to evaluate new spots? just shoot em
+        var targets_in_range_of_current_spot = ecs.GetComponent<TargetsComponent>(e);
+        if (targets_in_range_of_current_spot.targets.Count == 0)
+          EvaluateSurroundingPositionQuality(ecs, e, ref move, astar, spots);
 
         //
         // Evaluate
@@ -111,7 +138,15 @@ namespace Wiggy
         }
         else if (a.GetType() == typeof(Attack))
         {
-          var player_idx = Grid.GetIndex(player_pos, map.width);
+          var targets = ecs.GetComponent<TargetsComponent>(e).targets;
+          if (targets.Count == 0)
+          {
+            Debug.Log("AI requested attack action but no targets");
+            return;
+          }
+          var target = targets[0].entity;
+          var target_pos = ecs.GetComponent<GridPositionComponent>(target).position;
+          var player_idx = Grid.GetIndex(target_pos, map.width);
           // warning: this could introduce a bug where the ai now attacks 
           // everything at a specific index, instead of just the intended entity
           // as/if multiple units on the same tile, reevaluate this

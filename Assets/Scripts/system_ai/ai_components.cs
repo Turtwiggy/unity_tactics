@@ -69,9 +69,10 @@ namespace Wiggy
       }
       if (targets.targets.Count > 1)
         Debug.LogWarning("InsideWeaponDistanceConsideration >1 target.. choosing [0]");
-      var to = targets.targets[0];
+
+      var dst = targets.targets[0].distance;
+      var to = targets.targets[0].entity;
       var to_pos = ecs.GetComponent<GridPositionComponent>(to);
-      var dst = Mathf.Abs(Vector2.Distance(from.position, to_pos.position));
       Debug.Log($"(WeaponDistanceConsideration) dst: {dst}");
 
       // no utility in attacking; out of range!
@@ -107,25 +108,20 @@ namespace Wiggy
     public override float Evaluate(Wiggy.registry ecs, Entity e)
     {
       var move = ecs.GetComponent<AIMoveConsiderationComponent>(e);
-      var pos = ecs.GetComponent<GridPositionComponent>(e);
+      var pos = ecs.GetComponent<GridPositionComponent>(e).position;
 
       // Stupid simple...
 
       if (move.positions.Count < 2)
         return 0.0f;
 
-      var current_spot = move.positions.Where(val => val.Item1 == pos.position).First();
-      var best_spot = move.positions[^1];
+      var best_spot = move.positions[^1].Item1;
 
-      if (current_spot.Item1 == best_spot.Item1)
-        return 0; // same spot
+      if (pos.x == best_spot.x && pos.y == best_spot.y)
+        return 0.0f; // same spot
 
-      // if there's a better spot...
-      // there's some utility moving
-      if (best_spot.Item2 > current_spot.Item2)
-        return 0.5f;
-
-      return 0.25f;
+      // if there's a better spot.. there's some utility moving
+      return 0.5f;
     }
   }
 

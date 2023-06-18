@@ -22,9 +22,16 @@ namespace Wiggy
   }
 
   // Who is this entity targeting?
+
+  public struct TargetInfo
+  {
+    public Entity entity;
+    public float distance;
+  }
+
   public struct TargetsComponent
   {
-    public List<Entity> targets;
+    public List<TargetInfo> targets;
   }
 
   public struct WeaponComponent

@@ -99,38 +99,58 @@ namespace Wiggy
 
     // The quality of a spot is determined by:
     // Am I flanked by hostiles or friendlies
-    public static int SpotQuality(Wiggy.registry ecs, map_manager map, astar_cell[] astar, Vector2Int cur_pos, Vector2Int new_pos, Vector2Int player_pos)
+    public static int SpotQuality(Wiggy.registry ecs, Entity e, map_manager map, astar_cell[] astar, Vector2Int cur_pos, Vector2Int new_pos)
     {
+      var players_in_game = ecs.View<PlayerComponent>();
+      var weapon = ecs.GetComponent<WeaponComponent>(e);
       int quality = 0;
 
       bool spot_in_cover = SpotInCover(map, new_pos);
       if (spot_in_cover)
         quality += 2;
 
-      // Does this spot move closer to player?
-      var new_pos_dst_from_player = Vector2Int.Distance(new_pos, player_pos);
-      var cur_pos_dst_from_player = Vector2Int.Distance(cur_pos, player_pos);
-      if (new_pos_dst_from_player < cur_pos_dst_from_player) // moved closer
-        quality += 5;
+      foreach (var player in players_in_game)
+      {
+        var player_pos = ecs.GetComponent<GridPositionComponent>(player).position;
 
-      // Is a player flanking the potential spot?
-      bool spot_is_flanked = SpotIsFlanked(map, astar, player_pos, new_pos);
-      if (spot_is_flanked)
-        quality -= 1;
+        // Does this spot move in to weapon range to a player?
+        var (in_range, distance) = InWeaponRange(new_pos, player_pos, weapon);
+        if (in_range)
+        {
+          quality += 5;
+          break;
+        }
+
+        // Does this spot move towards a player?
+        var cur_pos_dst_from_player = Vector2Int.Distance(cur_pos, player_pos);
+        var new_pos_dst_from_player = Vector2Int.Distance(new_pos, player_pos);
+        if (new_pos_dst_from_player < cur_pos_dst_from_player)
+        {
+          quality += 3;
+          break;
+        }
+      }
 
       // Does the spot contain another actor?
       var new_spot_idx = Grid.GetIndex(new_pos, map.width);
       var entities = map.entity_map[new_spot_idx].entities;
-      foreach (var e in entities)
+      foreach (var other in entities)
       {
         // is a humanoid standing on a tile?
         HumanoidComponent humanoid_default = default;
-        ecs.TryGetComponent(e, ref humanoid_default, out var is_humanoid);
+        ecs.TryGetComponent(other, ref humanoid_default, out var is_humanoid);
         if (is_humanoid)
           return 0;
       }
 
       return quality;
+    }
+
+    public static (bool, float) InWeaponRange(Vector2Int atk_pos, Vector2Int def_pos, WeaponComponent weapon)
+    {
+      var dst = Mathf.Abs(Vector2Int.Distance(atk_pos, def_pos));
+      var in_range = dst >= weapon.min_range && dst <= weapon.max_range;
+      return (in_range, dst);
     }
 
     public static int CalculateDamage(Wiggy.registry ecs, map_manager map, astar_cell[] astar, Entity attacker, Entity defender)
@@ -150,18 +170,13 @@ namespace Wiggy
       // Check range
       var atk_pos = ecs.GetComponent<GridPositionComponent>(attacker).position;
       var def_pos = ecs.GetComponent<GridPositionComponent>(defender).position;
-      var dst = Mathf.Abs(Vector2Int.Distance(atk_pos, def_pos));
-      var in_weapon_range = dst <= weapon.max_range && dst >= weapon.min_range;
-      if (!in_weapon_range)
-      {
-        Debug.Log("attack out of range.. nulling damage");
+      var (in_range, _) = InWeaponRange(atk_pos, def_pos, weapon);
+      if (!in_range)
         damage = 0;
-      }
 
       // Check flanked
-      var flanked = SpotIsFlanked(map, astar, atk_pos, def_pos);
-      if (flanked)
-        damage *= 2;
+      // var flanked = SpotIsFlanked(map, astar, atk_pos, def_pos);
+      // if (!flanked) damage /= 2;
 
       // Check weaknesses
       // TODO
@@ -169,7 +184,6 @@ namespace Wiggy
       // Random crit amount?
       // TODO
 
-      Debug.Log($"damage: {damage} in_range: {in_weapon_range}, flanked: {flanked}");
       return damage;
     }
   }
