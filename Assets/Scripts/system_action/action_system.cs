@@ -162,7 +162,8 @@ namespace Wiggy
       }
 
       // Set the action as queued
-      QueueInteraction(new T());
+      action_selected = new T();
+      action_selected_from_ui = true;
 
       //
       // Actions that can resolve immediately
@@ -174,12 +175,6 @@ namespace Wiggy
 
       if (RequestActionIfImmediate(ecs, a, e))
         ClearInteraction(); // no further user input
-    }
-
-    public void QueueInteraction(Action a)
-    {
-      action_selected = a;
-      action_selected_from_ui = true;
     }
 
     public void ClearInteraction()

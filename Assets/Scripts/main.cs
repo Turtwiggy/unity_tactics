@@ -249,7 +249,7 @@ namespace Wiggy
       ui.DoStart(this);
     }
 
-    void Update()
+    public void Update()
     {
       // Camera
       camerah.HandleCursorOnGrid();

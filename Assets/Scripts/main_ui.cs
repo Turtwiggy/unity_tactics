@@ -102,7 +102,7 @@ namespace Wiggy
       next_turn_button.onClick.AddListener(() =>
       {
         // Update End Turn System
-        main.end_turn_system.Update(main.ecs);
+        main.end_turn_system.EndPlayerTurn(main.ecs);
 
         // Update AI system
         main.ai_system.Update(main.ecs, main.astar);

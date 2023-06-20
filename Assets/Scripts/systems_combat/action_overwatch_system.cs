@@ -20,6 +20,19 @@ namespace Wiggy
       this.vfx_overwatch = vfx_overwatch;
     }
 
+    public void RemoveOverwatchFromPlayers(Wiggy.registry ecs)
+    {
+      // If any of the players had overwatch, remove this as a status
+      var players = ecs.View<PlayerComponent>();
+      foreach (var player in players)
+      {
+        OverwatchStatus overwatch_default = default;
+        ecs.TryGetComponent(player, ref overwatch_default, out var has_overwatch);
+        if (has_overwatch)
+          ecs.RemoveComponent<OverwatchStatus>(player);
+      }
+    }
+
     public void Update(Wiggy.registry ecs)
     {
       foreach (var e in entities.ToArray()) // readonly because this is modified

@@ -129,5 +129,19 @@ namespace Wiggy
       return selected_entity_on_floor;
     }
 
+    public Optional<int> GetFloorIndex(Wiggy.registry ecs, Entity e)
+    {
+      var position = ecs.GetComponent<GridPositionComponent>(e);
+      var idx = Grid.GetIndex(position.position, map.width);
+      var ents = map.entity_map[idx].entities;
+      for (int i = 0; i < ents.Count; i++)
+      {
+        Entity ent = ents[i];
+        if (ent.id == e.id)
+          return new Optional<int>(i);
+      }
+      return new Optional<int>();
+    }
+
   }
 } // namespace Wiggy

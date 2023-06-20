@@ -107,7 +107,7 @@ namespace Wiggy
 
       bool spot_in_cover = SpotInCover(map, new_pos);
       if (spot_in_cover)
-        quality += 2;
+        quality += 1;
 
       foreach (var player in players_in_game)
       {
@@ -117,7 +117,7 @@ namespace Wiggy
         var (in_range, distance) = InWeaponRange(new_pos, player_pos, weapon);
         if (in_range)
         {
-          quality += 5;
+          quality += 6;
           break;
         }
 

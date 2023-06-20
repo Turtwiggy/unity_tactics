@@ -3,6 +3,8 @@ namespace Wiggy
 {
   public class EndTurnSystem : ECSSystem
   {
+    public bool overwatch_needs_to_process_that_ai_ended_turn { get; private set; }
+
     public override void SetSignature(Wiggy.registry ecs)
     {
       Signature s = new();
@@ -13,34 +15,31 @@ namespace Wiggy
 
     public void Start(Wiggy.registry ecs)
     {
-
+      overwatch_needs_to_process_that_ai_ended_turn = false;
     }
 
-    public void Update(Wiggy.registry ecs)
+    public void ClearActions(Wiggy.registry ecs, Team team)
     {
-      UnityEngine.Debug.Log("ending turn... (clearing allll actions)");
-
       foreach (var e in entities)
       {
-        var actions = ecs.GetComponent<ActionsComponent>(e);
-        var team = ecs.GetComponent<TeamComponent>(e);
+        ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
+        var t = ecs.GetComponent<TeamComponent>(e);
 
-        if (team.team == Team.PLAYER)
+        if (t.team == team)
           actions.done.Clear();
       }
+    }
+
+    public void EndPlayerTurn(Wiggy.registry ecs)
+    {
+      UnityEngine.Debug.Log("ending turn... (clearing allll actions)");
+      ClearActions(ecs, Team.PLAYER);
     }
 
     public void EndAiTurn(Wiggy.registry ecs)
     {
-      foreach (var e in entities)
-      {
-        var actions = ecs.GetComponent<ActionsComponent>(e);
-        var team = ecs.GetComponent<TeamComponent>(e);
-
-        if (team.team == Team.ENEMY)
-          actions.done.Clear();
-      }
+      ClearActions(ecs, Team.ENEMY);
+      overwatch_needs_to_process_that_ai_ended_turn = true;
     }
-
   }
 }

@@ -15,6 +15,7 @@ namespace Wiggy
   {
     public UnityEvent<MoveInformation> something_moved;
     private map_manager map;
+    private SelectSystem select_system;
 
     // animations
     private MonoBehaviour main;
@@ -33,6 +34,49 @@ namespace Wiggy
       this.main = main;
       this.map = Object.FindObjectOfType<map_manager>();
       this.something_moved = new();
+      this.select_system = main.select_system;
+    }
+
+    private bool ValidateRequest(Wiggy.registry ecs, Entity e, WantsToMove request)
+    {
+      // Does the request contain a path?
+      if (request.path == null || request.path.Length <= 1)
+      {
+        Debug.Log("no path...");
+        return false;
+      }
+
+      var position = ecs.GetComponent<GridPositionComponent>(e);
+      int from = Grid.GetIndex(position.position, map.width);
+      var final = request.path[^1];
+      var to = Grid.GetIndex(final, map.width);
+      var to_ents = map.entity_map[to].entities;
+      var from_ents = map.entity_map[from].entities;
+
+      // Does the "to" spot contain a humanoid?
+      {
+        bool to_contains_humanoid = false;
+        foreach (var to_ent in to_ents)
+        {
+          HumanoidComponent humanoid_default = default;
+          ecs.TryGetComponent(to_ent, ref humanoid_default, out var is_humanoid);
+          if (is_humanoid)
+            to_contains_humanoid = true;
+        }
+        if (to_contains_humanoid)
+        {
+          Debug.Log($"EID: {e.id} tried to move to spot containing a humanoid");
+          return false;
+        }
+      }
+
+      // Does the "from" spot contain the correct entity?
+      {
+        var floor_index = select_system.GetFloorIndex(ecs, e);
+        if (!floor_index.IsSet)
+          return false;
+      }
+      return true;
     }
 
     public void Update(Wiggy.registry ecs)
@@ -50,25 +94,25 @@ namespace Wiggy
 
         ref var actions = ref ecs.GetComponent<ActionsComponent>(e);
         var request = ecs.GetComponent<WantsToMove>(e);
-        var position = ecs.GetComponent<GridPositionComponent>(e);
 
-        // Process request
-        int from = Grid.GetIndex(position.position, map.width);
-
-        // Check this unit does not have the overwatch status
-        // (otherwise, you'd be immobalized)
-
-        OverwatchStatus overwatch_default = default;
-        ref var overwatch = ref ecs.TryGetComponent(e, ref overwatch_default, out var has_status);
-        if (has_status)
+        if (!ValidateRequest(ecs, e, request))
         {
-          Debug.Log("you cant move, you have overwatch status!");
+          Debug.Log("WantsToMove invalid request - not using action");
           ecs.RemoveComponent<WantsToMove>(e);
           continue;
         }
 
+        // If this unit had the overwatch status, remove it
+        OverwatchStatus overwatch_default = default;
+        ref var overwatch = ref ecs.TryGetComponent(e, ref overwatch_default, out var has_status);
+        if (has_status)
+        {
+          Debug.Log("Unit Moving; removing overwatch status");
+          ecs.RemoveComponent<OverwatchStatus>(e);
+        }
+
         Debug.Log("Moving..");
-        MoveActionLogic(ecs, e, from, request.path.ToArray());
+        MoveActionLogic(ecs, e, request.path.ToArray());
         Debug.Log("Move action done.");
 
         // Request is processed
@@ -76,49 +120,16 @@ namespace Wiggy
       }
     }
 
-    private void MoveActionLogic(Wiggy.registry ecs, Entity e, int from, Vector2Int[] path)
+    private void MoveActionLogic(Wiggy.registry ecs, Entity e, Vector2Int[] path)
     {
-      if (path == null || path.Length <= 1)
-      {
-        Debug.Log("no path...");
-        return;
-      }
+      var position = ecs.GetComponent<GridPositionComponent>(e);
+      int from = Grid.GetIndex(position.position, map.width);
       var final = path[^1];
       var to = Grid.GetIndex(final, map.width);
-      var to_ents = map.entity_map[to].entities;
-      var from_ents = map.entity_map[from].entities;
-
-      // Does the "to" spot contain a humanoid?
-      bool to_contains_humanoid = false;
-      foreach (var to_ent in to_ents)
-      {
-        HumanoidComponent humanoid_default = default;
-        ecs.TryGetComponent(to_ent, ref humanoid_default, out var is_humanoid);
-        if (is_humanoid)
-          to_contains_humanoid = true;
-      }
-      if (to_contains_humanoid)
-      {
-        Debug.Log($"EID: {e.id} tried to move to spot containing a humanoid");
-        return;
-      }
-
-      // Does the "from" spot contain the correct entity?
-      int index = -1;
-      for (int i = 0; i < from_ents.Count; i++)
-      {
-        Entity from_ent = from_ents[i];
-        if (from_ent.id == e.id)
-          index = i;
-      }
-      if (index == -1)
-      {
-        Debug.Log("Entity tried to move 'from' a spot that doesnt contain the correct entity");
-        return;
-      }
+      var floor_index = select_system.GetFloorIndex(ecs, e);
 
       // Update representation
-      map.entity_map[from].entities.RemoveAt(index);
+      map.entity_map[from].entities.RemoveAt(floor_index.Data);
       map.entity_map[to].entities.Add(e);
 
       // Update component data
@@ -136,8 +147,7 @@ namespace Wiggy
       // {
       //   Debug.Log("Stopping existing coroutine");
       //   main.StopCoroutine(animation_coroutine);
-      //   // Finish moving animation
-      //   if (animation_go != null)
+      //   if (animation_go != null) // Finish moving animation
       //     animation_go.transform.localPosition = Grid.GridSpaceToWorldSpace(animation_final, map.size);
       // }
 
