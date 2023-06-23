@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Wiggy
 {
   [System.Serializable]
-  [RequireComponent(typeof(main_ui_hover))]
+  [RequireComponent(typeof(main_ui_worldspace_hover))]
   public class main_ui : MonoBehaviour
   {
     [HideInInspector]
@@ -45,7 +45,7 @@ namespace Wiggy
     public Sprite heal_sprite;
     public Sprite overwatch_sprite;
 
-    private main_ui_hover hover_ui;
+    private main_ui_worldspace_hover hover_ui;
 
     [SerializeField]
     private GameObject selected_ui;
@@ -54,7 +54,7 @@ namespace Wiggy
     {
       // all the game/data
       this.main = main;
-      hover_ui = GetComponent<main_ui_hover>();
+      hover_ui = GetComponent<main_ui_worldspace_hover>();
       hover_ui.DoStart(this.main);
 
       // UI Systems

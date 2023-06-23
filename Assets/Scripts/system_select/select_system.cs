@@ -26,9 +26,9 @@ namespace Wiggy
       ecs.SetSystemSignature<SelectSystem>(s);
     }
 
-    public void Start(Wiggy.registry ecs, GameObject selected_cursor_prefab)
+    public void Start(Wiggy.registry ecs, camera_handler camerah, GameObject selected_cursor_prefab)
     {
-      camera = Object.FindObjectOfType<camera_handler>();
+      this.camera = camerah;
       map = Object.FindObjectOfType<map_manager>();
       input = Object.FindObjectOfType<input_handler>();
       cursor = Entities.create_cursor(ecs, selected_cursor_prefab, new Optional<GameObject>());

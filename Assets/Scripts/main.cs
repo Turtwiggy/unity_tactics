@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Cinemachine;
 
 namespace Wiggy
 {
@@ -20,8 +21,8 @@ namespace Wiggy
     public Texture2D map_texture;
 
     // unity-based systems
+    [HideInInspector] public camera_handler camerah = new();
     [HideInInspector] public input_handler input;
-    [HideInInspector] public camera_handler camerah;
     [HideInInspector] public map_manager map;
     [HideInInspector] public map_visual_manager mvm;
     [HideInInspector] public main_ui ui;
@@ -64,6 +65,7 @@ namespace Wiggy
     private GameObject vfx_overwatch;
     private GameObject vfx_reload;
     private GameObject vfx_take_damage;
+    public GameObject cursor_prefab;
 
     public void RegisterComponents(Wiggy.registry ecs)
     {
@@ -212,12 +214,12 @@ namespace Wiggy
     void Start()
     {
       // unity-based systems
-      camerah = FindObjectOfType<camera_handler>();
       map = FindObjectOfType<map_manager>();
       ui = FindObjectOfType<main_ui>();
       mvm = FindObjectOfType<map_visual_manager>();
       input = new GameObject("input_handler").AddComponent<input_handler>();
       scene_manager = new GameObject("scene_manager").AddComponent<scene_manager>();
+      camerah.DoStart(map, input, cursor_prefab);
 
       StartEditor();
 
@@ -239,7 +241,7 @@ namespace Wiggy
       overwatch_system.Start(ecs, vfx_overwatch);
       pickup_item_system.Start(ecs);
       reload_system.Start(ecs, vfx_reload);
-      select_system.Start(ecs, selected_cursor_prefab);
+      select_system.Start(ecs, camerah, selected_cursor_prefab);
       standing_on_item_system.Start(ecs);
       standing_next_to_door_system.Start(ecs);
       use_item_system.Start(ecs, select_system);
@@ -251,9 +253,10 @@ namespace Wiggy
 
     public void Update()
     {
+      float delta = Time.deltaTime;
+
       // Camera
-      camerah.HandleCursorOnGrid();
-      camerah.HandleCameraZoom();
+      camerah.DoUpdate(delta);
 
       // Input
       select_system.Update(ecs); // do before Select()
@@ -321,9 +324,8 @@ namespace Wiggy
     void LateUpdate()
     {
       float delta = Time.deltaTime;
+      camerah.DoLateUpdate(delta);
       input.DoLateUpdate();
-      camerah.HandleCameraMovement(delta, input.l_analogue);
-      camerah.HandleCameraLookAt();
     }
 
     List<(int, EntityType)> LoadMapFromTexture()
