@@ -17,6 +17,7 @@ namespace Wiggy
     public static int max_registered_components = 64;
   };
 
+  [System.Serializable]
   public struct Entity
   {
     public int id;

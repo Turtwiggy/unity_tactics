@@ -8,10 +8,12 @@ namespace Wiggy
   public class camera_handler
   {
     private readonly float camera_move_speed = 20.0f;
-    private readonly float camera_rotate_speed = 5.0f;
-    private readonly Vector2 y_clamp = new(5, 30);
+    private readonly float camera_rotate_speed = 250.0f;
+    private readonly float camera_scroll_speed = 0.5f;
+    private readonly Vector2 y_clamp = new(2, 10);
     private readonly Vector2 x_clamp = new(0, 30);
     private readonly Vector2 z_clamp = new(-10, 30);
+    private readonly Vector2 low_angle_to_high_angle = new(30, 45);
 
     private map_manager map;
     private input_handler input;
@@ -63,6 +65,7 @@ namespace Wiggy
     public void DoLateUpdate(float delta)
     {
       var delta_x = input.r_analogue.x;
+      var delta_y = input.r_analogue.y;
       var rmb = Mouse.current.rightButton.isPressed;
       var mmb = Mouse.current.middleButton.isPressed;
 
@@ -70,8 +73,11 @@ namespace Wiggy
 
       if (rmb)
         HandleCameraDrag();
+
       if (mmb)
-        HandleCameraRotation(delta_x);
+        HandleCameraRotation(delta, delta_x, delta_y);
+
+      HandleCameraZoom();
 
       // Clamp camera in boundaries 
       var pos = camera_parent.transform.position;
@@ -80,16 +86,34 @@ namespace Wiggy
       pos.z = Mathf.Clamp(pos.z, z_clamp.x, z_clamp.y);
       camera_parent.transform.position = pos;
 
-      HandleCameraZoom();
+      // Clamp camera angle
+      var ea = camera_parent.eulerAngles;
+      ea.x = Mathf.Clamp(ea.x, low_angle_to_high_angle.x, low_angle_to_high_angle.y);
+      camera_parent.eulerAngles = ea;
     }
 
-    private void HandleCameraRotation(float delta_x)
+    private void HandleCameraRotation(float delta, float delta_x, float delta_y)
     {
-      camera_parent.transform.rotation = Quaternion.Euler(
-        camera_parent.transform.rotation.eulerAngles.x,
-        delta_x * camera_rotate_speed + camera_parent.transform.rotation.eulerAngles.y,
-        0.0f
-      );
+      var epsilon = 0.05;
+      var abs_delta_x = Mathf.Abs(delta_x);
+      var abs_delta_y = Mathf.Abs(delta_y);
+      bool has_input = abs_delta_x > epsilon || abs_delta_y > epsilon;
+
+      if (!has_input)
+        return;
+
+      if (abs_delta_x > abs_delta_y)
+        camera_parent.transform.rotation = Quaternion.Euler(
+           camera_parent.transform.rotation.eulerAngles.x,
+           delta * delta_x * camera_rotate_speed + camera_parent.transform.rotation.eulerAngles.y,
+           0.0f
+         );
+      else
+        camera_parent.transform.rotation = Quaternion.Euler(
+          delta * -delta_y * camera_rotate_speed + camera_parent.transform.rotation.eulerAngles.x,
+          camera_parent.transform.rotation.eulerAngles.y,
+          0.0f
+        );
     }
 
     private void HandleCameraDrag()
@@ -124,12 +148,15 @@ namespace Wiggy
       float mouse_y = Mouse.current.scroll.ReadValue().y;
 
       if (mouse_y > 0.05f)
-        camera_parent.transform.position += Vector3.up;
+        camera_parent.transform.position += Vector3.up * camera_scroll_speed;
 
       if (mouse_y < -0.05f)
-        camera_parent.transform.position -= Vector3.up;
+        camera_parent.transform.position -= Vector3.up * camera_scroll_speed;
 
       camera_virtual.m_FollowOffset = new Vector3(0, 1, -1) * camera_parent.transform.position.y;
+
+      var clamped = Mathf.Clamp(camera_virtual.m_FollowOffset.y, y_clamp.x, y_clamp.y);
+      camera_virtual.m_FollowOffset = new Vector3(0, 1, -1) * clamped;
     }
 
     private void SetCursorToGrid()
